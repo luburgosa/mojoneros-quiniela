@@ -216,7 +216,7 @@
       <div class="hero__title">La liga de pronósticos</div>
       <div class="hero__sub">Resultados en vivo, tabla y partido por partido.</div>
     </div>
-    <span class="demo"><b>DEMO</b> · jugadores de ejemplo</span>
+    <span class="demo"><b>DEMO</b> · 8 de ejemplo + Luis (real)</span>
   </div>
 </header>
 
@@ -245,7 +245,7 @@
     <div class="sectionhead">
       <div class="eyebrow"><span class="sq"></span> Tabla general</div>
       <h2>La Tabla</h2>
-      <p>Puntos totales de cada partido jugado. Se gana <b>5</b> por marcador exacto, <b>2</b> por acertar el resultado y <b>0</b> por fallar.</p>
+      <p>Fase de grupos: <b>5</b> por el marcador exacto, <b>3</b> por la diferencia de goles (con el 1X2 acertado), <b>1</b> por el signo 1X2 y <b>0</b> al fallar. Los partidos marcados <b style="color:var(--red)">×2</b> valen doble.</p>
     </div>
     <div id="leader"></div>
     <div class="board" id="board"></div>
@@ -267,14 +267,14 @@
     <div class="sectionhead">
       <div class="eyebrow"><span class="sq"></span> Partido por partido</div>
       <h2>Los Partidos</h2>
-      <p>Del primer al último partido. Toca un juego para abrir los 8 pronósticos y los puntos que ganó cada quien.</p>
+      <p>Del primer al último partido. Toca un juego para abrir los 9 pronósticos y los puntos que ganó cada quien.</p>
     </div>
     <div id="games"></div>
   </section>
 </main>
 
 <footer>
-  Versión de muestra: <b>jugadores y pronósticos inventados</b>, pero fixtures y resultados reales del Mundial 2026.
+  Versión de muestra: <b>8 jugadores de ejemplo</b> más <b>Luis</b> (pronósticos reales de su quiniela); fixtures y resultados reales del Mundial 2026.
   Los marcadores se actualizan solos desde el feed público de ESPN; si no hay conexión, se muestran los últimos resultados guardados.
   Para hacerla tuya, reemplaza el bloque <code>JUGADORES</code> y <code>PARTIDOS</code> al inicio del script.
 </footer>
@@ -284,9 +284,9 @@
    DATA — jugadores, partidos y puntaje. Edita solo esto.
    ============================================================ */
 const TODAY = "2026-06-14";              // "hoy" del demo (Hoy / Mañana)
-const SCORING = { exact: 5, result: 2, miss: 0 };
+const SCORING = { exact: 5, diff: 3, sign: 1, miss: 0 };  // fase de grupos: exacto / diferencia / signo 1X2
 
-const PLAYERS = ["Memo","Lalo","Pollo","Tavo","Moy","Güero","Pancho","Beto"];
+const PLAYERS = ["Memo","Lalo","Pollo","Tavo","Moy","Güero","Pancho","Beto","Luis"];
 
 /* Cada partido:
    home/away  -> nombre que se muestra (español)
@@ -300,8 +300,8 @@ const GAMES = [
   {id:4,  stage:"Grupo D", date:"2026-06-12", time:"21:00", home:"Estados Unidos",  away:"Paraguay",       m:["united states","paraguay"],         seed:[4,1]},
   {id:5,  stage:"Grupo B", date:"2026-06-13", time:"15:00", home:"Catar",           away:"Suiza",          m:["qatar","switzerland"],              seed:[1,1]},
   {id:6,  stage:"Grupo C", date:"2026-06-13", time:"18:00", home:"Brasil",          away:"Marruecos",      m:["brazil","morocco"],                 seed:[1,1]},
-  {id:7,  stage:"Grupo C", date:"2026-06-13", time:"21:00", home:"Haití",           away:"Escocia",        m:["haiti","scotland"],                 seed:null},
-  {id:8,  stage:"Grupo D", date:"2026-06-14", time:"00:00", home:"Australia",       away:"Turquía",        m:["australia","turkey"],               seed:null},
+  {id:7,  stage:"Grupo C", date:"2026-06-13", time:"21:00", home:"Haití",           away:"Escocia",        m:["haiti","scotland"],                 seed:[0,1]},
+  {id:8,  stage:"Grupo D", date:"2026-06-14", time:"00:00", home:"Australia",       away:"Turquía",        m:["australia","turkey"],               seed:[2,0]},
   {id:9,  stage:"Grupo E", date:"2026-06-14", time:"13:00", home:"Alemania",        away:"Curazao",        m:["germany","curacao"],                seed:null},
   {id:10, stage:"Grupo F", date:"2026-06-14", time:"16:00", home:"Países Bajos",    away:"Japón",          m:["netherlands","japan"],              seed:null},
   {id:11, stage:"Grupo E", date:"2026-06-14", time:"19:00", home:"Costa de Marfil", away:"Ecuador",        m:["ivory coast","ecuador"],            seed:null},
@@ -315,27 +315,43 @@ const GAMES = [
   {id:19, stage:"Grupo J", date:"2026-06-16", time:"21:00", home:"Argentina",       away:"Argelia",        m:["argentina","algeria"],              seed:null},
 ];
 
+/* Partidos con DOBLE puntos (×2). Matchup en inglés; el orden local/visitante no importa.
+   Solo USA-Paraguay y Alemania-Curazao son de la jornada 1; el resto se activan solos
+   cuando agregues esos partidos de la jornada 2/3.                                       */
+const DOUBLE_MATCHUPS = [
+  ["united states","paraguay"], ["germany","curacao"], ["austria","jordan"],
+  ["uzbekistan","colombia"], ["canada","qatar"], ["scotland","morocco"],
+  ["netherlands","sweden"], ["uruguay","cape verde"], ["czechia","mexico"],
+  ["egypt","iran"], ["senegal","iraq"], ["croatia","ghana"]
+];
+
 /* Pronósticos de los jugadores ficticios (deterministas para el demo).
    En tu versión real, estos vienen de tu Excel.                          */
 function seeded(s){ return function(){ s=(s*1664525+1013904223)%4294967296; return s/4294967296; }; }
 function predScore(rng){ const r=rng(); return r<0.42?0 : r<0.74?1 : r<0.9?2 : 3; }
+/* Pronósticos REALES de Luis (extraídos de su quiniela — hoja Pool, formato signo|marcador). */
+const LUIS = {
+  1:[2,0], 2:[1,2], 3:[1,1], 4:[2,0], 5:[0,2], 6:[3,0], 7:[0,3], 8:[1,2], 9:[4,0], 10:[2,1],
+  11:[1,2], 12:[1,0], 13:[3,0], 14:[3,0], 15:[2,0], 16:[1,1], 17:[2,1], 18:[0,3], 19:[2,0]
+};
 const PREDICTIONS = {};
 GAMES.forEach((g)=>{
   PREDICTIONS[g.id] = {};
   PLAYERS.forEach((p,pi)=>{ const rng = seeded((g.id*97 + pi*31 + 7) >>> 0); PREDICTIONS[g.id][p] = [predScore(rng), predScore(rng)]; });
-  if(g.seed){ // garantiza un par de exactos en los partidos ya jugados (para el demo)
+  if(g.seed){ // garantiza un par de exactos en los partidos jugados (solo entre los 8 de ejemplo)
     const rng = seeded((g.id*1337) >>> 0);
-    const a = Math.floor(rng()*PLAYERS.length); let b = Math.floor(rng()*PLAYERS.length); if(b===a) b=(b+1)%PLAYERS.length;
+    const a = Math.floor(rng()*8); let b = Math.floor(rng()*8); if(b===a) b=(b+1)%8;
     PREDICTIONS[g.id][PLAYERS[a]] = [g.seed[0], g.seed[1]];
     PREDICTIONS[g.id][PLAYERS[b]] = [g.seed[0], g.seed[1]];
   }
+  if(LUIS[g.id]) PREDICTIONS[g.id]["Luis"] = [LUIS[g.id][0], LUIS[g.id][1]]; // Luis real — siempre al final
 });
 
 /* ============================================================
    LIVE DATA — feed público de ESPN (sin API key, permite CORS).
    ============================================================ */
 const ESPN_BASE = "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard";
-const LIVE_DATES = ["20260611","20260612","20260613","20260614","20260615","20260616"];
+const LIVE_DATES = [...new Set(GAMES.map(g=>g.date))].sort().map(d=>d.replace(/-/g,"")); // se deriva de los partidos
 // Alias: nombre del feed -> nuestro nombre en inglés
 const ALIASES = {
   "turkiye":"turkey", "korea republic":"south korea", "republic of korea":"south korea",
@@ -350,28 +366,31 @@ function canon(s){ const n = norm(s); return ALIASES[n] || n; }
 function pairKey(a,b){ return [canon(a),canon(b)].sort().join("|"); }
 
 async function fetchLive(){
-  const index = {}; let ok = false;
-  for(const d of LIVE_DATES){
+  const index = {};
+  const payloads = await Promise.all(LIVE_DATES.map(async d=>{
     try{
       const res = await fetch(`${ESPN_BASE}?dates=${d}`, {cache:"no-store"});
-      if(!res.ok) continue;
-      const data = await res.json(); ok = true;
-      (data.events||[]).forEach(ev=>{
-        const comp = (ev.competitions||[])[0]; if(!comp) return;
-        const cs = comp.competitors||[];
-        const H = cs.find(c=>c.homeAway==="home"), A = cs.find(c=>c.homeAway==="away");
-        if(!H||!A||!H.team||!A.team) return;
-        const hn = H.team.displayName||H.team.name||H.team.shortDisplayName;
-        const an = A.team.displayName||A.team.name||A.team.shortDisplayName;
-        const completed = !!(ev.status && ev.status.type && ev.status.type.completed);
-        index[pairKey(hn,an)] = {
-          home:{n:hn, s:H.score!=null?parseInt(H.score,10):null},
-          away:{n:an, s:A.score!=null?parseInt(A.score,10):null},
-          completed
-        };
-      });
-    }catch(e){ /* ignora errores por fecha */ }
-  }
+      return res.ok ? await res.json() : null;
+    }catch(e){ return null; }
+  }));
+  let ok = false;
+  payloads.forEach(data=>{
+    if(!data) return; ok = true;
+    (data.events||[]).forEach(ev=>{
+      const comp = (ev.competitions||[])[0]; if(!comp) return;
+      const cs = comp.competitors||[];
+      const H = cs.find(c=>c.homeAway==="home"), A = cs.find(c=>c.homeAway==="away");
+      if(!H||!A||!H.team||!A.team) return;
+      const hn = H.team.displayName||H.team.name||H.team.shortDisplayName;
+      const an = A.team.displayName||A.team.name||A.team.shortDisplayName;
+      const completed = !!(ev.status && ev.status.type && ev.status.type.completed);
+      index[pairKey(hn,an)] = {
+        home:{n:hn, s:H.score!=null?parseInt(H.score,10):null},
+        away:{n:an, s:A.score!=null?parseInt(A.score,10):null},
+        completed
+      };
+    });
+  });
   return ok ? index : null;
 }
 function applyLive(index){
@@ -390,31 +409,40 @@ function applyLive(index){
 /* ============================================================
    PUNTAJE + ESTADÍSTICAS (se recalculan cuando cambian resultados)
    ============================================================ */
-function pointsFor(pred, actual){
+function tierOf(pred, actual){
   if(!actual) return null;
-  if(pred[0]===actual[0] && pred[1]===actual[1]) return SCORING.exact;
-  return Math.sign(pred[0]-pred[1])===Math.sign(actual[0]-actual[1]) ? SCORING.result : SCORING.miss;
+  if(pred[0]===actual[0] && pred[1]===actual[1]) return "exact";
+  const ps = Math.sign(pred[0]-pred[1]), as = Math.sign(actual[0]-actual[1]);
+  if(ps !== as) return "miss";                                   // signo 1X2 fallado
+  if((pred[0]-pred[1]) === (actual[0]-actual[1])) return "diff"; // signo + diferencia de goles
+  return "sign";                                                 // solo signo 1X2
 }
-function isExact(pred, actual){ return actual && pred[0]===actual[0] && pred[1]===actual[1]; }
+function pointsFor(pred, actual, g){
+  const t = tierOf(pred, actual);
+  if(t===null) return null;
+  return SCORING[t] * (g && g.dbl ? 2 : 1);
+}
+function isExact(pred, actual){ return tierOf(pred, actual)==="exact"; }
 
 let GAME_AVG = {}, STATS = {}, RANKED = [], RANK = {}, activePlayer = null;
 function recompute(){
   GAME_AVG = {};
   GAMES.forEach(g=>{
     if(!g.actual){ GAME_AVG[g.id]=null; return; }
-    let s=0; PLAYERS.forEach(p=> s += pointsFor(PREDICTIONS[g.id][p], g.actual));
+    let s=0; PLAYERS.forEach(p=> s += pointsFor(PREDICTIONS[g.id][p], g.actual, g));
     GAME_AVG[g.id] = s / PLAYERS.length;
   });
   STATS = {};
   PLAYERS.forEach(p=>{
-    let total=0,exact=0,results=0,played=0,beat=0,scored=0;
+    let total=0,exact=0,hits=0,played=0,beat=0,scored=0;
     GAMES.forEach(g=>{
       if(!g.actual) return; played++;
-      const pts = pointsFor(PREDICTIONS[g.id][p], g.actual);
-      total += pts; if(pts===SCORING.exact) exact++; else if(pts===SCORING.result) results++;
+      const pts = pointsFor(PREDICTIONS[g.id][p], g.actual, g);
+      const t = tierOf(PREDICTIONS[g.id][p], g.actual);
+      total += pts; if(t==="exact") exact++; if(t!=="miss") hits++;
       scored++; if(pts > GAME_AVG[g.id]) beat++;
     });
-    STATS[p] = {total, exact, results, played, beat, scored};
+    STATS[p] = {total, exact, hits, played, beat, scored};
   });
   RANKED = [...PLAYERS].sort((a,b)=> STATS[b].total-STATS[a].total || STATS[b].exact-STATS[a].exact || a.localeCompare(b));
   RANK = {}; RANKED.forEach((p,i)=> RANK[p]=i+1);
@@ -424,7 +452,7 @@ function recompute(){
 /* ============================================================
    HELPERS DE RENDER
    ============================================================ */
-const AV_COLORS = ["#121212","#de2820","#3b3b3b","#8c1c15","#555555","#b32018","#2a2a2a","#d13a30"];
+const AV_COLORS = ["#121212","#de2820","#3b3b3b","#8c1c15","#555555","#b32018","#2a2a2a","#d13a30","#6b6b6b"];
 function avatar(name){
   const i = PLAYERS.indexOf(name);
   const c = AV_COLORS[(i>=0?i:0) % AV_COLORS.length];
@@ -446,14 +474,14 @@ function fmtDate(date){ return new Date(date+"T00:00:00").toLocaleDateString("es
 /* ---------- Próximos ---------- */
 function renderUpNext(){
   const wrap = document.getElementById("upnext"), row = document.getElementById("upnext-row");
-  const soon = GAMES.filter(g=>{ const t=new Date(TODAY+"T00:00:00"), d=new Date(g.date+"T00:00:00"); const diff=(d-t)/86400000; return diff>=0 && diff<=1; });
+  const soon = GAMES.filter(g=>{ if(g.actual) return false; const t=new Date(TODAY+"T00:00:00"), d=new Date(g.date+"T00:00:00"); const diff=(d-t)/86400000; return diff>=0 && diff<=1; });
   if(!soon.length){ wrap.style.display="none"; return; }
   row.innerHTML = soon.map(g=>{
     const rb = dayLabel(g.date);
     return `<div class="fix">${rb?`<span class="ribbon ${rb.cls}">${rb.txt}</span>`:""}
       <div class="when">${g.stage} · ${g.time}</div>
       <div class="teams">${g.home} <span style="color:var(--muted)">vs</span> ${g.away}</div>
-      <div class="meta">${fmtDate(g.date)} · pronósticos cerrados</div></div>`;
+      <div class="meta">${fmtDate(g.date)} · pronósticos cerrados${g.dbl?' · <b style="color:var(--red)">×2</b>':''}</div></div>`;
   }).join("");
 }
 
@@ -467,7 +495,7 @@ function renderStandings(){
       <div class="who">
         <div class="lbl">Líder</div>
         <div class="nm">${top}</div>
-        <div class="det">${STATS[top].exact} exactos · ${STATS[top].results} resultados · ${STATS[top].played} partidos</div>
+        <div class="det">${STATS[top].exact} exactos · ${STATS[top].hits} aciertos · ${STATS[top].played} jugados</div>
       </div>
       <div class="stat"><div class="big"><u><span data-count="${STATS[top].total}">0</span></u><small>puntos</small></div></div>
     </div>`;
@@ -475,7 +503,7 @@ function renderStandings(){
     <div class="board__head">
       <span>#</span><span>Jugador</span><span style="text-align:right">Pts</span>
       <span class="col-hide" style="text-align:center">Exactos</span>
-      <span class="col-hide" style="text-align:center">Result.</span>
+      <span class="col-hide" style="text-align:center">Aciertos</span>
     </div>` + RANKED.map(p=>{
       const s = STATS[p], r = RANK[p];
       return `<div class="board__row">
@@ -483,7 +511,7 @@ function renderStandings(){
         <div class="name-cell">${avatar(p)}<span>${p}</span></div>
         <div class="tot-cell">${s.total}</div>
         <div class="num-cell col-hide"><b>${s.exact}</b></div>
-        <div class="num-cell col-hide"><b>${s.results}</b></div>
+        <div class="num-cell col-hide"><b>${s.hits}</b></div>
       </div>`;
     }).join("");
   if(!standingsAnimated){ animateCounts(); standingsAnimated = true; }
@@ -507,7 +535,7 @@ function renderPicker(){
 }
 function renderProfile(){
   const p = activePlayer, s = STATS[p];
-  const acc = s.scored ? Math.round((s.exact+s.results)/s.scored*100) : 0;
+  const acc = s.scored ? Math.round(s.hits/s.scored*100) : 0;
   const rowsScored = GAMES.filter(g=>g.actual);
   let body;
   if(!rowsScored.length){
@@ -515,14 +543,14 @@ function renderProfile(){
   } else {
     body = `<div class="grow__head"><span>Partido</span><span>Apuesta vs final</span><span>Puntos</span><span>vs promedio</span></div><div class="grow">` +
       rowsScored.map(g=>{
-        const pred = PREDICTIONS[g.id][p], pts = pointsFor(pred, g.actual), exact = isExact(pred, g.actual);
+        const pred = PREDICTIONS[g.id][p], t = tierOf(pred, g.actual), pts = pointsFor(pred, g.actual, g), exact = t==="exact";
         const avg = GAME_AVG[g.id], diff = pts - avg;
         const dcls = diff>0.001?"up":diff<-0.001?"down":"eq";
         const arrow = diff>0.001?"▲":diff<-0.001?"▼":"—";
         const sign = diff>0?"+":"";
-        const ptsCls = pts===SCORING.exact?"pts pts--exact":pts===0?"pts pts--zero":"pts";
+        const ptsCls = exact?"pts pts--exact":pts===0?"pts pts--zero":"pts";
         return `<div class="grow__row">
-          <div class="match"><div class="stage">${g.stage} · ${fmtDate(g.date)}</div><div class="vs">${g.home} vs ${g.away}</div></div>
+          <div class="match"><div class="stage">${g.stage} · ${fmtDate(g.date)}${g.dbl?' · <b style="color:var(--red)">×2</b>':''}</div><div class="vs">${g.home} vs ${g.away}</div></div>
           <div class="boxes"><span class="tag">Apuesta</span>${sb(pred,"pred",exact)}<span class="tag" style="margin-left:6px">Final</span>${sb(g.actual,"actual",false)}</div>
           <span class="${ptsCls}">${pts} pt${pts===1?"":"s"}</span>
           <div class="delta ${dcls}">${arrow} ${sign}${diff.toFixed(1)}<span class="vsavg">prom. ${avg.toFixed(1)}</span></div>
@@ -550,10 +578,10 @@ function renderGames(){
     const rb = dayLabel(g.date), played = !!g.actual;
     const rightTag = played ? sb(g.actual,"actual",false)
       : `<span class="gtag" style="background:${rb?(rb.cls==="ribbon--today"?"var(--red)":"var(--black)"):"#d3d3cf"};color:${rb?'#fff':'var(--black)'}">${rb?rb.txt:g.time}</span>`;
-    let rows = PLAYERS.map(p=>{ const pred=PREDICTIONS[g.id][p]; return {p, pred, pts: played?pointsFor(pred,g.actual):null, exact:isExact(pred,g.actual)}; });
+    let rows = PLAYERS.map(p=>{ const pred=PREDICTIONS[g.id][p]; return {p, pred, pts: played?pointsFor(pred,g.actual,g):null, exact:isExact(pred,g.actual)}; });
     if(played) rows.sort((a,b)=> b.pts-a.pts || a.p.localeCompare(b.p)); else rows.sort((a,b)=> a.p.localeCompare(b.p));
     const list = rows.map(r=>{
-      const ptsHtml = played ? `<span class="${r.pts===SCORING.exact?'pts pts--exact':r.pts===0?'pts pts--zero':'pts'}">${r.pts}</span>` : `<span class="pts pts--zero">–</span>`;
+      const ptsHtml = played ? `<span class="${r.exact?'pts pts--exact':r.pts===0?'pts pts--zero':'pts'}">${r.pts}</span>` : `<span class="pts pts--zero">–</span>`;
       return `<div class="glist__row">
         <div class="who">${avatar(r.p)}<span>${r.p}</span> ${r.exact?'<span class="stamp">★ exacto</span>':''}</div>
         <div style="text-align:right">${sb(r.pred,"pred",r.exact)}</div>
@@ -562,7 +590,7 @@ function renderGames(){
     return `<div class="gcard" data-game="${g.id}">
       <button class="gcard__btn" aria-expanded="false">
         <span class="gnum">${String(g.id).padStart(2,"0")}</span>
-        <span class="ginfo"><span class="stage">${g.stage}</span><span class="teams">${g.home} vs ${g.away}</span><span class="date">${fmtDate(g.date)} · ${g.time}</span></span>
+        <span class="ginfo"><span class="stage">${g.stage}${g.dbl?' · <b style="color:var(--red)">×2 puntos</b>':''}</span><span class="teams">${g.home} vs ${g.away}</span><span class="date">${fmtDate(g.date)} · ${g.time}</span></span>
         <span class="gright">${rightTag}</span><span class="chev">▶</span>
       </button>
       <div class="gbody"><div class="gbody__in">
@@ -595,12 +623,11 @@ function setLive(state){
 function stampNow(){
   document.getElementById("livestamp").textContent = "· actualizado " + new Date().toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"});
 }
-async function refresh(){
-  setLive("loading");
+async function refresh(silent){
+  if(!silent) setLive("loading");
   const idx = await fetchLive();
-  if(idx){ applyLive(idx); recompute(); renderAll(); setLive("live"); }
-  else setLive("offline");
-  stampNow();
+  if(idx){ applyLive(idx); recompute(); renderAll(); setLive("live"); stampNow(); }
+  else if(!silent){ setLive("offline"); stampNow(); }
 }
 
 /* ============================================================
@@ -615,16 +642,17 @@ async function refresh(){
     panel.hidden=false; panel.classList.add("is-active");
   });
 });
-document.getElementById("refreshBtn").addEventListener("click", refresh);
+document.getElementById("refreshBtn").addEventListener("click", ()=>refresh(false));
 
 /* ============================================================
    INIT
    ============================================================ */
-GAMES.forEach(g=> g.actual = g.seed ? [g.seed[0], g.seed[1]] : null); // arranca con resultados guardados
+const DOUBLE_SET = new Set(DOUBLE_MATCHUPS.map(p=>pairKey(p[0],p[1])));
+GAMES.forEach(g=>{ g.dbl = DOUBLE_SET.has(pairKey(g.m[0], g.m[1])); g.actual = g.seed ? [g.seed[0], g.seed[1]] : null; }); // doble puntos + resultados guardados
 recompute();
 renderAll();
 refresh();                          // intenta el feed en vivo (lo sobrescribe si responde)
-setInterval(refresh, 60000);        // y cada 60 s
+setInterval(()=>refresh(true), 60000);  // y cada 60 s (silencioso)
 </script>
 </body>
 </html>
