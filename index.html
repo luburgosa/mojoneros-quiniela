@@ -68,6 +68,8 @@
   .sectionhead h2{font-family:"Russo One"; font-size:clamp(24px,5.4vw,34px); letter-spacing:.005em; line-height:1;}
   .sectionhead p{margin:8px 0 0; color:var(--muted); font-size:14px; max-width:60ch;}
   .sectionhead b{color:var(--black);}
+  .dblnote{display:inline-flex; align-items:center; gap:7px; margin-top:11px; font-family:"JetBrains Mono"; font-size:12px; font-weight:700; color:var(--black); background:rgba(222,40,32,.08); border:1px solid rgba(222,40,32,.28); border-radius:8px; padding:6px 11px;}
+  .dblnote b{color:var(--red);}
 
   /* ---------- Score box ---------- */
   .sb{display:inline-flex; align-items:stretch; font-family:"JetBrains Mono"; font-weight:800; border:1.5px solid var(--black); border-radius:6px; overflow:hidden; line-height:1; background:#fff; white-space:nowrap;}
@@ -216,7 +218,7 @@
       <div class="hero__title">La liga de pronósticos</div>
       <div class="hero__sub">Resultados en vivo, tabla y partido por partido.</div>
     </div>
-    <span class="demo"><b>DEMO</b> · 8 de ejemplo + Luis (real)</span>
+    <span class="demo"><b>DEMO</b> · Luis (real) + Comunista</span>
   </div>
 </header>
 
@@ -245,7 +247,8 @@
     <div class="sectionhead">
       <div class="eyebrow"><span class="sq"></span> Tabla general</div>
       <h2>La Tabla</h2>
-      <p>Fase de grupos: <b>5</b> por el marcador exacto, <b>3</b> por la diferencia de goles (con el 1X2 acertado), <b>1</b> por el signo 1X2 y <b>0</b> al fallar. Los partidos marcados <b style="color:var(--red)">×2</b> valen doble.</p>
+      <p>Fase de grupos (se suman): <b>1</b> por el signo 1X2, <b>+3</b> por la diferencia de goles y <b>+5</b> por el marcador exacto — hasta <b>9</b> por partido.</p>
+      <div class="dblnote"><b>×2</b> Some matches are worth double points</div>
     </div>
     <div id="leader"></div>
     <div class="board" id="board"></div>
@@ -267,14 +270,14 @@
     <div class="sectionhead">
       <div class="eyebrow"><span class="sq"></span> Partido por partido</div>
       <h2>Los Partidos</h2>
-      <p>Del primer al último partido. Toca un juego para abrir los 9 pronósticos y los puntos que ganó cada quien.</p>
+      <p>Del primer al último partido. Toca un juego para abrir los pronósticos y los puntos que ganó cada quien.</p>
     </div>
     <div id="games"></div>
   </section>
 </main>
 
 <footer>
-  Versión de muestra: <b>8 jugadores de ejemplo</b> más <b>Luis</b> (pronósticos reales de su quiniela); fixtures y resultados reales del Mundial 2026.
+  <b>Luis</b> juega con los pronósticos reales de su quiniela; <b>Comunista</b> es un jugador de ejemplo. Fixtures y resultados reales del Mundial 2026.
   Los marcadores se actualizan solos desde el feed público de ESPN; si no hay conexión, se muestran los últimos resultados guardados.
   Para hacerla tuya, reemplaza el bloque <code>JUGADORES</code> y <code>PARTIDOS</code> al inicio del script.
 </footer>
@@ -284,9 +287,9 @@
    DATA — jugadores, partidos y puntaje. Edita solo esto.
    ============================================================ */
 const TODAY = "2026-06-14";              // "hoy" del demo (Hoy / Mañana)
-const SCORING = { exact: 5, diff: 3, sign: 1, miss: 0 };  // fase de grupos: exacto / diferencia / signo 1X2
+const SCORING = { exact: 5, diff: 3, sign: 1, miss: 0 };  // fase de grupos, acumulables: signo 1 + diferencia 3 + exacto 5 = hasta 9
 
-const PLAYERS = ["Memo","Lalo","Pollo","Tavo","Moy","Güero","Pancho","Beto","Luis"];
+const PLAYERS = ["Luis","Comunista"];
 
 /* Cada partido:
    home/away  -> nombre que se muestra (español)
@@ -313,6 +316,11 @@ const GAMES = [
   {id:17, stage:"Grupo I", date:"2026-06-16", time:"15:00", home:"Francia",         away:"Senegal",        m:["france","senegal"],                 seed:null},
   {id:18, stage:"Grupo I", date:"2026-06-16", time:"18:00", home:"Irak",            away:"Noruega",        m:["iraq","norway"],                    seed:null},
   {id:19, stage:"Grupo J", date:"2026-06-16", time:"21:00", home:"Argentina",       away:"Argelia",        m:["argentina","algeria"],              seed:null},
+  {id:20, stage:"Grupo J", date:"2026-06-16", time:"23:00", home:"Austria",         away:"Jordania",       m:["austria","jordan"],                 seed:null},
+  {id:21, stage:"Grupo K", date:"2026-06-17", time:"12:00", home:"Portugal",        away:"RD Congo",       m:["portugal","dr congo"],              seed:null},
+  {id:22, stage:"Grupo L", date:"2026-06-17", time:"15:00", home:"Inglaterra",      away:"Croacia",        m:["england","croatia"],                seed:null},
+  {id:23, stage:"Grupo L", date:"2026-06-17", time:"18:00", home:"Ghana",           away:"Panamá",         m:["ghana","panama"],                   seed:null},
+  {id:24, stage:"Grupo K", date:"2026-06-17", time:"20:00", home:"Uzbekistán",      away:"Colombia",       m:["uzbekistan","colombia"],            seed:null},
 ];
 
 /* Partidos con DOBLE puntos (×2). Matchup en inglés; el orden local/visitante no importa.
@@ -332,19 +340,22 @@ function predScore(rng){ const r=rng(); return r<0.42?0 : r<0.74?1 : r<0.9?2 : 3
 /* Pronósticos REALES de Luis (extraídos de su quiniela — hoja Pool, formato signo|marcador). */
 const LUIS = {
   1:[2,0], 2:[1,2], 3:[1,1], 4:[2,0], 5:[0,2], 6:[3,0], 7:[0,3], 8:[1,2], 9:[4,0], 10:[2,1],
-  11:[1,2], 12:[1,0], 13:[3,0], 14:[3,0], 15:[2,0], 16:[1,1], 17:[2,1], 18:[0,3], 19:[2,0]
+  11:[1,2], 12:[1,0], 13:[3,0], 14:[3,0], 15:[2,0], 16:[1,1], 17:[2,1], 18:[0,3], 19:[2,0],
+  20:[1,2], 21:[3,0], 22:[2,0], 23:[1,1], 24:[1,2]
+};
+
+/* Pronósticos de Comunista — malos a propósito: pocos signos acertados, ningún marcador exacto. */
+const COMUNISTA = {
+  1:[1,0], 2:[1,2], 3:[2,0], 4:[1,0], 5:[2,1], 6:[0,1], 7:[0,2], 8:[0,1], 9:[0,1], 10:[1,2],
+  11:[2,1], 12:[0,0], 13:[1,2], 14:[0,1], 15:[1,0], 16:[2,2], 17:[0,1], 18:[1,1], 19:[1,2],
+  20:[0,0], 21:[1,2], 22:[0,1], 23:[2,0], 24:[0,1]
 };
 const PREDICTIONS = {};
 GAMES.forEach((g)=>{
   PREDICTIONS[g.id] = {};
   PLAYERS.forEach((p,pi)=>{ const rng = seeded((g.id*97 + pi*31 + 7) >>> 0); PREDICTIONS[g.id][p] = [predScore(rng), predScore(rng)]; });
-  if(g.seed){ // garantiza un par de exactos en los partidos jugados (solo entre los 8 de ejemplo)
-    const rng = seeded((g.id*1337) >>> 0);
-    const a = Math.floor(rng()*8); let b = Math.floor(rng()*8); if(b===a) b=(b+1)%8;
-    PREDICTIONS[g.id][PLAYERS[a]] = [g.seed[0], g.seed[1]];
-    PREDICTIONS[g.id][PLAYERS[b]] = [g.seed[0], g.seed[1]];
-  }
-  if(LUIS[g.id]) PREDICTIONS[g.id]["Luis"] = [LUIS[g.id][0], LUIS[g.id][1]]; // Luis real — siempre al final
+  if(LUIS[g.id]) PREDICTIONS[g.id]["Luis"] = [LUIS[g.id][0], LUIS[g.id][1]]; // Luis real
+  if(COMUNISTA[g.id]) PREDICTIONS[g.id]["Comunista"] = [COMUNISTA[g.id][0], COMUNISTA[g.id][1]]; // Comunista malo a propósito
 });
 
 /* ============================================================
@@ -357,6 +368,7 @@ const ALIASES = {
   "turkiye":"turkey", "korea republic":"south korea", "republic of korea":"south korea",
   "czech republic":"czechia", "usa":"united states", "united states of america":"united states",
   "cote divoire":"ivory coast", "cabo verde":"cape verde", "bosnia herzegovina":"bosnia and herzegovina",
+  "congo dr":"dr congo", "ir iran":"iran",
 };
 function norm(s){
   return (s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")
@@ -418,9 +430,15 @@ function tierOf(pred, actual){
   return "sign";                                                 // solo signo 1X2
 }
 function pointsFor(pred, actual, g){
-  const t = tierOf(pred, actual);
-  if(t===null) return null;
-  return SCORING[t] * (g && g.dbl ? 2 : 1);
+  if(!actual) return null;
+  const ps = Math.sign(pred[0]-pred[1]), as = Math.sign(actual[0]-actual[1]);
+  let pts = 0;
+  if(ps === as){                                                        // signo 1X2 correcto
+    pts += SCORING.sign;                                                // +1
+    if((pred[0]-pred[1]) === (actual[0]-actual[1])) pts += SCORING.diff; // +3 diferencia de goles
+    if(pred[0]===actual[0] && pred[1]===actual[1]) pts += SCORING.exact; // +5 marcador exacto
+  }
+  return pts * (g && g.dbl ? 2 : 1);
 }
 function isExact(pred, actual){ return tierOf(pred, actual)==="exact"; }
 
@@ -458,6 +476,20 @@ function avatar(name){
   const c = AV_COLORS[(i>=0?i:0) % AV_COLORS.length];
   return `<span class="av" style="background:${c}">${name.slice(0,2).toUpperCase()}</span>`;
 }
+/* Banderas por clave en inglés (las mismas que usa cada partido en m[]). */
+const FLAGS = {
+  "mexico":"🇲🇽","south africa":"🇿🇦","south korea":"🇰🇷","czechia":"🇨🇿","canada":"🇨🇦",
+  "bosnia and herzegovina":"🇧🇦","qatar":"🇶🇦","switzerland":"🇨🇭","brazil":"🇧🇷","morocco":"🇲🇦",
+  "haiti":"🇭🇹","scotland":"🏴󠁧󠁢󠁳󠁣󠁴󠁿","united states":"🇺🇸","paraguay":"🇵🇾","australia":"🇦🇺",
+  "turkey":"🇹🇷","germany":"🇩🇪","curacao":"🇨🇼","ivory coast":"🇨🇮","ecuador":"🇪🇨",
+  "netherlands":"🇳🇱","japan":"🇯🇵","sweden":"🇸🇪","tunisia":"🇹🇳","belgium":"🇧🇪",
+  "egypt":"🇪🇬","iran":"🇮🇷","new zealand":"🇳🇿","spain":"🇪🇸","cape verde":"🇨🇻",
+  "saudi arabia":"🇸🇦","uruguay":"🇺🇾","france":"🇫🇷","senegal":"🇸🇳","iraq":"🇮🇶",
+  "norway":"🇳🇴","argentina":"🇦🇷","algeria":"🇩🇿","austria":"🇦🇹","jordan":"🇯🇴",
+  "portugal":"🇵🇹","dr congo":"🇨🇩","england":"🏴󠁧󠁢󠁥󠁮󠁧󠁿","croatia":"🇭🇷","ghana":"🇬🇭",
+  "panama":"🇵🇦","uzbekistan":"🇺🇿","colombia":"🇨🇴"
+};
+function flag(k){ return FLAGS[k] || ""; }
 function sb(score, variant, exact){
   if(!score) return `<span class="sb sm sb--pending"><i>–</i><i>–</i></span>`;
   let cls = "sb sm"; if(variant==="actual") cls+=" sb--actual"; if(exact) cls+=" sb--exact";
@@ -480,7 +512,7 @@ function renderUpNext(){
     const rb = dayLabel(g.date);
     return `<div class="fix">${rb?`<span class="ribbon ${rb.cls}">${rb.txt}</span>`:""}
       <div class="when">${g.stage} · ${g.time}</div>
-      <div class="teams">${g.home} <span style="color:var(--muted)">vs</span> ${g.away}</div>
+      <div class="teams">${flag(g.m[0])} ${g.home} <span style="color:var(--muted)">vs</span> ${flag(g.m[1])} ${g.away}</div>
       <div class="meta">${fmtDate(g.date)} · pronósticos cerrados${g.dbl?' · <b style="color:var(--red)">×2</b>':''}</div></div>`;
   }).join("");
 }
@@ -550,7 +582,7 @@ function renderProfile(){
         const sign = diff>0?"+":"";
         const ptsCls = exact?"pts pts--exact":pts===0?"pts pts--zero":"pts";
         return `<div class="grow__row">
-          <div class="match"><div class="stage">${g.stage} · ${fmtDate(g.date)}${g.dbl?' · <b style="color:var(--red)">×2</b>':''}</div><div class="vs">${g.home} vs ${g.away}</div></div>
+          <div class="match"><div class="stage">${g.stage} · ${fmtDate(g.date)}${g.dbl?' · <b style="color:var(--red)">×2</b>':''}</div><div class="vs">${flag(g.m[0])} ${g.home} vs ${flag(g.m[1])} ${g.away}</div></div>
           <div class="boxes"><span class="tag">Apuesta</span>${sb(pred,"pred",exact)}<span class="tag" style="margin-left:6px">Final</span>${sb(g.actual,"actual",false)}</div>
           <span class="${ptsCls}">${pts} pt${pts===1?"":"s"}</span>
           <div class="delta ${dcls}">${arrow} ${sign}${diff.toFixed(1)}<span class="vsavg">prom. ${avg.toFixed(1)}</span></div>
@@ -590,7 +622,7 @@ function renderGames(){
     return `<div class="gcard" data-game="${g.id}">
       <button class="gcard__btn" aria-expanded="false">
         <span class="gnum">${String(g.id).padStart(2,"0")}</span>
-        <span class="ginfo"><span class="stage">${g.stage}${g.dbl?' · <b style="color:var(--red)">×2 puntos</b>':''}</span><span class="teams">${g.home} vs ${g.away}</span><span class="date">${fmtDate(g.date)} · ${g.time}</span></span>
+        <span class="ginfo"><span class="stage">${g.stage}${g.dbl?' · <b style="color:var(--red)">×2 puntos</b>':''}</span><span class="teams">${flag(g.m[0])} ${g.home} vs ${flag(g.m[1])} ${g.away}</span><span class="date">${fmtDate(g.date)} · ${g.time}</span></span>
         <span class="gright">${rightTag}</span><span class="chev">▶</span>
       </button>
       <div class="gbody"><div class="gbody__in">
