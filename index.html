@@ -184,6 +184,24 @@
 
   .empty{padding:26px 20px; text-align:center; color:var(--muted); font-size:14px;}
 
+  /* ---------- Grupos ---------- */
+  .groups{display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:14px;}
+  .gp{background:var(--paper); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); overflow:hidden;}
+  .gp__h{font-family:"Russo One"; font-size:14px; letter-spacing:.03em; padding:11px 16px; background:var(--black); color:#fff; display:flex; align-items:center; gap:9px;}
+  .gp__dot{width:8px; height:8px; background:var(--red); border-radius:2px; flex:none;}
+  .gp__cols, .gp__row{display:grid; grid-template-columns:22px 1fr 30px 38px 32px; align-items:center; gap:8px; padding:8px 16px;}
+  .gp__cols{font-family:"JetBrains Mono"; font-size:9px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--line); background:rgba(18,18,18,.025);}
+  .gp__cols span:nth-child(n+3){text-align:center;}
+  .gp__row{border-bottom:1px solid var(--line-soft);}
+  .gp__row:last-child{border-bottom:0;}
+  .gp__row.qual{background:rgba(222,40,32,.045);}
+  .gp__row .pos{font-family:"JetBrains Mono"; font-weight:800; font-size:12px; color:var(--muted);}
+  .gp__row.qual .pos{color:var(--red);}
+  .gp__row .tm{font-weight:700; font-size:13px; display:flex; align-items:center; gap:7px; min-width:0;}
+  .gp__row .tm span{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .gp__row .c{font-family:"JetBrains Mono"; font-size:12px; text-align:center; color:var(--muted);}
+  .gp__row .pts{font-family:"JetBrains Mono"; font-weight:800; font-size:14px; text-align:center; color:var(--black);}
+
   footer{max-width:1080px; margin:0 auto; padding:0 20px 50px; color:var(--muted); font-size:12px;}
   footer code{background:#fff; border:1px solid var(--line); border-radius:4px; padding:1px 5px; font-family:"JetBrains Mono"; font-size:11px;}
 
@@ -226,6 +244,7 @@
     <button class="tab" role="tab" id="tab-standings" aria-controls="panel-standings" aria-selected="true">Tabla</button>
     <button class="tab" role="tab" id="tab-players" aria-controls="panel-players" aria-selected="false">Jugadores</button>
     <button class="tab" role="tab" id="tab-games" aria-controls="panel-games" aria-selected="false">Partidos</button>
+    <button class="tab" role="tab" id="tab-groups" aria-controls="panel-groups" aria-selected="false">Grupos</button>
   </div>
 </nav>
 
@@ -272,6 +291,16 @@
       <p>Del primer al último partido. Toca un juego para abrir los pronósticos y los puntos que ganó cada quien.</p>
     </div>
     <div id="games"></div>
+  </section>
+
+  <!-- ===== GROUPS ===== -->
+  <section class="panel" id="panel-groups" role="tabpanel" aria-labelledby="tab-groups" hidden>
+    <div class="sectionhead">
+      <div class="eyebrow"><span class="sq"></span> Fase de grupos</div>
+      <h2>Los Grupos</h2>
+      <p>Tabla de cada grupo con los resultados reales del Mundial. Avanzan los <b>2 primeros</b> de cada grupo, más los <b>mejores terceros</b>.</p>
+    </div>
+    <div id="groups" class="groups"></div>
   </section>
 </main>
 
@@ -643,9 +672,43 @@ function renderGames(){
 }
 
 /* ---------- Render todo (preserva tarjetas abiertas) ---------- */
+function renderGroups(){
+  const groups = {};
+  GAMES.forEach(g=>{
+    const L = g.stage.replace("Grupo ","").trim();
+    if(!groups[L]) groups[L] = {};
+    [[g.m[0], g.home],[g.m[1], g.away]].forEach(([key,name])=>{
+      if(!groups[L][key]) groups[L][key] = {key, name, pj:0, gf:0, gc:0, pts:0};
+    });
+    if(g.actual){
+      const h = g.actual[0], a = g.actual[1];
+      const H = groups[L][g.m[0]], A = groups[L][g.m[1]];
+      H.pj++; A.pj++; H.gf+=h; H.gc+=a; A.gf+=a; A.gc+=h;
+      if(h>a){ H.pts+=3; } else if(h<a){ A.pts+=3; } else { H.pts++; A.pts++; }
+    }
+  });
+  document.getElementById("groups").innerHTML = Object.keys(groups).sort().map(L=>{
+    const teams = Object.values(groups[L]).sort((x,y)=>
+      y.pts-x.pts || (y.gf-y.gc)-(x.gf-x.gc) || y.gf-x.gf || x.name.localeCompare(y.name));
+    const rows = teams.map((t,i)=>{
+      const dg = t.gf - t.gc, dgs = (dg>0?"+":"") + dg;
+      return `<div class="gp__row ${i<2?'qual':''}">
+        <span class="pos">${i+1}</span>
+        <span class="tm">${flag(t.key)} <span>${t.name}</span></span>
+        <span class="c">${t.pj}</span>
+        <span class="c">${dgs}</span>
+        <span class="pts">${t.pts}</span></div>`;
+    }).join("");
+    return `<div class="gp">
+      <div class="gp__h"><span class="gp__dot"></span> Grupo ${L}</div>
+      <div class="gp__cols"><span>#</span><span>Equipo</span><span>PJ</span><span>DG</span><span>Pts</span></div>
+      ${rows}</div>`;
+  }).join("");
+}
+
 function renderAll(){
   const openIds = [...document.querySelectorAll(".gcard.open")].map(c=>c.dataset.game);
-  renderUpNext(); renderStandings(); renderPicker(); renderProfile(); renderGames();
+  renderUpNext(); renderStandings(); renderPicker(); renderProfile(); renderGames(); renderGroups();
   openIds.forEach(id=>{ const c=document.querySelector(`.gcard[data-game="${id}"]`); if(c){ c.classList.add("open"); const b=c.querySelector(".gcard__btn"); if(b) b.setAttribute("aria-expanded","true"); } });
 }
 
