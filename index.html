@@ -95,6 +95,7 @@
   .fix .ribbon{position:absolute; top:11px; right:11px; font-family:"JetBrains Mono"; font-size:9px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; padding:3px 7px; border-radius:5px;}
   .ribbon--today{background:var(--red); color:#fff;}
   .ribbon--tomorrow{background:var(--black); color:#fff;}
+  .adminbadge{width:14px; height:14px; vertical-align:-2px; margin-left:4px; flex:none;}
   /* ---- live / in-progress ---- */
   @keyframes lvpulse{0%,100%{opacity:1;} 50%{opacity:.3;}}
   .lvdot{width:7px; height:7px; border-radius:50%; background:currentColor; display:inline-block; flex:none; animation:lvpulse 1.1s ease-in-out infinite;}
@@ -175,7 +176,9 @@
   .gcard__btn:hover{background:rgba(222,40,32,.05);}
   .gcard__btn:focus-visible{outline:2px solid var(--red); outline-offset:-2px;}
   .gnum{font-family:"Russo One"; font-size:20px; color:var(--muted); line-height:1;}
-  .ginfo{min-width:0;}
+  .ginfo{min-width:0; display:flex; flex-direction:column;}
+  .ginfo .gloc{display:flex; align-items:center; gap:4px; font-size:11px; color:var(--muted); margin-top:3px; line-height:1.25;}
+  .ginfo .gloc .pin{width:11px; height:11px; flex:none; opacity:.85;}
   .ginfo .stage{font-family:"JetBrains Mono"; font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--red); font-weight:700;}
   .ginfo .teams{font-weight:700; font-size:15px; margin-top:3px;}
   .ginfo .date{font-size:11px; color:var(--muted); margin-top:2px;}
@@ -265,7 +268,6 @@
       <div class="hero__title">The prediction league</div>
       <div class="hero__sub">Live results, standings, and match by match.</div>
     </div>
-    <span class="demo"><b>DEMO</b> · real data</span>
   </div>
 </header>
 
@@ -346,7 +348,7 @@
 </main>
 
 <footer>
-  <b>Luis</b>, <b>Sr. David Magro</b> and <b>David Jr.</b> use the real predictions from their pool entries. Real 2026 World Cup fixtures and results.
+  <b>Luis</b>, <b>David M. Sr</b> and <b>David M. Jr</b> use the real predictions from their pool entries. Real 2026 World Cup fixtures and results.
   To make it your own, replace the <code>PLAYERS</code> and <code>MATCHES</code> block at the top of the script.
 </footer>
 
@@ -365,7 +367,7 @@ const LIVE_MS = 140*60*1000;              // a match counts as "in play" from ki
 function liveWindow(g){ const k = kickoff(g).getTime(), n = Date.now(); return n >= k && n <= k + LIVE_MS; }
 const SCORING = { exact: 5, diff: 3, sign: 1, miss: 0 };  // group stage, cumulative: result 1 + goal diff 3 + exact 5 = up to 9
 
-const PLAYERS = ["Luis","Sr. David Magro","David Jr."];
+const PLAYERS = ["Luis","David M. Sr","David M. Jr","Alex","Karlox","Calique","Mister","Flaca","Blas","Ethan","Flaco","Eligh"];
 
 /* Each match:
    home/away  -> display name
@@ -373,30 +375,30 @@ const PLAYERS = ["Luis","Sr. David Magro","David Jr."];
    seed       -> known real result (fallback). null = not played yet.
    The live feed overwrites seed when the match finishes.            */
 const GAMES = [
-  {id:1,  stage:"Group A", date:"2026-06-11", time:"15:00", home:"Mexico",          away:"South Africa",      m:["mexico","south africa"],            seed:[2,0]},
-  {id:2,  stage:"Group A", date:"2026-06-11", time:"21:00", home:"South Korea",    away:"Czechia",        m:["south korea","czechia"],            seed:[2,1]},
-  {id:3,  stage:"Group B", date:"2026-06-12", time:"15:00", home:"Canada",          away:"Bosnia & H.",    m:["canada","bosnia and herzegovina"],  seed:[1,1]},
-  {id:4,  stage:"Group D", date:"2026-06-12", time:"21:00", home:"United States",  away:"Paraguay",       m:["united states","paraguay"],         seed:[4,1]},
-  {id:5,  stage:"Group B", date:"2026-06-13", time:"15:00", home:"Qatar",           away:"Switzerland",          m:["qatar","switzerland"],              seed:[1,1]},
-  {id:6,  stage:"Group C", date:"2026-06-13", time:"18:00", home:"Brazil",          away:"Morocco",      m:["brazil","morocco"],                 seed:[1,1]},
-  {id:7,  stage:"Group C", date:"2026-06-13", time:"21:00", home:"Haiti",           away:"Scotland",        m:["haiti","scotland"],                 seed:[0,1]},
-  {id:8,  stage:"Group D", date:"2026-06-14", time:"00:00", home:"Australia",       away:"Turkey",        m:["australia","turkey"],               seed:[2,0]},
-  {id:9,  stage:"Group E", date:"2026-06-14", time:"13:00", home:"Germany",        away:"Curaçao",        m:["germany","curacao"],                seed:null},
-  {id:10, stage:"Group F", date:"2026-06-14", time:"16:00", home:"Netherlands",    away:"Japan",          m:["netherlands","japan"],              seed:null},
-  {id:11, stage:"Group E", date:"2026-06-14", time:"19:00", home:"Ivory Coast", away:"Ecuador",        m:["ivory coast","ecuador"],            seed:null},
-  {id:12, stage:"Group F", date:"2026-06-14", time:"22:00", home:"Sweden",          away:"Tunisia",          m:["sweden","tunisia"],                 seed:null},
-  {id:13, stage:"Group H", date:"2026-06-15", time:"12:00", home:"Spain",          away:"Cape Verde",     m:["spain","cape verde"],               seed:null},
-  {id:14, stage:"Group G", date:"2026-06-15", time:"15:00", home:"Belgium",         away:"Egypt",         m:["belgium","egypt"],                  seed:null},
-  {id:15, stage:"Group H", date:"2026-06-15", time:"18:00", home:"Saudi Arabia",  away:"Uruguay",        m:["saudi arabia","uruguay"],           seed:null},
-  {id:16, stage:"Group G", date:"2026-06-15", time:"21:00", home:"Iran",            away:"New Zealand",  m:["iran","new zealand"],               seed:null},
-  {id:17, stage:"Group I", date:"2026-06-16", time:"15:00", home:"France",         away:"Senegal",        m:["france","senegal"],                 seed:null},
-  {id:18, stage:"Group I", date:"2026-06-16", time:"18:00", home:"Iraq",            away:"Norway",        m:["iraq","norway"],                    seed:null},
-  {id:19, stage:"Group J", date:"2026-06-16", time:"21:00", home:"Argentina",       away:"Algeria",        m:["argentina","algeria"],              seed:null},
-  {id:20, stage:"Group J", date:"2026-06-16", time:"23:00", home:"Austria",         away:"Jordan",       m:["austria","jordan"],                 seed:null},
-  {id:21, stage:"Group K", date:"2026-06-17", time:"12:00", home:"Portugal",        away:"DR Congo",       m:["portugal","dr congo"],              seed:null},
-  {id:22, stage:"Group L", date:"2026-06-17", time:"15:00", home:"England",      away:"Croatia",        m:["england","croatia"],                seed:null},
-  {id:23, stage:"Group L", date:"2026-06-17", time:"18:00", home:"Ghana",           away:"Panama",         m:["ghana","panama"],                   seed:null},
-  {id:24, stage:"Group K", date:"2026-06-17", time:"20:00", home:"Uzbekistan",      away:"Colombia",       m:["uzbekistan","colombia"],            seed:null},
+  {id:1,  stage:"Group A", date:"2026-06-11", time:"15:00", home:"Mexico",          away:"South Africa",      m:["mexico","south africa"],            venue:"Estadio Azteca · Mexico City, CDMX", seed:[2,0]},
+  {id:2,  stage:"Group A", date:"2026-06-11", time:"21:00", home:"South Korea",    away:"Czechia",        m:["south korea","czechia"],            venue:"MetLife Stadium · East Rutherford, NJ", seed:[2,1]},
+  {id:3,  stage:"Group B", date:"2026-06-12", time:"15:00", home:"Canada",          away:"Bosnia & H.",    m:["canada","bosnia and herzegovina"],  venue:"BMO Field · Toronto, ON", seed:[1,1]},
+  {id:4,  stage:"Group D", date:"2026-06-12", time:"21:00", home:"United States",  away:"Paraguay",       m:["united states","paraguay"],         venue:"SoFi Stadium · Inglewood, CA", seed:[4,1]},
+  {id:5,  stage:"Group B", date:"2026-06-13", time:"15:00", home:"Qatar",           away:"Switzerland",          m:["qatar","switzerland"],              venue:"Hard Rock Stadium · Miami Gardens, FL", seed:[1,1]},
+  {id:6,  stage:"Group C", date:"2026-06-13", time:"18:00", home:"Brazil",          away:"Morocco",      m:["brazil","morocco"],                 venue:"Mercedes-Benz Stadium · Atlanta, GA", seed:[1,1]},
+  {id:7,  stage:"Group C", date:"2026-06-13", time:"21:00", home:"Haiti",           away:"Scotland",        m:["haiti","scotland"],                 venue:"Gillette Stadium · Foxborough, MA", seed:[0,1]},
+  {id:8,  stage:"Group D", date:"2026-06-14", time:"00:00", home:"Australia",       away:"Turkey",        m:["australia","turkey"],               venue:"Lumen Field · Seattle, WA", seed:[2,0]},
+  {id:9,  stage:"Group E", date:"2026-06-14", time:"13:00", home:"Germany",        away:"Curaçao",        m:["germany","curacao"],                venue:"AT&T Stadium · Arlington, TX", seed:null},
+  {id:10, stage:"Group F", date:"2026-06-14", time:"16:00", home:"Netherlands",    away:"Japan",          m:["netherlands","japan"],              venue:"NRG Stadium · Houston, TX", seed:null},
+  {id:11, stage:"Group E", date:"2026-06-14", time:"19:00", home:"Ivory Coast", away:"Ecuador",        m:["ivory coast","ecuador"],            venue:"Lincoln Financial Field · Philadelphia, PA", seed:null},
+  {id:12, stage:"Group F", date:"2026-06-14", time:"22:00", home:"Sweden",          away:"Tunisia",          m:["sweden","tunisia"],                 venue:"Arrowhead Stadium · Kansas City, MO", seed:null},
+  {id:13, stage:"Group H", date:"2026-06-15", time:"12:00", home:"Spain",          away:"Cape Verde",     m:["spain","cape verde"],               venue:"Levi's Stadium · Santa Clara, CA", seed:null},
+  {id:14, stage:"Group G", date:"2026-06-15", time:"15:00", home:"Belgium",         away:"Egypt",         m:["belgium","egypt"],                  venue:"Estadio BBVA · Monterrey, Nuevo León", seed:null},
+  {id:15, stage:"Group H", date:"2026-06-15", time:"18:00", home:"Saudi Arabia",  away:"Uruguay",        m:["saudi arabia","uruguay"],           venue:"Estadio Akron · Guadalajara, Jalisco", seed:null},
+  {id:16, stage:"Group G", date:"2026-06-15", time:"21:00", home:"Iran",            away:"New Zealand",  m:["iran","new zealand"],               venue:"BC Place · Vancouver, BC", seed:null},
+  {id:17, stage:"Group I", date:"2026-06-16", time:"15:00", home:"France",         away:"Senegal",        m:["france","senegal"],                 venue:"MetLife Stadium · East Rutherford, NJ", seed:null},
+  {id:18, stage:"Group I", date:"2026-06-16", time:"18:00", home:"Iraq",            away:"Norway",        m:["iraq","norway"],                    venue:"Mercedes-Benz Stadium · Atlanta, GA", seed:null},
+  {id:19, stage:"Group J", date:"2026-06-16", time:"21:00", home:"Argentina",       away:"Algeria",        m:["argentina","algeria"],              venue:"Hard Rock Stadium · Miami Gardens, FL", seed:null},
+  {id:20, stage:"Group J", date:"2026-06-16", time:"23:00", home:"Austria",         away:"Jordan",       m:["austria","jordan"],                 venue:"AT&T Stadium · Arlington, TX", seed:null},
+  {id:21, stage:"Group K", date:"2026-06-17", time:"12:00", home:"Portugal",        away:"DR Congo",       m:["portugal","dr congo"],              venue:"SoFi Stadium · Inglewood, CA", seed:null},
+  {id:22, stage:"Group L", date:"2026-06-17", time:"15:00", home:"England",      away:"Croatia",        m:["england","croatia"],                venue:"Lumen Field · Seattle, WA", seed:null},
+  {id:23, stage:"Group L", date:"2026-06-17", time:"18:00", home:"Ghana",           away:"Panama",         m:["ghana","panama"],                   venue:"NRG Stadium · Houston, TX", seed:null},
+  {id:24, stage:"Group K", date:"2026-06-17", time:"20:00", home:"Uzbekistan",      away:"Colombia",       m:["uzbekistan","colombia"],            venue:"Estadio Azteca · Mexico City, CDMX", seed:null},
 ];
 
 /* DOUBLE-points matches (×2). Matchup in English; home/away order does not matter.
@@ -420,26 +422,46 @@ const LUIS = {
   20:[1,2], 21:[3,0], 22:[2,0], 23:[1,1], 24:[1,2]
 };
 
-/* REAL predictions from Sr. David Magro (Pool sheet of his entry). */
+/* REAL predictions from David M. Sr (Pool sheet of his entry). */
 const SR_DAVID = {
   1:[2,1], 2:[1,1], 3:[1,0], 4:[1,1], 5:[0,3], 6:[1,1], 7:[0,3], 8:[0,2], 9:[6,0], 10:[2,1],
   11:[1,2], 12:[1,0], 13:[3,0], 14:[3,1], 15:[1,2], 16:[1,1], 17:[2,1], 18:[0,4], 19:[2,0],
   20:[1,0], 21:[3,0], 22:[2,1], 23:[2,1], 24:[1,3]
 };
 
-/* REAL predictions from David Jr. (Pool sheet of his entry). */
+/* REAL predictions from David M. Jr (Pool sheet of his entry). */
 const DAVID_JR = {
   1:[2,1], 2:[0,0], 3:[1,1], 4:[1,0], 5:[1,3], 6:[1,1], 7:[0,3], 8:[0,1], 9:[6,0], 10:[2,1],
   11:[1,2], 12:[2,1], 13:[5,0], 14:[2,0], 15:[0,2], 16:[3,1], 17:[1,0], 18:[1,3], 19:[3,1],
   20:[2,0], 21:[3,0], 22:[2,1], 23:[2,0], 24:[1,3]
 };
+
+/* REAL predictions from the 9 additional players (Pool sheet, matchday 1). */
+const ALEX = {1:[3,1],2:[1,1],3:[3,0],4:[1,0],5:[1,2],6:[2,1],7:[0,2],8:[1,1],9:[4,0],10:[2,0],11:[1,2],12:[1,1],13:[3,0],14:[3,1],15:[0,2],16:[1,1],17:[3,1],18:[1,2],19:[3,0],20:[1,0],21:[3,0],22:[2,2],23:[1,0],24:[0,2]};
+const CARLOS_BRITO = {1:[2,1],2:[1,1],3:[1,1],4:[2,1],5:[1,2],6:[2,1],7:[0,2],8:[1,2],9:[2,0],10:[1,1],11:[1,1],12:[2,0],13:[3,1],14:[1,1],15:[0,2],16:[1,0],17:[2,1],18:[0,1],19:[2,0],20:[1,0],21:[2,0],22:[2,1],23:[1,0],24:[0,1]};
+const CALIQUE = {1:[2,0],2:[3,1],3:[1,1],4:[2,2],5:[1,3],6:[3,2],7:[0,2],8:[0,1],9:[5,0],10:[1,3],11:[1,2],12:[2,1],13:[8,0],14:[1,0],15:[1,2],16:[1,1],17:[3,1],18:[0,3],19:[1,1],20:[3,1],21:[4,0],22:[1,1],23:[2,0],24:[0,3]};
+const MISTER = {1:[2,0],2:[1,1],3:[2,2],4:[2,1],5:[0,2],6:[3,1],7:[0,2],8:[3,1],9:[6,0],10:[2,2],11:[1,1],12:[1,0],13:[5,0],14:[2,0],15:[1,2],16:[0,2],17:[2,0],18:[0,2],19:[3,0],20:[1,1],21:[3,0],22:[3,1],23:[2,2],24:[1,3]};
+const FLACA = {1:[2,1],2:[1,0],3:[2,1],4:[2,1],5:[0,3],6:[3,2],7:[0,1],8:[1,1],9:[5,0],10:[1,0],11:[1,2],12:[2,0],13:[5,0],14:[1,0],15:[0,2],16:[1,0],17:[3,1],18:[0,3],19:[5,1],20:[2,2],21:[2,0],22:[3,1],23:[1,1],24:[1,4]};
+const BLAS = {1:[2,1],2:[1,0],3:[0,2],4:[2,1],5:[0,2],6:[2,1],7:[0,3],8:[0,2],9:[5,0],10:[1,2],11:[1,2],12:[1,0],13:[5,0],14:[2,0],15:[1,2],16:[1,0],17:[3,1],18:[0,2],19:[2,0],20:[2,0],21:[3,0],22:[2,1],23:[3,0],24:[0,3]};
+const ETHAN = {1:[3,0],2:[1,3],3:[0,0],4:[1,1],5:[0,1],6:[1,1],7:[0,1],8:[0,1],9:[4,1],10:[2,1],11:[1,1],12:[1,0],13:[2,0],14:[0,1],15:[0,1],16:[0,0],17:[2,0],18:[0,1],19:[3,0],20:[1,0],21:[2,1],22:[1,1],23:[1,1],24:[0,1]};
+const FLACO = {1:[2,1],2:[1,0],3:[2,1],4:[3,1],5:[0,2],6:[3,3],7:[1,3],8:[0,2],9:[4,0],10:[3,2],11:[1,2],12:[2,0],13:[5,0],14:[3,1],15:[0,3],16:[1,1],17:[3,1],18:[0,4],19:[2,1],20:[1,0],21:[3,0],22:[2,2],23:[2,0],24:[0,3]};
+const ELIGH = {1:[2,0],2:[2,1],3:[2,1],4:[2,1],5:[2,0],6:[3,1],7:[0,2],8:[0,2],9:[3,0],10:[2,1],11:[1,2],12:[1,0],13:[3,0],14:[2,1],15:[0,2],16:[1,0],17:[3,1],18:[0,2],19:[3,0],20:[2,0],21:[3,0],22:[2,1],23:[2,0],24:[1,2]};
 const PREDICTIONS = {};
 GAMES.forEach((g)=>{
   PREDICTIONS[g.id] = {};
   PLAYERS.forEach((p,pi)=>{ const rng = seeded((g.id*97 + pi*31 + 7) >>> 0); PREDICTIONS[g.id][p] = [predScore(rng), predScore(rng)]; });
   if(LUIS[g.id]) PREDICTIONS[g.id]["Luis"] = [LUIS[g.id][0], LUIS[g.id][1]]; // Luis real
-  if(SR_DAVID[g.id]) PREDICTIONS[g.id]["Sr. David Magro"] = [SR_DAVID[g.id][0], SR_DAVID[g.id][1]]; // Sr. David Magro real
-  if(DAVID_JR[g.id]) PREDICTIONS[g.id]["David Jr."] = [DAVID_JR[g.id][0], DAVID_JR[g.id][1]]; // David Jr. real
+  if(SR_DAVID[g.id]) PREDICTIONS[g.id]["David M. Sr"] = [SR_DAVID[g.id][0], SR_DAVID[g.id][1]]; // David M. Sr real
+  if(DAVID_JR[g.id]) PREDICTIONS[g.id]["David M. Jr"] = [DAVID_JR[g.id][0], DAVID_JR[g.id][1]]; // David M. Jr real
+  if(ALEX[g.id]) PREDICTIONS[g.id]["Alex"] = ALEX[g.id].slice();
+  if(CARLOS_BRITO[g.id]) PREDICTIONS[g.id]["Karlox"] = CARLOS_BRITO[g.id].slice();
+  if(CALIQUE[g.id]) PREDICTIONS[g.id]["Calique"] = CALIQUE[g.id].slice();
+  if(MISTER[g.id]) PREDICTIONS[g.id]["Mister"] = MISTER[g.id].slice();
+  if(FLACA[g.id]) PREDICTIONS[g.id]["Flaca"] = FLACA[g.id].slice();
+  if(BLAS[g.id]) PREDICTIONS[g.id]["Blas"] = BLAS[g.id].slice();
+  if(ETHAN[g.id]) PREDICTIONS[g.id]["Ethan"] = ETHAN[g.id].slice();
+  if(FLACO[g.id]) PREDICTIONS[g.id]["Flaco"] = FLACO[g.id].slice();
+  if(ELIGH[g.id]) PREDICTIONS[g.id]["Eligh"] = ELIGH[g.id].slice();
 });
 
 /* ============================================================
@@ -562,12 +584,15 @@ function recompute(){
 /* ============================================================
    HELPERS DE RENDER
    ============================================================ */
-const AV_COLORS = ["#121212","#de2820","#3b3b3b","#8c1c15","#555555","#b32018","#2a2a2a","#d13a30","#6b6b6b"];
+const AV_COLORS = ["#121212","#de2820","#3b3b3b","#8c1c15","#555555","#b32018","#2a2a2a","#d13a30","#6b6b6b","#a81e16","#474747","#7d7d7d"];
 function avatar(name){
   const i = PLAYERS.indexOf(name);
   const c = AV_COLORS[(i>=0?i:0) % AV_COLORS.length];
   return `<span class="av" style="background:${c}">${name.slice(0,2).toUpperCase()}</span>`;
 }
+const ADMIN = "Flaco";
+const ADMIN_BADGE = '<svg class="adminbadge" viewBox="0 0 24 24" role="img" aria-label="Pool admin"><title>Pool admin</title><path fill="#de2820" d="M3 8l4 3 5-6 5 6 4-3-2 11H5z"/></svg>';
+function adminTag(name){ return name===ADMIN ? ADMIN_BADGE : ""; }
 /* Flags by English key (same ones each match uses in m[]). */
 const FLAGS = {
   "mexico":"🇲🇽","south africa":"🇿🇦","south korea":"🇰🇷","czechia":"🇨🇿","canada":"🇨🇦",
@@ -628,7 +653,7 @@ function renderStandings(){
       <div class="rk">1</div>
       <div class="who">
         <div class="lbl">Leader</div>
-        <div class="nm">${top}</div>
+        <div class="nm">${top}${adminTag(top)}</div>
         <div class="det">${STATS[top].exact} exact · ${STATS[top].hits} correct · ${STATS[top].played} played</div>
       </div>
       <div class="stat"><div class="big"><u><span data-count="${STATS[top].total}">0</span></u><small>points</small></div></div>
@@ -642,7 +667,7 @@ function renderStandings(){
       const s = STATS[p], r = RANK[p];
       return `<div class="board__row">
         <div class="rk-cell ${r<=3?"top":""}">${r}</div>
-        <div class="name-cell">${avatar(p)}<span>${p}</span></div>
+        <div class="name-cell">${avatar(p)}<span>${p}${adminTag(p)}</span></div>
         <div class="tot-cell">${s.total}</div>
         <div class="num-cell col-hide"><b>${s.exact}</b></div>
         <div class="num-cell col-hide"><b>${s.hits}</b></div>
@@ -662,7 +687,7 @@ function animateCounts(){
 /* ---------- Players ---------- */
 function renderPicker(){
   document.getElementById("picker").innerHTML = PLAYERS.map(p=>`
-    <button class="pchip" data-player="${p}" aria-pressed="${p===activePlayer}">${avatar(p)}<span>${p}</span></button>`).join("");
+    <button class="pchip" data-player="${p}" aria-pressed="${p===activePlayer}">${avatar(p)}<span>${p}${adminTag(p)}</span></button>`).join("");
   document.querySelectorAll(".pchip").forEach(b=>{
     b.addEventListener("click", ()=>{ activePlayer=b.dataset.player; renderPicker(); renderProfile(); });
   });
@@ -695,7 +720,7 @@ function renderProfile(){
     <div class="profile">
       <div class="profile__top">
         ${avatar(p)}
-        <div><div class="profile__name">${p}</div><div class="role">Place ${RANK[p]} of ${PLAYERS.length}</div></div>
+        <div><div class="profile__name">${p}${adminTag(p)}</div><div class="role">Place ${RANK[p]} of ${PLAYERS.length}</div></div>
         <div class="kpis">
           <div class="kpi"><b>${s.total}</b><span>Points</span></div>
           <div class="kpi"><b>${s.exact}</b><span>Exact</span></div>
@@ -725,14 +750,14 @@ function renderGames(){
     const list = rows.map(r=>{
       const ptsHtml = played ? `<span class="${r.exact?'pts pts--exact':r.pts===0?'pts pts--zero':'pts'}">${r.pts}</span>` : `<span class="pts pts--zero">–</span>`;
       return `<div class="glist__row">
-        <div class="who">${avatar(r.p)}<span>${r.p}</span> ${r.exact?'<span class="stamp">★ exact</span>':''}</div>
+        <div class="who">${avatar(r.p)}<span>${r.p}${adminTag(r.p)}</span> ${r.exact?'<span class="stamp">★ exact</span>':''}</div>
         <div style="text-align:right">${sb(r.pred,"pred",r.exact)}</div>
         <div style="text-align:right">${ptsHtml}</div></div>`;
     }).join("");
     return `<div class="gcard ${g.live?'gcard--live':''}" data-game="${g.id}">
       <button class="gcard__btn" aria-expanded="false">
         <span class="gnum">${String(g.id).padStart(2,"0")}</span>
-        <span class="ginfo"><span class="stage">${g.stage}${g.dbl?' · <b style="color:var(--red)">×2 points</b>':''}</span><span class="teams">${flag(g.m[0])} ${g.home} vs ${flag(g.m[1])} ${g.away}</span><span class="date">${fmtDate(g.date)} · ${g.time} ET</span></span>
+        <span class="ginfo"><span class="stage">${g.stage}${g.dbl?' · <b style="color:var(--red)">×2 points</b>':''}</span><span class="teams">${flag(g.m[0])} ${g.home} vs ${flag(g.m[1])} ${g.away}</span><span class="date">${fmtDate(g.date)} · ${g.time} ET</span>${g.venue?`<span class="gloc"><svg class="pin" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C8.1 2 5 5.1 5 9c0 4.7 6.2 12.3 6.5 12.6a.7.7 0 0 0 1 0C12.8 21.3 19 13.7 19 9c0-3.9-3.1-7-7-7Zm0 9.6A2.6 2.6 0 1 1 12 6.4a2.6 2.6 0 0 1 0 5.2Z"/></svg>${g.venue}</span>`:""}</span>
         <span class="gright">${rightTag}</span><span class="chev">▶</span>
       </button>
       <div class="gbody"><div class="gbody__in">
