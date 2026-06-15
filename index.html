@@ -294,6 +294,7 @@
 .tie__row--w{color:var(--red)}
 .tie__row--w b{color:var(--red)}
 .tie__pens{font-size:10px;color:var(--muted);margin-top:5px;font-style:italic}
+.postag{display:inline-block;margin-left:5px;font-family:"JetBrains Mono",monospace;font-size:9.5px;font-weight:700;color:var(--muted);background:#efefec;border-radius:4px;padding:0 4px;vertical-align:1px}
 /* Podium + awards chips */
 .pod,.aw{flex:0 0 auto;min-width:150px;border:1px solid var(--line);border-radius:12px;background:#fff;padding:10px 12px;scroll-snap-align:start}
 .pod span,.aw span{display:block;font-size:11px;color:var(--muted);margin-bottom:4px}
@@ -476,7 +477,7 @@ const PLAYERS = ["Luis","David M. Sr","David M. Jr","Alex","Karlox","Calique","M
    The live feed overwrites seed when the match finishes.            */
 const GAMES = [
   {id:1,  stage:"Group A", date:"2026-06-11", time:"15:00", home:"Mexico",          away:"South Africa",      m:["mexico","south africa"],            venue:"Estadio Azteca · Mexico City, CDMX", seed:[2,0]},
-  {id:2,  stage:"Group A", date:"2026-06-11", time:"21:00", home:"South Korea",    away:"Czechia",        m:["south korea","czechia"],            venue:"Estadio Akron · Guadalajara, Jalisco", seed:[2,1]},
+  {id:2,  stage:"Group A", date:"2026-06-11", time:"22:00", home:"South Korea",    away:"Czechia",        m:["south korea","czechia"],            venue:"Estadio Akron · Guadalajara, Jalisco", seed:[2,1]},
   {id:3,  stage:"Group B", date:"2026-06-12", time:"15:00", home:"Canada",          away:"Bosnia & H.",    m:["canada","bosnia and herzegovina"],  venue:"BMO Field · Toronto, ON", seed:[1,1]},
   {id:4,  stage:"Group D", date:"2026-06-12", time:"21:00", home:"United States",  away:"Paraguay",       m:["united states","paraguay"],         venue:"SoFi Stadium · Inglewood, CA", seed:[4,1]},
   {id:5,  stage:"Group B", date:"2026-06-13", time:"15:00", home:"Qatar",           away:"Switzerland",          m:["qatar","switzerland"],              venue:"Levi's Stadium · Santa Clara, CA", seed:[1,1]},
@@ -494,11 +495,59 @@ const GAMES = [
   {id:17, stage:"Group I", date:"2026-06-16", time:"15:00", home:"France",         away:"Senegal",        m:["france","senegal"],                 venue:"MetLife Stadium · East Rutherford, NJ", seed:null},
   {id:18, stage:"Group I", date:"2026-06-16", time:"18:00", home:"Iraq",            away:"Norway",        m:["iraq","norway"],                    venue:"Gillette Stadium · Foxborough, MA", seed:null},
   {id:19, stage:"Group J", date:"2026-06-16", time:"21:00", home:"Argentina",       away:"Algeria",        m:["argentina","algeria"],              venue:"Arrowhead Stadium · Kansas City, MO", seed:null},
-  {id:20, stage:"Group J", date:"2026-06-16", time:"23:00", home:"Austria",         away:"Jordan",       m:["austria","jordan"],                 venue:"Levi's Stadium · Santa Clara, CA", seed:null},
-  {id:21, stage:"Group K", date:"2026-06-17", time:"12:00", home:"Portugal",        away:"DR Congo",       m:["portugal","dr congo"],              venue:"NRG Stadium · Houston, TX", seed:null},
-  {id:22, stage:"Group L", date:"2026-06-17", time:"15:00", home:"England",      away:"Croatia",        m:["england","croatia"],                venue:"AT&T Stadium · Arlington, TX", seed:null},
-  {id:23, stage:"Group L", date:"2026-06-17", time:"18:00", home:"Ghana",           away:"Panama",         m:["ghana","panama"],                   venue:"BMO Field · Toronto, ON", seed:null},
-  {id:24, stage:"Group K", date:"2026-06-17", time:"20:00", home:"Uzbekistan",      away:"Colombia",       m:["uzbekistan","colombia"],            venue:"Estadio Azteca · Mexico City, CDMX", seed:null},
+  {id:20, stage:"Group J", date:"2026-06-17", time:"00:00", home:"Austria",         away:"Jordan",       m:["austria","jordan"],                 venue:"Levi's Stadium · Santa Clara, CA", seed:null},
+  {id:21, stage:"Group K", date:"2026-06-17", time:"13:00", home:"Portugal",        away:"DR Congo",       m:["portugal","dr congo"],              venue:"NRG Stadium · Houston, TX", seed:null},
+  {id:22, stage:"Group L", date:"2026-06-17", time:"16:00", home:"England",      away:"Croatia",        m:["england","croatia"],                venue:"AT&T Stadium · Arlington, TX", seed:null},
+  {id:23, stage:"Group L", date:"2026-06-17", time:"19:00", home:"Ghana",           away:"Panama",         m:["ghana","panama"],                   venue:"BMO Field · Toronto, ON", seed:null},
+  {id:24, stage:"Group K", date:"2026-06-17", time:"22:00", home:"Uzbekistan",      away:"Colombia",       m:["uzbekistan","colombia"],            venue:"Estadio Azteca · Mexico City, CDMX", seed:null},
+  {id:25, stage:"Group A", date:"2026-06-18", time:"12:00", home:"Czechia", away:"South Africa", m:["czechia","south africa"], venue:"Mercedes-Benz Stadium · Atlanta, GA", seed:null},
+  {id:26, stage:"Group B", date:"2026-06-18", time:"15:00", home:"Switzerland", away:"Bosnia & H.", m:["switzerland","bosnia and herzegovina"], venue:"SoFi Stadium · Inglewood, CA", seed:null},
+  {id:27, stage:"Group B", date:"2026-06-18", time:"18:00", home:"Canada", away:"Qatar", m:["canada","qatar"], venue:"BC Place · Vancouver, BC", seed:null},
+  {id:28, stage:"Group A", date:"2026-06-18", time:"21:00", home:"Mexico", away:"South Korea", m:["mexico","south korea"], venue:"Estadio Akron · Guadalajara, Jalisco", seed:null},
+  {id:29, stage:"Group D", date:"2026-06-19", time:"15:00", home:"United States", away:"Australia", m:["united states","australia"], venue:"Lumen Field · Seattle, WA", seed:null},
+  {id:30, stage:"Group C", date:"2026-06-19", time:"18:00", home:"Scotland", away:"Morocco", m:["scotland","morocco"], venue:"Gillette Stadium · Foxborough, MA", seed:null},
+  {id:31, stage:"Group C", date:"2026-06-19", time:"20:30", home:"Brazil", away:"Haiti", m:["brazil","haiti"], venue:"Lincoln Financial Field · Philadelphia, PA", seed:null},
+  {id:32, stage:"Group D", date:"2026-06-19", time:"23:00", home:"Turkey", away:"Paraguay", m:["turkey","paraguay"], venue:"Levi's Stadium · Santa Clara, CA", seed:null},
+  {id:33, stage:"Group F", date:"2026-06-20", time:"13:00", home:"Netherlands", away:"Sweden", m:["netherlands","sweden"], venue:"NRG Stadium · Houston, TX", seed:null},
+  {id:34, stage:"Group E", date:"2026-06-20", time:"16:00", home:"Germany", away:"Ivory Coast", m:["germany","ivory coast"], venue:"BMO Field · Toronto, ON", seed:null},
+  {id:35, stage:"Group E", date:"2026-06-20", time:"20:00", home:"Ecuador", away:"Curaçao", m:["ecuador","curacao"], venue:"Arrowhead Stadium · Kansas City, MO", seed:null},
+  {id:36, stage:"Group F", date:"2026-06-21", time:"00:00", home:"Tunisia", away:"Japan", m:["tunisia","japan"], venue:"Estadio BBVA · Monterrey, Nuevo León", seed:null},
+  {id:37, stage:"Group H", date:"2026-06-21", time:"12:00", home:"Spain", away:"Saudi Arabia", m:["spain","saudi arabia"], venue:"Mercedes-Benz Stadium · Atlanta, GA", seed:null},
+  {id:38, stage:"Group G", date:"2026-06-21", time:"15:00", home:"Belgium", away:"Iran", m:["belgium","iran"], venue:"SoFi Stadium · Inglewood, CA", seed:null},
+  {id:39, stage:"Group H", date:"2026-06-21", time:"18:00", home:"Uruguay", away:"Cape Verde", m:["uruguay","cape verde"], venue:"Hard Rock Stadium · Miami Gardens, FL", seed:null},
+  {id:40, stage:"Group G", date:"2026-06-21", time:"21:00", home:"New Zealand", away:"Egypt", m:["new zealand","egypt"], venue:"BC Place · Vancouver, BC", seed:null},
+  {id:41, stage:"Group J", date:"2026-06-22", time:"13:00", home:"Argentina", away:"Austria", m:["argentina","austria"], venue:"AT&T Stadium · Arlington, TX", seed:null},
+  {id:42, stage:"Group I", date:"2026-06-22", time:"17:00", home:"France", away:"Iraq", m:["france","iraq"], venue:"Lincoln Financial Field · Philadelphia, PA", seed:null},
+  {id:43, stage:"Group I", date:"2026-06-22", time:"20:00", home:"Norway", away:"Senegal", m:["norway","senegal"], venue:"MetLife Stadium · East Rutherford, NJ", seed:null},
+  {id:44, stage:"Group J", date:"2026-06-22", time:"23:00", home:"Jordan", away:"Algeria", m:["jordan","algeria"], venue:"Levi's Stadium · Santa Clara, CA", seed:null},
+  {id:45, stage:"Group K", date:"2026-06-23", time:"13:00", home:"Portugal", away:"Uzbekistan", m:["portugal","uzbekistan"], venue:"NRG Stadium · Houston, TX", seed:null},
+  {id:46, stage:"Group L", date:"2026-06-23", time:"16:00", home:"England", away:"Ghana", m:["england","ghana"], venue:"Gillette Stadium · Foxborough, MA", seed:null},
+  {id:47, stage:"Group L", date:"2026-06-23", time:"19:00", home:"Panama", away:"Croatia", m:["panama","croatia"], venue:"BMO Field · Toronto, ON", seed:null},
+  {id:48, stage:"Group K", date:"2026-06-23", time:"22:00", home:"Colombia", away:"DR Congo", m:["colombia","dr congo"], venue:"Estadio Akron · Guadalajara, Jalisco", seed:null},
+  {id:49, stage:"Group B", date:"2026-06-24", time:"15:00", home:"Switzerland", away:"Canada", m:["switzerland","canada"], venue:"BC Place · Vancouver, BC", seed:null},
+  {id:50, stage:"Group B", date:"2026-06-24", time:"15:00", home:"Bosnia & H.", away:"Qatar", m:["bosnia and herzegovina","qatar"], venue:"Lumen Field · Seattle, WA", seed:null},
+  {id:51, stage:"Group C", date:"2026-06-24", time:"18:00", home:"Scotland", away:"Brazil", m:["scotland","brazil"], venue:"Hard Rock Stadium · Miami Gardens, FL", seed:null},
+  {id:52, stage:"Group C", date:"2026-06-24", time:"18:00", home:"Morocco", away:"Haiti", m:["morocco","haiti"], venue:"Mercedes-Benz Stadium · Atlanta, GA", seed:null},
+  {id:53, stage:"Group A", date:"2026-06-24", time:"21:00", home:"Czechia", away:"Mexico", m:["czechia","mexico"], venue:"Estadio Azteca · Mexico City, CDMX", seed:null},
+  {id:54, stage:"Group A", date:"2026-06-24", time:"21:00", home:"South Africa", away:"South Korea", m:["south africa","south korea"], venue:"Estadio BBVA · Monterrey, Nuevo León", seed:null},
+  {id:55, stage:"Group E", date:"2026-06-25", time:"16:00", home:"Curaçao", away:"Ivory Coast", m:["curacao","ivory coast"], venue:"Lincoln Financial Field · Philadelphia, PA", seed:null},
+  {id:56, stage:"Group E", date:"2026-06-25", time:"16:00", home:"Ecuador", away:"Germany", m:["ecuador","germany"], venue:"MetLife Stadium · East Rutherford, NJ", seed:null},
+  {id:57, stage:"Group F", date:"2026-06-25", time:"19:00", home:"Japan", away:"Sweden", m:["japan","sweden"], venue:"AT&T Stadium · Arlington, TX", seed:null},
+  {id:58, stage:"Group F", date:"2026-06-25", time:"19:00", home:"Tunisia", away:"Netherlands", m:["tunisia","netherlands"], venue:"Arrowhead Stadium · Kansas City, MO", seed:null},
+  {id:59, stage:"Group D", date:"2026-06-25", time:"22:00", home:"Turkey", away:"United States", m:["turkey","united states"], venue:"SoFi Stadium · Inglewood, CA", seed:null},
+  {id:60, stage:"Group D", date:"2026-06-25", time:"22:00", home:"Paraguay", away:"Australia", m:["paraguay","australia"], venue:"Levi's Stadium · Santa Clara, CA", seed:null},
+  {id:61, stage:"Group I", date:"2026-06-26", time:"15:00", home:"Norway", away:"France", m:["norway","france"], venue:"Gillette Stadium · Foxborough, MA", seed:null},
+  {id:62, stage:"Group I", date:"2026-06-26", time:"15:00", home:"Senegal", away:"Iraq", m:["senegal","iraq"], venue:"BMO Field · Toronto, ON", seed:null},
+  {id:63, stage:"Group H", date:"2026-06-26", time:"20:00", home:"Cape Verde", away:"Saudi Arabia", m:["cape verde","saudi arabia"], venue:"NRG Stadium · Houston, TX", seed:null},
+  {id:64, stage:"Group H", date:"2026-06-26", time:"20:00", home:"Uruguay", away:"Spain", m:["uruguay","spain"], venue:"Estadio Akron · Guadalajara, Jalisco", seed:null},
+  {id:65, stage:"Group G", date:"2026-06-26", time:"23:00", home:"Egypt", away:"Iran", m:["egypt","iran"], venue:"Lumen Field · Seattle, WA", seed:null},
+  {id:66, stage:"Group G", date:"2026-06-26", time:"23:00", home:"New Zealand", away:"Belgium", m:["new zealand","belgium"], venue:"BC Place · Vancouver, BC", seed:null},
+  {id:67, stage:"Group L", date:"2026-06-27", time:"17:00", home:"Panama", away:"England", m:["panama","england"], venue:"MetLife Stadium · East Rutherford, NJ", seed:null},
+  {id:68, stage:"Group L", date:"2026-06-27", time:"17:00", home:"Croatia", away:"Ghana", m:["croatia","ghana"], venue:"Lincoln Financial Field · Philadelphia, PA", seed:null},
+  {id:69, stage:"Group K", date:"2026-06-27", time:"19:30", home:"Colombia", away:"Portugal", m:["colombia","portugal"], venue:"Hard Rock Stadium · Miami Gardens, FL", seed:null},
+  {id:70, stage:"Group K", date:"2026-06-27", time:"19:30", home:"DR Congo", away:"Uzbekistan", m:["dr congo","uzbekistan"], venue:"Mercedes-Benz Stadium · Atlanta, GA", seed:null},
+  {id:71, stage:"Group J", date:"2026-06-27", time:"22:00", home:"Algeria", away:"Austria", m:["algeria","austria"], venue:"Arrowhead Stadium · Kansas City, MO", seed:null},
+  {id:72, stage:"Group J", date:"2026-06-27", time:"22:00", home:"Jordan", away:"Argentina", m:["jordan","argentina"], venue:"AT&T Stadium · Arlington, TX", seed:null},
 ];
 
 /* DOUBLE-points matches (×2). Matchup in English; home/away order does not matter.
@@ -546,6 +595,20 @@ const BLAS = {1:[2,1],2:[1,0],3:[0,2],4:[2,1],5:[0,2],6:[2,1],7:[0,3],8:[0,2],9:
 const ETHAN = {1:[3,0],2:[1,3],3:[0,0],4:[1,1],5:[0,1],6:[1,1],7:[0,1],8:[0,1],9:[4,1],10:[2,1],11:[1,1],12:[1,0],13:[2,0],14:[0,1],15:[0,1],16:[0,0],17:[2,0],18:[0,1],19:[3,0],20:[1,0],21:[2,1],22:[1,1],23:[1,1],24:[0,1]};
 const FLACO = {1:[2,1],2:[1,0],3:[2,1],4:[3,1],5:[0,2],6:[3,3],7:[1,3],8:[0,2],9:[4,0],10:[3,2],11:[1,2],12:[2,0],13:[5,0],14:[3,1],15:[0,3],16:[1,1],17:[3,1],18:[0,4],19:[2,1],20:[1,0],21:[3,0],22:[2,2],23:[2,0],24:[0,3]};
 const ELIGH = {1:[2,0],2:[2,1],3:[2,1],4:[2,1],5:[2,0],6:[3,1],7:[0,2],8:[0,2],9:[3,0],10:[2,1],11:[1,2],12:[1,0],13:[3,0],14:[2,1],15:[0,2],16:[1,0],17:[3,1],18:[0,2],19:[3,0],20:[2,0],21:[3,0],22:[2,1],23:[2,0],24:[1,2]};
+const GM = {
+  "Luis": {"turkey>paraguay":[2,0],"czechia>south africa":[2,1],"senegal>iraq":[2,0],"scotland>morocco":[1,2],"colombia>portugal":[1,2],"portugal>uzbekistan":[2,1],"south africa>south korea":[1,2],"argentina>austria":[3,0],"japan>sweden":[2,1],"uruguay>spain":[2,0],"paraguay>australia":[2,1],"france>iraq":[2,0],"bosnia and herzegovina>qatar":[2,1],"norway>france":[1,1],"brazil>haiti":[4,0],"new zealand>belgium":[0,2],"cape verde>saudi arabia":[0,2],"united states>australia":[1,1],"germany>ivory coast":[2,1],"mexico>south korea":[2,0],"spain>saudi arabia":[2,0],"scotland>brazil":[1,3],"colombia>dr congo":[2,0],"switzerland>canada":[1,1],"new zealand>egypt":[2,1],"algeria>austria":[2,1],"belgium>iran":[1,0],"panama>croatia":[1,2],"czechia>mexico":[1,1],"england>ghana":[3,1],"curacao>ivory coast":[1,3],"turkey>united states":[0,1],"ecuador>germany":[0,3],"ecuador>curacao":[3,0],"jordan>algeria":[1,1],"canada>qatar":[2,0],"tunisia>japan":[1,2],"netherlands>sweden":[1,1],"switzerland>bosnia and herzegovina":[3,0],"croatia>ghana":[2,1],"panama>england":[0,4],"uruguay>cape verde":[3,1],"egypt>iran":[2,1],"norway>senegal":[2,1],"tunisia>netherlands":[0,3],"dr congo>uzbekistan":[3,0],"morocco>haiti":[2,0],"jordan>argentina":[0,4]},
+  "David M. Sr": {"turkey>paraguay":[1,1],"czechia>south africa":[1,0],"senegal>iraq":[2,0],"scotland>morocco":[1,2],"colombia>portugal":[2,2],"portugal>uzbekistan":[2,0],"south africa>south korea":[0,2],"argentina>austria":[2,1],"japan>sweden":[2,1],"uruguay>spain":[1,1],"paraguay>australia":[1,0],"france>iraq":[4,0],"bosnia and herzegovina>qatar":[1,0],"norway>france":[1,1],"brazil>haiti":[6,0],"new zealand>belgium":[0,3],"cape verde>saudi arabia":[1,1],"united states>australia":[2,1],"germany>ivory coast":[2,1],"mexico>south korea":[1,1],"spain>saudi arabia":[2,0],"scotland>brazil":[1,2],"colombia>dr congo":[2,1],"switzerland>canada":[1,1],"new zealand>egypt":[0,1],"algeria>austria":[0,2],"belgium>iran":[2,0],"panama>croatia":[0,2],"czechia>mexico":[1,1],"england>ghana":[1,1],"curacao>ivory coast":[0,3],"turkey>united states":[1,1],"ecuador>germany":[1,1],"ecuador>curacao":[4,0],"jordan>algeria":[1,1],"canada>qatar":[2,1],"tunisia>japan":[1,2],"netherlands>sweden":[2,0],"switzerland>bosnia and herzegovina":[1,0],"croatia>ghana":[1,1],"panama>england":[0,2],"uruguay>cape verde":[2,1],"egypt>iran":[1,0],"norway>senegal":[2,0],"tunisia>netherlands":[1,2],"dr congo>uzbekistan":[1,1],"morocco>haiti":[4,0],"jordan>argentina":[0,2]},
+  "David M. Jr": {"turkey>paraguay":[1,1],"czechia>south africa":[2,0],"senegal>iraq":[3,1],"scotland>morocco":[0,1],"colombia>portugal":[1,2],"portugal>uzbekistan":[2,0],"south africa>south korea":[0,2],"argentina>austria":[2,1],"japan>sweden":[2,1],"uruguay>spain":[1,2],"paraguay>australia":[2,0],"france>iraq":[3,0],"bosnia and herzegovina>qatar":[3,0],"norway>france":[1,1],"brazil>haiti":[5,0],"new zealand>belgium":[1,3],"cape verde>saudi arabia":[0,1],"united states>australia":[2,1],"germany>ivory coast":[2,0],"mexico>south korea":[1,1],"spain>saudi arabia":[4,1],"scotland>brazil":[1,2],"colombia>dr congo":[2,1],"switzerland>canada":[2,1],"new zealand>egypt":[0,3],"algeria>austria":[0,1],"belgium>iran":[2,0],"panama>croatia":[0,3],"czechia>mexico":[1,2],"england>ghana":[2,0],"curacao>ivory coast":[0,3],"turkey>united states":[1,1],"ecuador>germany":[1,1],"ecuador>curacao":[4,0],"jordan>algeria":[0,1],"canada>qatar":[2,0],"tunisia>japan":[0,2],"netherlands>sweden":[1,0],"switzerland>bosnia and herzegovina":[1,0],"croatia>ghana":[1,0],"panama>england":[0,3],"uruguay>cape verde":[2,0],"egypt>iran":[2,1],"norway>senegal":[2,0],"tunisia>netherlands":[1,3],"dr congo>uzbekistan":[2,1],"morocco>haiti":[3,0],"jordan>argentina":[0,4]},
+  "Alex": {"turkey>paraguay":[0,2],"czechia>south africa":[0,2],"senegal>iraq":[2,1],"scotland>morocco":[1,3],"colombia>portugal":[1,2],"portugal>uzbekistan":[3,1],"south africa>south korea":[1,0],"argentina>austria":[3,1],"japan>sweden":[2,2],"uruguay>spain":[2,3],"paraguay>australia":[1,0],"france>iraq":[2,0],"bosnia and herzegovina>qatar":[2,1],"norway>france":[2,3],"brazil>haiti":[4,0],"new zealand>belgium":[0,3],"cape verde>saudi arabia":[0,1],"united states>australia":[2,0],"germany>ivory coast":[3,1],"mexico>south korea":[2,1],"spain>saudi arabia":[2,0],"scotland>brazil":[1,3],"colombia>dr congo":[3,1],"switzerland>canada":[1,1],"new zealand>egypt":[0,1],"algeria>austria":[1,1],"belgium>iran":[2,0],"panama>croatia":[0,2],"czechia>mexico":[1,1],"england>ghana":[2,0],"curacao>ivory coast":[1,2],"turkey>united states":[1,3],"ecuador>germany":[1,2],"ecuador>curacao":[3,0],"jordan>algeria":[0,1],"canada>qatar":[3,1],"tunisia>japan":[0,2],"netherlands>sweden":[1,0],"switzerland>bosnia and herzegovina":[2,0],"croatia>ghana":[3,1],"panama>england":[1,2],"uruguay>cape verde":[1,0],"egypt>iran":[0,0],"norway>senegal":[1,0],"tunisia>netherlands":[0,3],"dr congo>uzbekistan":[1,1],"morocco>haiti":[2,0],"jordan>argentina":[0,4]},
+  "Karlox": {"turkey>paraguay":[2,1],"czechia>south africa":[1,0],"senegal>iraq":[1,0],"scotland>morocco":[0,1],"colombia>portugal":[1,2],"portugal>uzbekistan":[2,0],"south africa>south korea":[0,2],"argentina>austria":[2,1],"japan>sweden":[2,1],"uruguay>spain":[1,1],"paraguay>australia":[1,0],"france>iraq":[2,0],"bosnia and herzegovina>qatar":[1,0],"norway>france":[1,2],"brazil>haiti":[3,0],"new zealand>belgium":[0,2],"cape verde>saudi arabia":[1,0],"united states>australia":[1,0],"germany>ivory coast":[1,1],"mexico>south korea":[2,2],"spain>saudi arabia":[2,0],"scotland>brazil":[1,2],"colombia>dr congo":[1,0],"switzerland>canada":[1,1],"new zealand>egypt":[0,2],"algeria>austria":[1,1],"belgium>iran":[1,0],"panama>croatia":[0,2],"czechia>mexico":[1,1],"england>ghana":[2,0],"curacao>ivory coast":[0,1],"turkey>united states":[1,0],"ecuador>germany":[1,2],"ecuador>curacao":[2,1],"jordan>algeria":[0,2],"canada>qatar":[2,0],"tunisia>japan":[0,2],"netherlands>sweden":[2,1],"switzerland>bosnia and herzegovina":[2,1],"croatia>ghana":[1,1],"panama>england":[0,3],"uruguay>cape verde":[2,0],"egypt>iran":[2,1],"norway>senegal":[1,1],"tunisia>netherlands":[0,2],"dr congo>uzbekistan":[1,1],"morocco>haiti":[2,0],"jordan>argentina":[0,2]},
+  "Calique": {"turkey>paraguay":[1,2],"czechia>south africa":[1,1],"senegal>iraq":[1,0],"scotland>morocco":[1,1],"colombia>portugal":[1,2],"portugal>uzbekistan":[4,0],"south africa>south korea":[2,2],"argentina>austria":[2,0],"japan>sweden":[2,0],"uruguay>spain":[2,4],"paraguay>australia":[0,0],"france>iraq":[5,0],"bosnia and herzegovina>qatar":[3,0],"norway>france":[2,2],"brazil>haiti":[3,0],"new zealand>belgium":[2,1],"cape verde>saudi arabia":[1,2],"united states>australia":[3,1],"germany>ivory coast":[2,0],"mexico>south korea":[1,1],"spain>saudi arabia":[3,1],"scotland>brazil":[2,1],"colombia>dr congo":[2,0],"switzerland>canada":[0,1],"new zealand>egypt":[0,2],"algeria>austria":[0,1],"belgium>iran":[2,0],"panama>croatia":[1,2],"czechia>mexico":[2,1],"england>ghana":[2,0],"curacao>ivory coast":[1,2],"turkey>united states":[0,1],"ecuador>germany":[1,0],"ecuador>curacao":[3,0],"jordan>algeria":[0,2],"canada>qatar":[2,0],"tunisia>japan":[1,1],"netherlands>sweden":[1,0],"switzerland>bosnia and herzegovina":[2,2],"croatia>ghana":[1,0],"panama>england":[0,3],"uruguay>cape verde":[2,0],"egypt>iran":[3,1],"norway>senegal":[2,0],"tunisia>netherlands":[1,3],"dr congo>uzbekistan":[0,0],"morocco>haiti":[3,1],"jordan>argentina":[0,3]},
+  "Mister": {"turkey>paraguay":[1,0],"czechia>south africa":[2,1],"senegal>iraq":[0,0],"scotland>morocco":[2,2],"colombia>portugal":[2,3],"portugal>uzbekistan":[4,2],"south africa>south korea":[0,2],"argentina>austria":[2,0],"japan>sweden":[2,2],"uruguay>spain":[2,3],"paraguay>australia":[1,2],"france>iraq":[4,0],"bosnia and herzegovina>qatar":[2,0],"norway>france":[2,3],"brazil>haiti":[5,0],"new zealand>belgium":[1,1],"cape verde>saudi arabia":[0,2],"united states>australia":[2,2],"germany>ivory coast":[3,1],"mexico>south korea":[2,2],"spain>saudi arabia":[3,0],"scotland>brazil":[2,3],"colombia>dr congo":[2,0],"switzerland>canada":[3,1],"new zealand>egypt":[2,1],"algeria>austria":[2,2],"belgium>iran":[3,1],"panama>croatia":[0,2],"czechia>mexico":[1,1],"england>ghana":[2,0],"curacao>ivory coast":[0,2],"turkey>united states":[2,2],"ecuador>germany":[1,3],"ecuador>curacao":[3,0],"jordan>algeria":[1,2],"canada>qatar":[1,0],"tunisia>japan":[1,2],"netherlands>sweden":[3,1],"switzerland>bosnia and herzegovina":[1,1],"croatia>ghana":[3,3],"panama>england":[1,3],"uruguay>cape verde":[3,0],"egypt>iran":[1,0],"norway>senegal":[2,1],"tunisia>netherlands":[0,2],"dr congo>uzbekistan":[0,1],"morocco>haiti":[2,0],"jordan>argentina":[1,4]},
+  "Flaca": {"turkey>paraguay":[2,2],"czechia>south africa":[0,2],"senegal>iraq":[1,1],"scotland>morocco":[1,3],"colombia>portugal":[1,2],"portugal>uzbekistan":[2,1],"south africa>south korea":[1,1],"argentina>austria":[3,1],"japan>sweden":[1,1],"uruguay>spain":[1,3],"paraguay>australia":[1,2],"france>iraq":[4,0],"bosnia and herzegovina>qatar":[1,2],"norway>france":[1,2],"brazil>haiti":[5,0],"new zealand>belgium":[0,2],"cape verde>saudi arabia":[1,1],"united states>australia":[2,1],"germany>ivory coast":[1,0],"mexico>south korea":[2,1],"spain>saudi arabia":[4,0],"scotland>brazil":[1,3],"colombia>dr congo":[2,1],"switzerland>canada":[1,2],"new zealand>egypt":[0,1],"algeria>austria":[2,1],"belgium>iran":[2,0],"panama>croatia":[1,1],"czechia>mexico":[1,3],"england>ghana":[2,0],"curacao>ivory coast":[1,1],"turkey>united states":[2,3],"ecuador>germany":[1,2],"ecuador>curacao":[3,0],"jordan>algeria":[1,2],"canada>qatar":[1,1],"tunisia>japan":[1,1],"netherlands>sweden":[2,1],"switzerland>bosnia and herzegovina":[1,0],"croatia>ghana":[2,0],"panama>england":[0,3],"uruguay>cape verde":[2,0],"egypt>iran":[1,1],"norway>senegal":[1,0],"tunisia>netherlands":[0,2],"dr congo>uzbekistan":[1,1],"morocco>haiti":[2,1],"jordan>argentina":[0,6]},
+  "Blas": {"turkey>paraguay":[3,0],"czechia>south africa":[2,0],"senegal>iraq":[2,0],"scotland>morocco":[0,2],"colombia>portugal":[1,2],"portugal>uzbekistan":[4,0],"south africa>south korea":[0,3],"argentina>austria":[3,1],"japan>sweden":[2,1],"uruguay>spain":[1,2],"paraguay>australia":[1,0],"france>iraq":[3,0],"bosnia and herzegovina>qatar":[3,0],"norway>france":[0,2],"brazil>haiti":[5,0],"new zealand>belgium":[0,3],"cape verde>saudi arabia":[0,1],"united states>australia":[1,0],"germany>ivory coast":[3,0],"mexico>south korea":[1,2],"spain>saudi arabia":[2,0],"scotland>brazil":[1,2],"colombia>dr congo":[3,1],"switzerland>canada":[3,0],"new zealand>egypt":[0,2],"algeria>austria":[0,2],"belgium>iran":[4,0],"panama>croatia":[0,3],"czechia>mexico":[1,0],"england>ghana":[3,1],"curacao>ivory coast":[0,2],"turkey>united states":[2,0],"ecuador>germany":[1,3],"ecuador>curacao":[3,0],"jordan>algeria":[1,2],"canada>qatar":[2,0],"tunisia>japan":[0,2],"netherlands>sweden":[2,0],"switzerland>bosnia and herzegovina":[1,0],"croatia>ghana":[2,0],"panama>england":[0,4],"uruguay>cape verde":[3,0],"egypt>iran":[2,1],"norway>senegal":[2,1],"tunisia>netherlands":[1,3],"dr congo>uzbekistan":[2,1],"morocco>haiti":[5,0],"jordan>argentina":[0,3]},
+  "Ethan": {"turkey>paraguay":[2,0],"czechia>south africa":[2,0],"senegal>iraq":[1,0],"scotland>morocco":[1,0],"colombia>portugal":[2,2],"portugal>uzbekistan":[2,0],"south africa>south korea":[0,0],"argentina>austria":[2,0],"japan>sweden":[0,1],"uruguay>spain":[1,3],"paraguay>australia":[0,0],"france>iraq":[2,0],"bosnia and herzegovina>qatar":[1,0],"norway>france":[1,3],"brazil>haiti":[3,0],"new zealand>belgium":[0,1],"cape verde>saudi arabia":[0,0],"united states>australia":[1,0],"germany>ivory coast":[1,0],"mexico>south korea":[1,0],"spain>saudi arabia":[3,0],"scotland>brazil":[1,1],"colombia>dr congo":[2,0],"switzerland>canada":[1,0],"new zealand>egypt":[0,2],"algeria>austria":[0,1],"belgium>iran":[2,0],"panama>croatia":[1,0],"czechia>mexico":[1,2],"england>ghana":[1,1],"curacao>ivory coast":[0,1],"turkey>united states":[2,0],"ecuador>germany":[1,1],"ecuador>curacao":[2,0],"jordan>algeria":[0,0],"canada>qatar":[1,0],"tunisia>japan":[0,1],"netherlands>sweden":[1,0],"switzerland>bosnia and herzegovina":[1,1],"croatia>ghana":[0,0],"panama>england":[0,1],"uruguay>cape verde":[2,0],"egypt>iran":[2,0],"norway>senegal":[1,1],"tunisia>netherlands":[0,1],"dr congo>uzbekistan":[0,0],"morocco>haiti":[2,0],"jordan>argentina":[0,2]},
+  "Flaco": {"turkey>paraguay":[3,2],"czechia>south africa":[1,1],"senegal>iraq":[2,0],"scotland>morocco":[2,2],"colombia>portugal":[1,2],"portugal>uzbekistan":[4,0],"south africa>south korea":[0,2],"argentina>austria":[1,0],"japan>sweden":[2,2],"uruguay>spain":[2,2],"paraguay>australia":[2,1],"france>iraq":[3,0],"bosnia and herzegovina>qatar":[2,0],"norway>france":[2,2],"brazil>haiti":[4,0],"new zealand>belgium":[0,2],"cape verde>saudi arabia":[1,1],"united states>australia":[1,0],"germany>ivory coast":[3,1],"mexico>south korea":[1,2],"spain>saudi arabia":[4,0],"scotland>brazil":[1,3],"colombia>dr congo":[2,1],"switzerland>canada":[2,2],"new zealand>egypt":[1,2],"algeria>austria":[0,3],"belgium>iran":[3,0],"panama>croatia":[0,3],"czechia>mexico":[0,0],"england>ghana":[2,1],"curacao>ivory coast":[0,2],"turkey>united states":[1,0],"ecuador>germany":[2,2],"ecuador>curacao":[2,0],"jordan>algeria":[2,2],"canada>qatar":[3,0],"tunisia>japan":[1,2],"netherlands>sweden":[3,1],"switzerland>bosnia and herzegovina":[2,2],"croatia>ghana":[1,1],"panama>england":[1,3],"uruguay>cape verde":[2,0],"egypt>iran":[2,2],"norway>senegal":[2,1],"tunisia>netherlands":[0,2],"dr congo>uzbekistan":[0,0],"morocco>haiti":[2,0],"jordan>argentina":[0,2]},
+  "Eligh": {"turkey>paraguay":[1,1],"czechia>south africa":[2,1],"senegal>iraq":[1,1],"scotland>morocco":[1,2],"colombia>portugal":[1,2],"portugal>uzbekistan":[2,1],"south africa>south korea":[2,0],"argentina>austria":[2,1],"japan>sweden":[1,1],"uruguay>spain":[1,3],"paraguay>australia":[2,1],"france>iraq":[3,1],"bosnia and herzegovina>qatar":[2,1],"norway>france":[1,3],"brazil>haiti":[4,0],"new zealand>belgium":[1,3],"cape verde>saudi arabia":[1,1],"united states>australia":[3,1],"germany>ivory coast":[2,1],"mexico>south korea":[1,1],"spain>saudi arabia":[4,0],"scotland>brazil":[0,2],"colombia>dr congo":[2,0],"switzerland>canada":[2,0],"new zealand>egypt":[1,2],"algeria>austria":[2,0],"belgium>iran":[2,0],"panama>croatia":[2,0],"czechia>mexico":[1,1],"england>ghana":[3,1],"curacao>ivory coast":[0,2],"turkey>united states":[1,1],"ecuador>germany":[1,2],"ecuador>curacao":[2,0],"jordan>algeria":[1,1],"canada>qatar":[1,1],"tunisia>japan":[0,2],"netherlands>sweden":[2,1],"switzerland>bosnia and herzegovina":[2,1],"croatia>ghana":[1,1],"panama>england":[0,3],"uruguay>cape verde":[2,1],"egypt>iran":[1,1],"norway>senegal":[1,2],"tunisia>netherlands":[1,1],"dr congo>uzbekistan":[1,2],"morocco>haiti":[3,0],"jordan>argentina":[1,3]},
+};
 const PREDICTIONS = {};
 GAMES.forEach((g)=>{
   PREDICTIONS[g.id] = {};
@@ -563,6 +626,8 @@ GAMES.forEach((g)=>{
   if(FLACO[g.id]) PREDICTIONS[g.id]["Flaco"] = FLACO[g.id].slice();
   if(ELIGH[g.id]) PREDICTIONS[g.id]["Eligh"] = ELIGH[g.id].slice();
 });
+/* Matchday 2 & 3 real predictions (keyed by matchup, from each player's pool). */
+GAMES.forEach(g=>{ if(g.id>24){ const k=g.m[0]+">"+g.m[1]; PLAYERS.forEach(p=>{ if(GM[p]&&GM[p][k]) PREDICTIONS[g.id][p]=GM[p][k].slice(); }); } });
 
 /* ============================================================
    LIVE DATA — public data feed (no API key, CORS-friendly).
@@ -711,6 +776,14 @@ function flag(k){ return FLAGS[k] || ""; }
 /* Key → display name (every team appears in round 1, so this covers all 48). */
 const NAME = {}; GAMES.forEach(g=>{ NAME[g.m[0]]=g.home; NAME[g.m[1]]=g.away; });
 function teamName(k){ return NAME[k] || (k ? k.replace(/\b\w/g, c=>c.toUpperCase()) : "—"); }
+/* Matchday of a group game (ids 1–24 = MD1, 25–48 = MD2, 49–72 = MD3). */
+function mdOf(id){ return id<=24 ? 1 : id<=48 ? 2 : 3; }
+/* Where a team finished in its group per a player's prediction, e.g. "1A", "3H". */
+function posTag(player, k){
+  const pp = POS_PRED[player]; if(!pp || !k) return "";
+  for(const L in pp){ const i = pp[L].indexOf(k); if(i>=0) return `${i+1}${L}`; }
+  return "";
+}
 /* A group is complete once all four teams have played their three group matches. */
 function groupComplete(teams){ return teams.length>=4 && teams.every(t=>t.pj>=3); }
 /* Exact-position points: 5 for each team a player placed in its exact final slot.
@@ -839,17 +912,18 @@ function renderGroupCard(player){
     <div class="gcwgrid">${tiles}</div></div>`;
 }
 /* ---------- Knockout forecast (per player) ---------- */
-function tieCard(hk, ak, score, label){
+function tieCard(hk, ak, score, label, player){
   const draw = score[0]===score[1], hw = score[0]>score[1];
+  const ht = posTag(player, hk), at = posTag(player, ak);
   return `<div class="tie">
     ${label?`<div class="tie__slot">${label}</div>`:``}
-    <div class="tie__row${!draw&&hw?' tie__row--w':''}"><span class="tie__t">${flag(hk)} ${teamName(hk)}</span><b>${score[0]}</b></div>
-    <div class="tie__row${!draw&&!hw?' tie__row--w':''}"><span class="tie__t">${flag(ak)} ${teamName(ak)}</span><b>${score[1]}</b></div>
+    <div class="tie__row${!draw&&hw?' tie__row--w':''}"><span class="tie__t">${flag(hk)} ${teamName(hk)}${ht?`<span class="postag">${ht}</span>`:``}</span><b>${score[0]}</b></div>
+    <div class="tie__row${!draw&&!hw?' tie__row--w':''}"><span class="tie__t">${flag(ak)} ${teamName(ak)}${at?`<span class="postag">${at}</span>`:``}</span><b>${score[1]}</b></div>
     ${draw?`<div class="tie__pens">decided on penalties</div>`:``}
   </div>`;
 }
-function koRound(title, ties, slots){
-  const cards = ties.map((t,i)=> tieCard(t[0], t[1], t[2], slots?`${R32_SLOTS[i][0]} · ${R32_SLOTS[i][1]}`:"")).join("");
+function koRound(title, ties, slots, player){
+  const cards = ties.map((t,i)=> tieCard(t[0], t[1], t[2], slots?`${R32_SLOTS[i][0]} · ${R32_SLOTS[i][1]}`:"", player)).join("");
   return `<div class="ko__round"><div class="ko__rtitle">${title} <span class="ko__n">${ties.length}</span></div><div class="hscroll">${cards}</div></div>`;
 }
 function renderKnockoutForecast(player){
@@ -861,13 +935,13 @@ function renderKnockoutForecast(player){
   const awards = `<div class="hscroll">${fc.awards.map((a,i)=>`<div class="aw"><span>${awLab[i]}</span><b>${a||"—"}</b><i>${awSub[i]}</i></div>`).join("")}</div>`;
   return `<div class="kowrap">
     <div class="ghead"><h3>Knockout forecast</h3><span class="gtotal gtotal--ghost">${player}</span></div>
-    <p class="gcnote">Round‑of‑32 cards show the group finishes that feed each slot — e.g. <b>1A · 3CEFHI</b> means winner of Group A vs a third‑placed team. Later rounds show ${player}’s own predicted matchups. Swipe each round sideways.</p>
-    ${koRound("Round of 32", fc.r32, true)}
-    ${koRound("Round of 16", fc.r16, false)}
-    ${koRound("Quarter‑finals", fc.qf, false)}
-    ${koRound("Semi‑finals", fc.sf, false)}
-    ${koRound("Third‑place match", fc.third, false)}
-    ${koRound("Final", fc.final, false)}
+    <p class="gcnote">Round‑of‑32 cards show the group finishes that feed each slot — e.g. <b>1A · 3CEFHI</b> means winner of Group A vs a third‑placed team. The small tag on each team (e.g. <b>1H</b>, <b>3C</b>) is where ${player} has that team finishing its group. Later rounds show ${player}’s own predicted matchups. Swipe each round sideways.</p>
+    ${koRound("Round of 32", fc.r32, true, player)}
+    ${koRound("Round of 16", fc.r16, false, player)}
+    ${koRound("Quarter‑finals", fc.qf, false, player)}
+    ${koRound("Semi‑finals", fc.sf, false, player)}
+    ${koRound("Third‑place match", fc.third, false, player)}
+    ${koRound("Final", fc.final, false, player)}
     <div class="ko__round"><div class="ko__rtitle">Podium</div>${podium}</div>
     <div class="ko__round"><div class="ko__rtitle">Top scorers & best players</div>${awards}</div>
   </div>`;
@@ -937,7 +1011,7 @@ function renderProfile(){
         const sign = diff>0?"+":"";
         const ptsCls = exact?"pts pts--exact":pts===0?"pts pts--zero":"pts";
         return `<div class="grow__row">
-          <div class="match"><div class="stage">${g.stage} · ${fmtDate(g.date)}${g.dbl?' · <b style="color:var(--red)">×2</b>':''}</div><div class="vs">${flag(g.m[0])} ${g.home} vs ${flag(g.m[1])} ${g.away}</div></div>
+          <div class="match"><div class="stage">${g.stage} · MD${mdOf(g.id)} · ${fmtDate(g.date)}${g.dbl?' · <b style="color:var(--red)">×2</b>':''}</div><div class="vs">${flag(g.m[0])} ${g.home} vs ${flag(g.m[1])} ${g.away}</div></div>
           <div class="boxes"><span class="tag">Pick</span>${sb(pred,"pred",exact)}<span class="tag" style="margin-left:6px">Final</span>${sb(g.actual,"actual",false)}</div>
           <span class="${ptsCls}">${pts} pt${pts===1?"":"s"}</span>
           <div class="delta ${dcls}">${arrow} ${sign}${diff.toFixed(1)}<span class="vsavg">avg ${avg.toFixed(1)}</span></div>
@@ -985,7 +1059,7 @@ function renderGames(){
     return `<div class="gcard ${g.live?'gcard--live':''}" data-game="${g.id}">
       <button class="gcard__btn" aria-expanded="false">
         <span class="gnum">${String(g.id).padStart(2,"0")}</span>
-        <span class="ginfo"><span class="stage">${g.stage}${g.dbl?' · <b style="color:var(--red)">×2 points</b>':''}</span><span class="teams">${flag(g.m[0])} ${g.home} vs ${flag(g.m[1])} ${g.away}</span><span class="date">${fmtDate(g.date)} · ${g.time} ET</span>${g.venue?`<span class="gloc"><svg class="pin" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C8.1 2 5 5.1 5 9c0 4.7 6.2 12.3 6.5 12.6a.7.7 0 0 0 1 0C12.8 21.3 19 13.7 19 9c0-3.9-3.1-7-7-7Zm0 9.6A2.6 2.6 0 1 1 12 6.4a2.6 2.6 0 0 1 0 5.2Z"/></svg>${g.venue}</span>`:""}</span>
+        <span class="ginfo"><span class="stage">${g.stage} · MD${mdOf(g.id)}${g.dbl?' · <b style="color:var(--red)">×2 points</b>':''}</span><span class="teams">${flag(g.m[0])} ${g.home} vs ${flag(g.m[1])} ${g.away}</span><span class="date">${fmtDate(g.date)} · ${g.time} ET</span>${g.venue?`<span class="gloc"><svg class="pin" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C8.1 2 5 5.1 5 9c0 4.7 6.2 12.3 6.5 12.6a.7.7 0 0 0 1 0C12.8 21.3 19 13.7 19 9c0-3.9-3.1-7-7-7Zm0 9.6A2.6 2.6 0 1 1 12 6.4a2.6 2.6 0 0 1 0 5.2Z"/></svg>${g.venue}</span>`:""}</span>
         <span class="gright">${rightTag}</span><span class="chev">▶</span>
       </button>
       <div class="gbody"><div class="gbody__in">
