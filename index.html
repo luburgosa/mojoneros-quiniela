@@ -686,8 +686,10 @@ function norm(s){
 function canon(s){ const n = norm(s); return ALIASES[n] || n; }
 function pairKey(a,b){ return [canon(a),canon(b)].sort().join("|"); }
 
+let SCORERS = {};   // tournament goal tally (scorer name → goals), from the live scoreboard
 async function fetchLive(){
   const index = {};
+  const scorers = {};
   const payloads = await Promise.all(LIVE_DATES.map(async d=>{
     try{
       const res = await fetch(`${ESPN_BASE}?dates=${d}`, {cache:"no-store"});
@@ -713,8 +715,18 @@ async function fetchLive(){
         away:{n:an, s:A.score!=null?parseInt(A.score,10):null},
         completed, state, detail
       };
+      // Golden Boot: count goals from scoring plays (skip own goals & shootout kicks)
+      (comp.details||[]).forEach(d=>{
+        if(!d || !d.scoringPlay) return;
+        const txt = ((d.type && d.type.text) || "").toLowerCase();
+        if(d.ownGoal || txt.includes("own") || txt.includes("shootout") || txt.includes("penalty shootout")) return;
+        const ath = (d.athletesInvolved || [])[0];
+        const nm = ath && (ath.displayName || ath.shortName);
+        if(nm) scorers[nm] = (scorers[nm] || 0) + 1;
+      });
     });
   });
+  if(ok) SCORERS = scorers;
   return ok ? index : null;
 }
 function applyLive(index){
@@ -1052,13 +1064,34 @@ function computeStats(){
   const champRank=Object.entries(champ).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
   const finRank=Object.entries(fin).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])).slice(0,6);
   const lone=PLAYERS.filter(p=>FC[p]&&champ[FC[p].podium[0]]===1);
+  // Tournament aggregates from match results
+  let goals=0, drawCount=0, cleanSheets=0, biggest={diff:-1,g:null}, highest={tot:-1,g:null};
+  const teamGoals={};
+  played.forEach(g=>{ const h=g.actual[0], a=g.actual[1];
+    goals+=h+a; if(h===a) drawCount++;
+    cleanSheets += (a===0?1:0)+(h===0?1:0);
+    const diff=Math.abs(h-a); if(diff>biggest.diff) biggest={diff,g};
+    const tot=h+a; if(tot>highest.tot) highest={tot,g};
+    teamGoals[g.m[0]]=(teamGoals[g.m[0]]||0)+h; teamGoals[g.m[1]]=(teamGoals[g.m[1]]||0)+a;
+  });
+  const topTeam=Object.entries(teamGoals).sort((a,b)=>b[1]-a[1])[0]||null;
+  const boot=Object.entries(SCORERS).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])).slice(0,8);
+  const tourney={goals, drawCount, cleanSheets, biggest, highest, topTeam, boot};
   return {played:played.length, leader:RANKED[0], leaderPts:STATS[RANKED[0]].total,
-          mostExact, best, sharp, acc, bold, cautious, draws, champRank, finRank, lone};
+          mostExact, best, sharp, acc, bold, cautious, draws, champRank, finRank, lone, tourney};
 }
 function statCard(title, player, value, sub){
   return `<div class="stcard"><div class="stcard__t">${title}</div>
     <div class="stcard__p">${avatar(player)}<span>${player}${adminTag(player)}</span></div>
     <div class="stcard__v">${value}</div>${sub?`<div class="stcard__s">${sub}</div>`:""}</div>`;
+}
+function factCard(title, value, sub){
+  return `<div class="stcard"><div class="stcard__t">${title}</div><div class="stcard__v">${value}</div>${sub?`<div class="stcard__s">${sub}</div>`:""}</div>`;
+}
+function scorerList(boot){
+  if(!boot.length) return `<p class="statnote">Top scorers fill in from the live scoreboard as goals go in.</p>`;
+  const max=boot[0][1];
+  return `<div class="bars">${boot.map(([nm,g],i)=>`<div class="bar"><span class="bar__t">${i===0?"🥇 ":""}${nm}</span><span class="bar__track"><span class="bar__fill" style="width:${Math.round(g/max*100)}%"></span></span><b>${g}</b></div>`).join("")}</div>`;
 }
 function barList(rank){
   if(!rank.length) return "";
@@ -1090,8 +1123,28 @@ function renderStats(){
   const loneTxt = S.lone.length
     ? `<p class="statnote">Going it alone: ${S.lone.map(p=>teamName(FC[p].podium[0])+" ("+p+")").join(", ")} backed a champion no one else did.</p>`
     : "";
-  el.innerHTML =
-    `<div class="ko__round"><div class="ko__rtitle">Form so far</div>${form}</div>
+  // Tournament section (first) — real tournament facts
+  const T=S.tourney;
+  let tourneyHtml;
+  if(!S.played){
+    tourneyHtml=`<div class="ko__round"><div class="ko__rtitle">Tournament so far</div><div class="empty">Tournament stats appear once matches kick off.</div></div>`;
+  } else {
+    const bw=T.biggest.g, hi=T.highest.g;
+    const facts=[
+      factCard("Goals scored", T.goals, `in ${S.played} games`),
+      factCard("Goals per game", (T.goals/S.played).toFixed(2), "tournament average"),
+      factCard("Biggest win", bw?`${T.biggest.diff}‑goal`:"—", bw?`${teamName(bw.m[0])} ${bw.actual[0]}–${bw.actual[1]} ${teamName(bw.m[1])}`:""),
+      factCard("Highest scoring", hi?`${T.highest.tot} goals`:"—", hi?`${teamName(hi.m[0])} ${hi.actual[0]}–${hi.actual[1]} ${teamName(hi.m[1])}`:""),
+      factCard("Clean sheets", T.cleanSheets, "shutouts kept"),
+      factCard("Draws", T.drawCount, `of ${S.played} games`),
+      T.topTeam?factCard("Most goals (team)", `${T.topTeam[1]}`, `${teamName(T.topTeam[0])}`):"",
+    ];
+    tourneyHtml=
+      `<div class="ko__round"><div class="ko__rtitle">Golden Boot race</div><p class="statnote">Top scorers across the tournament, from the live scoreboard.</p>${scorerList(T.boot)}</div>
+       <div class="ko__round"><div class="ko__rtitle">Tournament so far</div><div class="hscroll">${facts.join("")}</div></div>`;
+  }
+  el.innerHTML = tourneyHtml +
+    `<div class="ko__round"><div class="ko__rtitle">Form so far <span class="ko__n" style="background:#3b3b3b">the pool</span></div>${form}</div>
      <div class="ko__round"><div class="ko__rtitle">The crowd's champion</div><p class="statnote">Who the ${PLAYERS.length} entries picked to win it all.</p>${barList(S.champRank)}${loneTxt}</div>
      <div class="ko__round"><div class="ko__rtitle">Most-picked finalists</div>${barList(S.finRank)}</div>
      <div class="ko__round"><div class="ko__rtitle">Playing style</div><div class="hscroll">${style.join("")}</div></div>`;
