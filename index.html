@@ -86,6 +86,7 @@
   .pts{font-family:"JetBrains Mono"; font-weight:800; font-size:13px; background:var(--black); color:#fff; padding:4px 9px; border-radius:20px; white-space:nowrap;}
   .pts--zero{background:#d3d3cf; color:var(--black);}
   .pts--exact{background:var(--red); color:#fff;}
+  .pts--est{background:#fff; color:var(--red); box-shadow:inset 0 0 0 1.5px var(--red);}
 
   /* ---------- Up next ---------- */
   .upnext{margin-bottom:26px;}
@@ -1206,12 +1207,21 @@ function renderGames(){
     } else {
       rightTag = `<span class="gtag" style="background:${rb?(rb.cls==="ribbon--today"?"var(--red)":"var(--black)"):"#d3d3cf"};color:${rb?'#fff':'var(--black)'}">${rb?rb.txt:g.time+" ET"}</span>`;
     }
-    let rows = PLAYERS.map(p=>{ const pred=PREDICTIONS[g.id][p]; return {p, pred, pts: played?pointsFor(pred,g.actual,g):null, exact:isExact(pred,g.actual)}; });
-    if(played) rows.sort((a,b)=> b.pts-a.pts || a.p.localeCompare(b.p)); else rows.sort((a,b)=> a.p.localeCompare(b.p));
+    const liveScore = (!played && g.live) ? g.live.score : null;
+    const scored = played || !!liveScore;
+    let rows = PLAYERS.map(p=>{
+      const pred = PREDICTIONS[g.id][p];
+      const basis = played ? g.actual : liveScore;            // score the pick against the result, or the live score
+      return {p, pred, pts: basis ? pointsFor(pred, basis, g) : null, exact: basis ? isExact(pred, basis) : false};
+    });
+    if(scored) rows.sort((a,b)=> b.pts-a.pts || a.p.localeCompare(b.p)); else rows.sort((a,b)=> a.p.localeCompare(b.p));
     const list = rows.map(r=>{
-      const ptsHtml = played ? `<span class="${r.exact?'pts pts--exact':r.pts===0?'pts pts--zero':'pts'}">${r.pts}</span>` : `<span class="pts pts--zero">–</span>`;
+      let ptsHtml;
+      if(played) ptsHtml = `<span class="${r.exact?'pts pts--exact':r.pts===0?'pts pts--zero':'pts'}">${r.pts}</span>`;
+      else if(liveScore) ptsHtml = `<span class="pts pts--est" title="Estimated from the current score — not final">~${r.pts}</span>`;
+      else ptsHtml = `<span class="pts pts--zero">–</span>`;
       return `<div class="glist__row">
-        <div class="who">${avatar(r.p)}<span>${r.p}${adminTag(r.p)}</span> ${r.exact?'<span class="stamp">★ exact</span>':''}</div>
+        <div class="who">${avatar(r.p)}<span>${r.p}${adminTag(r.p)}</span> ${played&&r.exact?'<span class="stamp">★ exact</span>':''}</div>
         <div style="text-align:right">${sb(r.pred,"pred",r.exact)}</div>
         <div style="text-align:right">${ptsHtml}</div></div>`;
     }).join("");
@@ -1222,7 +1232,7 @@ function renderGames(){
         <span class="gright">${rightTag}</span><span class="chev">▶</span>
       </button>
       <div class="gbody"><div class="gbody__in">
-        <div class="glist__head"><span>Predictions ${played?'· best first':''}</span><span>Pick</span><span>Pts</span></div>
+        <div class="glist__head"><span>Predictions ${scored?'· best first':''}</span><span>Pick</span><span>${liveScore?'Est. pts':'Pts'}</span></div>
         <div class="glist">${list}</div>
       </div></div></div>`;
   }).join("");
@@ -1363,5 +1373,7 @@ async function liveLoop(){ await refresh(true); clearTimeout(LIVE_TIMER); LIVE_T
 renderScoring();
 refresh(false).then(()=>{ clearTimeout(LIVE_TIMER); LIVE_TIMER = setTimeout(liveLoop, nextDelay()); });
 </script>
+<script data-goatcounter="https://luburgos.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
