@@ -251,6 +251,63 @@
     .gcard__btn{grid-template-columns:30px 1fr auto 16px; gap:10px; padding:13px 14px;}
   }
   @media (prefers-reduced-motion:reduce){ *{animation:none !important; transition:none !important;} }
+/* Group standings points card (Players section) */
+.gcardwrap{margin-top:18px;border-top:1px solid var(--line);padding-top:16px}
+.ghead{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ghead h3{font-family:"Russo One",sans-serif;font-size:15px;letter-spacing:.3px;margin:0}
+.gtotal{font-family:"JetBrains Mono",monospace;font-weight:700;background:var(--red);color:#fff;border-radius:999px;padding:3px 12px;font-size:14px}
+.gcnote{color:var(--muted);font-size:12.5px;line-height:1.5;margin:8px 0 14px}
+.gcwgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.gcw{border:1px solid var(--line);border-radius:12px;background:#fff;overflow:hidden}
+.gcw__h{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:8px 11px;background:var(--black);color:#fff}
+.gcw__h>span:first-child{font-family:"Russo One",sans-serif;font-size:12.5px;letter-spacing:.4px}
+.gcw__st{font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.gcw__st--final{background:var(--red);color:#fff}
+.gcw__st--live{background:#fff;color:var(--black)}
+.gcw__st--idle{background:#3b3b3b;color:#cfcfcf}
+.gcw__row{display:flex;align-items:center;gap:9px;padding:7px 11px;border-top:1px solid var(--line);font-size:13px}
+.gcw__row:first-of-type{border-top:0}
+.gcw__row--hit{background:rgba(222,40,32,.07)}
+.gcw__pos{font-family:"JetBrains Mono",monospace;font-weight:700;color:var(--muted);width:14px;text-align:center;flex:none}
+.gcw__team{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gcw__pt{font-family:"JetBrains Mono",monospace;font-weight:700;color:var(--red);flex:none}
+.gcw__no{font-family:"JetBrains Mono",monospace;color:var(--muted);flex:none}
+.gcw__ok{color:var(--red);font-weight:700;flex:none}
+.gcw__dot{color:#c8c8c4;flex:none}
+/* Horizontal scrollers (forecast rounds + scoring examples) */
+.hscroll{display:flex;gap:10px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:2px 2px 10px;scroll-snap-type:x proximity}
+.hscroll::-webkit-scrollbar{height:7px}
+.hscroll::-webkit-scrollbar-thumb{background:#d3d3cf;border-radius:99px}
+.hscroll::-webkit-scrollbar-track{background:transparent}
+.kowrap{margin-top:20px;border-top:1px solid var(--line);padding-top:16px}
+.gtotal--ghost{background:#efefec;color:var(--black)}
+.ko__round{margin-top:14px}
+.ko__rtitle{font-family:"Russo One",sans-serif;font-size:12.5px;letter-spacing:.4px;text-transform:uppercase;color:var(--black);margin:0 0 8px;display:flex;align-items:center;gap:8px}
+.ko__n{font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;color:#fff;background:var(--black);border-radius:99px;padding:1px 8px}
+/* Tie card */
+.tie{flex:0 0 auto;width:178px;border:1px solid var(--line);border-radius:12px;background:#fff;padding:9px 11px;scroll-snap-align:start}
+.tie__slot{font-family:"JetBrains Mono",monospace;font-size:10.5px;font-weight:700;color:var(--red);letter-spacing:.5px;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tie__row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 0;font-size:13px}
+.tie__row+.tie__row{border-top:1px dashed var(--line)}
+.tie__t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tie__row b{font-family:"JetBrains Mono",monospace;font-weight:700;flex:none}
+.tie__row--w{color:var(--red)}
+.tie__row--w b{color:var(--red)}
+.tie__pens{font-size:10px;color:var(--muted);margin-top:5px;font-style:italic}
+/* Podium + awards chips */
+.pod,.aw{flex:0 0 auto;min-width:150px;border:1px solid var(--line);border-radius:12px;background:#fff;padding:10px 12px;scroll-snap-align:start}
+.pod span,.aw span{display:block;font-size:11px;color:var(--muted);margin-bottom:4px}
+.pod b,.aw b{font-size:14px;display:block;text-transform:capitalize}
+.aw i{display:block;font-size:10.5px;color:#b9b9b4;font-style:normal;margin-top:2px}
+/* Scoring example cards */
+.ex{flex:0 0 auto;width:188px;border:1px solid var(--line);border-radius:12px;background:#fff;padding:11px 12px;scroll-snap-align:start;display:flex;flex-direction:column}
+.ex__h{font-weight:700;font-size:13px;margin-bottom:8px}
+.ex__l{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12.5px;color:#444;padding:3px 0;border-top:1px solid var(--line)}
+.ex__l:first-of-type{border-top:0}
+.ex__l span:last-child{font-family:"JetBrains Mono",monospace;font-weight:600;color:var(--black)}
+.ex__pts{margin-top:9px;align-self:flex-start;font-family:"JetBrains Mono",monospace;font-weight:700;font-size:15px;background:var(--red);color:#fff;border-radius:99px;padding:3px 13px}
+.ex__pts--big{font-size:17px}
+.ex__note{margin-top:8px;font-size:11px;color:var(--muted);line-height:1.4}
 </style>
 </head>
 <body>
@@ -278,6 +335,7 @@
     <button class="tab" role="tab" id="tab-games" aria-controls="panel-games" aria-selected="false">Matches</button>
     <button class="tab" role="tab" id="tab-groups" aria-controls="panel-groups" aria-selected="false">Groups</button>
     <button class="tab" role="tab" id="tab-bracket" aria-controls="panel-bracket" aria-selected="false">Qualified</button>
+    <button class="tab" role="tab" id="tab-scoring" aria-controls="panel-scoring" aria-selected="false">Scoring</button>
   </div>
 </nav>
 
@@ -345,6 +403,16 @@
     </div>
     <div id="qualified"></div>
   </section>
+
+  <!-- ===== SCORING ===== -->
+  <section class="panel" id="panel-scoring" role="tabpanel" aria-labelledby="tab-scoring" hidden>
+    <div class="sectionhead">
+      <div class="eyebrow"><span class="sq"></span> How points work</div>
+      <h2>Scoring, end to end</h2>
+      <p>Every rule in the pool, with a worked example. Swipe each row sideways to see more cases.</p>
+    </div>
+    <div id="scoring"></div>
+  </section>
 </main>
 
 <footer>
@@ -366,6 +434,38 @@ function kickoff(g){ return new Date(`${g.date}T${g.time}:00${ET_OFFSET}`); }
 const LIVE_MS = 140*60*1000;              // a match counts as "in play" from kickoff until ~140 min after (covers the final)
 function liveWindow(g){ const k = kickoff(g).getTime(), n = Date.now(); return n >= k && n <= k + LIVE_MS; }
 const SCORING = { exact: 5, diff: 3, sign: 1, miss: 0 };  // group stage, cumulative: result 1 + goal diff 3 + exact 5 = up to 9
+const POS_PTS = 5;   // exact final group position (1st/2nd/3rd/4th) = 5 pts each, scored when the group is complete
+const POS_PRED = {
+  "Luis": {A:["mexico","czechia","south korea","south africa"], B:["switzerland","canada","bosnia and herzegovina","qatar"], C:["brazil","morocco","scotland","haiti"], D:["united states","turkey","paraguay","australia"], E:["germany","ecuador","ivory coast","curacao"], F:["netherlands","japan","sweden","tunisia"], G:["belgium","new zealand","egypt","iran"], H:["spain","uruguay","saudi arabia","cape verde"], I:["norway","france","senegal","iraq"], J:["argentina","algeria","jordan","austria"], K:["portugal","colombia","dr congo","uzbekistan"], L:["england","croatia","ghana","panama"]},
+  "David M. Sr": {A:["south korea","mexico","czechia","south africa"], B:["switzerland","canada","bosnia and herzegovina","qatar"], C:["brazil","morocco","scotland","haiti"], D:["turkey","united states","paraguay","australia"], E:["germany","ecuador","ivory coast","curacao"], F:["netherlands","japan","sweden","tunisia"], G:["belgium","egypt","iran","new zealand"], H:["spain","uruguay","saudi arabia","cape verde"], I:["norway","france","senegal","iraq"], J:["argentina","austria","jordan","algeria"], K:["portugal","colombia","dr congo","uzbekistan"], L:["england","ghana","croatia","panama"]},
+  "David M. Jr": {A:["mexico","south korea","czechia","south africa"], B:["switzerland","bosnia and herzegovina","canada","qatar"], C:["brazil","morocco","scotland","haiti"], D:["united states","turkey","paraguay","australia"], E:["germany","ecuador","ivory coast","curacao"], F:["netherlands","japan","sweden","tunisia"], G:["belgium","egypt","iran","new zealand"], H:["spain","uruguay","saudi arabia","cape verde"], I:["norway","france","senegal","iraq"], J:["argentina","austria","algeria","jordan"], K:["portugal","colombia","dr congo","uzbekistan"], L:["england","croatia","ghana","panama"]},
+  "Alex": {A:["mexico","south africa","czechia","south korea"], B:["canada","switzerland","bosnia and herzegovina","qatar"], C:["brazil","morocco","scotland","haiti"], D:["united states","paraguay","australia","turkey"], E:["germany","ecuador","ivory coast","curacao"], F:["netherlands","japan","sweden","tunisia"], G:["belgium","egypt","iran","new zealand"], H:["spain","uruguay","saudi arabia","cape verde"], I:["france","norway","senegal","iraq"], J:["argentina","austria","algeria","jordan"], K:["portugal","colombia","uzbekistan","dr congo"], L:["croatia","england","ghana","panama"]},
+  "Karlox": {A:["south korea","mexico","czechia","south africa"], B:["switzerland","canada","bosnia and herzegovina","qatar"], C:["brazil","morocco","scotland","haiti"], D:["turkey","united states","paraguay","australia"], E:["germany","ivory coast","ecuador","curacao"], F:["netherlands","japan","sweden","tunisia"], G:["egypt","belgium","iran","new zealand"], H:["spain","uruguay","cape verde","saudi arabia"], I:["france","senegal","norway","iraq"], J:["argentina","algeria","austria","jordan"], K:["portugal","colombia","dr congo","uzbekistan"], L:["england","croatia","ghana","panama"]},
+  "Calique": {A:["south korea","czechia","mexico","south africa"], B:["canada","bosnia and herzegovina","switzerland","qatar"], C:["scotland","brazil","morocco","haiti"], D:["united states","paraguay","turkey","australia"], E:["ecuador","germany","ivory coast","curacao"], F:["japan","netherlands","sweden","tunisia"], G:["belgium","egypt","new zealand","iran"], H:["spain","uruguay","saudi arabia","cape verde"], I:["france","norway","senegal","iraq"], J:["argentina","austria","algeria","jordan"], K:["portugal","colombia","dr congo","uzbekistan"], L:["england","croatia","ghana","panama"]},
+  "Mister": {A:["mexico","south korea","czechia","south africa"], B:["switzerland","bosnia and herzegovina","canada","qatar"], C:["brazil","scotland","morocco","haiti"], D:["australia","united states","turkey","paraguay"], E:["germany","ecuador","ivory coast","curacao"], F:["netherlands","japan","sweden","tunisia"], G:["belgium","new zealand","egypt","iran"], H:["spain","uruguay","saudi arabia","cape verde"], I:["france","norway","senegal","iraq"], J:["argentina","algeria","austria","jordan"], K:["portugal","colombia","uzbekistan","dr congo"], L:["england","croatia","ghana","panama"]},
+  "Flaca": {A:["mexico","south africa","south korea","czechia"], B:["canada","switzerland","qatar","bosnia and herzegovina"], C:["brazil","morocco","scotland","haiti"], D:["united states","australia","turkey","paraguay"], E:["germany","ecuador","ivory coast","curacao"], F:["netherlands","sweden","japan","tunisia"], G:["belgium","egypt","iran","new zealand"], H:["spain","uruguay","saudi arabia","cape verde"], I:["france","norway","senegal","iraq"], J:["argentina","algeria","austria","jordan"], K:["portugal","colombia","dr congo","uzbekistan"], L:["england","croatia","panama","ghana"]},
+  "Blas": {A:["south korea","czechia","mexico","south africa"], B:["switzerland","bosnia and herzegovina","canada","qatar"], C:["brazil","morocco","scotland","haiti"], D:["turkey","united states","paraguay","australia"], E:["germany","ecuador","ivory coast","curacao"], F:["japan","netherlands","sweden","tunisia"], G:["belgium","egypt","iran","new zealand"], H:["spain","uruguay","saudi arabia","cape verde"], I:["france","norway","senegal","iraq"], J:["argentina","austria","algeria","jordan"], K:["portugal","colombia","dr congo","uzbekistan"], L:["england","croatia","ghana","panama"]},
+  "Ethan": {A:["mexico","czechia","south korea","south africa"], B:["switzerland","bosnia and herzegovina","canada","qatar"], C:["scotland","brazil","morocco","haiti"], D:["turkey","united states","paraguay","australia"], E:["germany","ecuador","ivory coast","curacao"], F:["netherlands","sweden","japan","tunisia"], G:["egypt","belgium","new zealand","iran"], H:["spain","uruguay","cape verde","saudi arabia"], I:["france","norway","senegal","iraq"], J:["argentina","austria","jordan","algeria"], K:["portugal","colombia","dr congo","uzbekistan"], L:["england","panama","ghana","croatia"]},
+  "Flaco": {A:["south korea","mexico","czechia","south africa"], B:["canada","switzerland","bosnia and herzegovina","qatar"], C:["brazil","morocco","scotland","haiti"], D:["turkey","united states","paraguay","australia"], E:["germany","ecuador","ivory coast","curacao"], F:["netherlands","japan","sweden","tunisia"], G:["belgium","egypt","iran","new zealand"], H:["spain","uruguay","saudi arabia","cape verde"], I:["france","norway","senegal","iraq"], J:["argentina","austria","jordan","algeria"], K:["portugal","colombia","dr congo","uzbekistan"], L:["england","croatia","ghana","panama"]},
+  "Eligh": {A:["mexico","south korea","czechia","south africa"], B:["switzerland","qatar","canada","bosnia and herzegovina"], C:["brazil","morocco","scotland","haiti"], D:["united states","turkey","paraguay","australia"], E:["germany","ecuador","ivory coast","curacao"], F:["netherlands","japan","sweden","tunisia"], G:["belgium","egypt","iran","new zealand"], H:["spain","uruguay","cape verde","saudi arabia"], I:["france","senegal","norway","iraq"], J:["argentina","algeria","austria","jordan"], K:["portugal","colombia","uzbekistan","dr congo"], L:["england","ghana","panama","croatia"]},
+};
+const R32_SLOTS = [["2A","2B"],["1C","2F"],["1E","3ABCDF"],["1F","2C"],["2E","2I"],["1I","3CDFGH"],["1A","3CEFHI"],["1L","3EHIJK"],["1G","3AEHIJ"],["1D","3BEFIJ"],["1H","2J"],["2K","2L"],["1B","3EFGIJ"],["2D","2G"],["1J","2H"],["1K","3DEIJL"]];
+const FC = {
+  "Luis": {r32:[["czechia","canada",[1,2]],["brazil","japan",[3,0]],["germany","scotland",[3,0]],["netherlands","morocco",[2,1]],["ecuador","france",[0,3]],["norway","sweden",[2,0]],["mexico","saudi arabia",[2,0]],["england","senegal",[3,0]],["belgium","south korea",[2,1]],["united states","bosnia and herzegovina",[2,1]],["spain","algeria",[4,0]],["colombia","croatia",[1,2]],["switzerland","jordan",[3,0]],["turkey","new zealand",[2,0]],["argentina","uruguay",[2,1]],["portugal","ivory coast",[3,0]]],r16:[["canada","netherlands",[1,2]],["germany","norway",[3,1]],["brazil","france",[1,2]],["mexico","england",[1,2]],["croatia","spain",[0,3]],["united states","belgium",[2,1]],["argentina","turkey",[3,0]],["switzerland","portugal",[0,2]]],qf:[["germany","netherlands",[2,1]],["spain","united states",[3,1]],["france","england",[2,1]],["argentina","portugal",[1,2]]],sf:[["germany","spain",[1,1]],["france","portugal",[2,1]]],third:[["germany","portugal",[1,2]]],final:[["spain","france",[2,1]]],podium:["spain", "france", "portugal"],awards:["Kylian Mbappé", "Lamine Yamal", "Harry Kane", "Lamine Yamal", "Kylian Mbappé", "Pedri"]},
+  "David M. Sr": {r32:[["mexico","canada",[2,1]],["brazil","japan",[2,1]],["germany","paraguay",[1,0]],["netherlands","morocco",[2,1]],["ecuador","france",[0,1]],["norway","sweden",[2,0]],["south korea","scotland",[0,1]],["england","senegal",[3,1]],["belgium","czechia",[2,1]],["turkey","bosnia and herzegovina",[1,0]],["spain","austria",[2,1]],["colombia","ghana",[2,0]],["switzerland","ivory coast",[1,0]],["united states","egypt",[1,0]],["argentina","uruguay",[2,1]],["portugal","croatia",[2,0]]],r16:[["mexico","netherlands",[0,2]],["germany","norway",[1,2]],["brazil","france",[0,2]],["scotland","england",[0,2]],["colombia","spain",[1,2]],["turkey","belgium",[1,0]],["argentina","united states",[2,0]],["switzerland","portugal",[1,2]]],qf:[["norway","netherlands",[1,2]],["spain","turkey",[1,0]],["france","england",[1,2]],["argentina","portugal",[2,3]]],sf:[["netherlands","spain",[1,2]],["england","portugal",[1,2]]],third:[["netherlands","england",[2,1]]],final:[["spain","portugal",[1,2]]],podium:["portugal", "spain", "netherlands"],awards:["Mbappe", "Kane", "Haaland", "Vitinha", "Yamal", "Kane"]},
+  "David M. Jr": {r32:[["south korea","bosnia and herzegovina",[2,1]],["brazil","japan",[1,1]],["germany","paraguay",[2,0]],["netherlands","morocco",[2,1]],["ecuador","france",[1,1]],["norway","sweden",[2,0]],["mexico","scotland",[2,1]],["england","senegal",[3,1]],["belgium","czechia",[2,1]],["united states","canada",[3,1]],["spain","austria",[2,0]],["colombia","croatia",[0,0]],["switzerland","iran",[2,0]],["turkey","egypt",[1,0]],["argentina","uruguay",[1,0]],["portugal","ivory coast",[3,1]]],r16:[["south korea","netherlands",[0,2]],["germany","norway",[1,2]],["brazil","france",[1,1]],["mexico","england",[0,1]],["colombia","spain",[1,2]],["united states","belgium",[1,3]],["argentina","turkey",[2,1]],["switzerland","portugal",[1,2]]],qf:[["norway","netherlands",[1,2]],["spain","belgium",[2,0]],["france","england",[1,2]],["argentina","portugal",[1,2]]],sf:[["netherlands","spain",[1,2]],["england","portugal",[1,1]]],third:[["netherlands","england",[2,1]]],final:[["spain","portugal",[1,1]]],podium:["portugal", "spain", "netherlands"],awards:["Lamine", "Kane", "Halaand", "Vitinha", "Lamine", "Haaland"]},
+  "Alex": {r32:[["south africa","switzerland",[1,0]],["brazil","japan",[2,1]],["germany","scotland",[3,1]],["netherlands","morocco",[2,0]],["ecuador","norway",[1,2]],["france","sweden",[2,1]],["mexico","ivory coast",[1,2]],["croatia","senegal",[3,1]],["belgium","saudi arabia",[3,0]],["united states","bosnia and herzegovina",[2,0]],["spain","austria",[2,0]],["colombia","england",[1,2]],["canada","algeria",[1,0]],["paraguay","egypt",[0,1]],["argentina","uruguay",[2,1]],["portugal","ghana",[2,0]]],r16:[["south africa","netherlands",[1,3]],["germany","france",[2,3]],["brazil","norway",[3,2]],["ivory coast","croatia",[1,3]],["england","spain",[1,3]],["united states","belgium",[0,2]],["argentina","egypt",[3,0]],["canada","portugal",[0,2]]],qf:[["france","netherlands",[3,1]],["spain","belgium",[2,1]],["brazil","croatia",[3,2]],["argentina","portugal",[1,2]]],sf:[["france","spain",[2,3]],["brazil","portugal",[1,2]]],third:[["france","brazil",[3,1]]],final:[["spain","portugal",[2,1]]],podium:["spain", "portugal", "france"],awards:["Mbappe", "Kane", "Haaland", "Olise", "Kane", "Lamine"]},
+  "Karlox": {r32:[["mexico","canada",[1,2]],["brazil","japan",[2,1]],["germany","scotland",[1,0]],["netherlands","morocco",[2,1]],["ivory coast","senegal",[1,2]],["france","sweden",[2,0]],["south korea","ecuador",[1,2]],["england","norway",[2,0]],["egypt","czechia",[2,1]],["turkey","bosnia and herzegovina",[2,1]],["spain","algeria",[2,0]],["colombia","croatia",[1,1]],["switzerland","austria",[1,0]],["united states","belgium",[1,2]],["argentina","uruguay",[2,1]],["portugal","ghana",[2,0]]],r16:[["canada","netherlands",[1,2]],["germany","france",[1,2]],["brazil","senegal",[2,0]],["ecuador","england",[1,2]],["croatia","spain",[2,1]],["turkey","egypt",[2,1]],["argentina","belgium",[2,0]],["switzerland","portugal",[0,2]]],qf:[["france","netherlands",[2,1]],["croatia","turkey",[1,2]],["brazil","england",[2,1]],["argentina","portugal",[2,2]]],sf:[["france","turkey",[2,1]],["brazil","portugal",[1,2]]],third:[["turkey","brazil",[1,2]]],final:[["france","portugal",[2,3]]],podium:["portugal", "france", "brazil"],awards:["Cristiano", "Kane", "Mbappe", "Cristiano", "Mbappe", "Vinicius"]},
+  "Calique": {r32:[["czechia","bosnia and herzegovina",[2,1]],["scotland","netherlands",[1,0]],["ecuador","morocco",[2,2]],["japan","brazil",[1,3]],["germany","norway",[3,2]],["france","turkey",[2,0]],["south korea","saudi arabia",[1,0]],["england","algeria",[3,1]],["belgium","mexico",[2,1]],["united states","switzerland",[1,1]],["spain","austria",[3,0]],["colombia","croatia",[1,1]],["canada","new zealand",[2,0]],["paraguay","egypt",[2,0]],["argentina","uruguay",[3,2]],["portugal","ghana",[2,1]]],r16:[["czechia","brazil",[0,1]],["ecuador","france",[1,3]],["scotland","germany",[1,1]],["south korea","england",[1,2]],["colombia","spain",[1,3]],["united states","belgium",[1,2]],["argentina","paraguay",[3,0]],["canada","portugal",[0,2]]],qf:[["france","brazil",[2,2]],["spain","belgium",[2,0]],["germany","england",[1,2]],["argentina","portugal",[3,3]]],sf:[["brazil","spain",[1,3]],["england","portugal",[0,1]]],third:[["brazil","england",[2,1]]],final:[["spain","portugal",[3,4]]],podium:["portugal", "spain", "brazil"],awards:["mbappe", "vini", "yamal", "Bernardo silva", "yamal", "cristiano"]},
+  "Mister": {r32:[["south korea","bosnia and herzegovina",[2,0]],["brazil","japan",[4,2]],["germany","morocco",[4,0]],["netherlands","scotland",[3,1]],["ecuador","norway",[1,2]],["france","sweden",[3,1]],["mexico","saudi arabia",[1,0]],["england","ivory coast",[3,1]],["belgium","czechia",[4,2]],["australia","canada",[2,2]],["spain","algeria",[4,1]],["colombia","croatia",[2,2]],["switzerland","egypt",[3,1]],["united states","new zealand",[2,1]],["argentina","uruguay",[4,2]],["portugal","turkey",[3,1]]],r16:[["south korea","netherlands",[2,3]],["germany","france",[3,2]],["brazil","norway",[2,0]],["mexico","england",[2,3]],["croatia","spain",[2,4]],["australia","belgium",[0,2]],["argentina","united states",[4,2]],["switzerland","portugal",[2,2]]],qf:[["germany","netherlands",[2,0]],["spain","belgium",[3,1]],["brazil","england",[2,2]],["argentina","portugal",[3,2]]],sf:[["germany","spain",[4,2]],["brazil","argentina",[3,4]]],third:[["spain","brazil",[3,2]]],final:[["germany","argentina",[3,1]]],podium:["germany", "argentina", "spain"],awards:["Kane", "Vinicius", "Mbappe", "Kimmich", "Messi", "Vinicius"]},
+  "Flaca": {r32:[["south africa","switzerland",[1,3]],["brazil","sweden",[2,1]],["germany","turkey",[3,2]],["netherlands","morocco",[2,2]],["ecuador","norway",[1,2]],["france","japan",[3,1]],["mexico","scotland",[2,1]],["england","ivory coast",[2,2]],["belgium","south korea",[1,1]],["united states","qatar",[2,1]],["spain","algeria",[3,1]],["colombia","croatia",[1,2]],["canada","iran",[2,1]],["australia","egypt",[1,3]],["argentina","uruguay",[3,2]],["portugal","panama",[4,1]]],r16:[["switzerland","netherlands",[1,2]],["germany","france",[2,2]],["brazil","norway",[2,1]],["mexico","england",[1,3]],["croatia","spain",[1,2]],["united states","belgium",[1,1]],["argentina","egypt",[3,0]],["canada","portugal",[1,2]]],qf:[["france","netherlands",[3,1]],["spain","united states",[3,2]],["brazil","england",[2,3]],["argentina","portugal",[2,2]]],sf:[["france","spain",[1,1]],["england","argentina",[2,1]]],third:[["france","argentina",[3,2]]],final:[["spain","england",[1,2]]],podium:["england", "spain", "france"],awards:["Haaland", "Mbappe", "Kane", "Bellingham", "Yamal", "Olise"]},
+  "Blas": {r32:[["czechia","bosnia and herzegovina",[2,1]],["brazil","netherlands",[3,1]],["germany","scotland",[4,2]],["japan","morocco",[2,1]],["ecuador","norway",[1,0]],["france","sweden",[3,1]],["south korea","saudi arabia",[2,0]],["england","senegal",[2,0]],["belgium","mexico",[3,1]],["turkey","ivory coast",[2,1]],["spain","austria",[3,1]],["colombia","croatia",[1,2]],["switzerland","algeria",[1,0]],["united states","egypt",[0,1]],["argentina","uruguay",[3,2]],["portugal","ghana",[3,1]]],r16:[["czechia","japan",[1,2]],["germany","france",[1,2]],["brazil","ecuador",[3,1]],["south korea","england",[1,2]],["croatia","spain",[1,2]],["turkey","belgium",[2,1]],["argentina","egypt",[3,1]],["switzerland","portugal",[1,2]]],qf:[["france","japan",[3,1]],["spain","turkey",[2,1]],["brazil","england",[2,0]],["argentina","portugal",[2,2]]],sf:[["france","spain",[1,2]],["brazil","portugal",[0,2]]],third:[["france","brazil",[2,0]]],final:[["spain","portugal",[1,0]]],podium:["spain", "portugal", "france"],awards:["Mbappe", "Oryazabal", "Messi", "Lamine Yamal", "Cristiano Ronaldo", "Mbappe"]},
+  "Ethan": {r32:[["czechia","bosnia and herzegovina",[1,0]],["scotland","sweden",[1,0]],["germany","paraguay",[1,0]],["netherlands","brazil",[1,0]],["ecuador","norway",[0,1]],["france","japan",[1,0]],["mexico","morocco",[1,0]],["england","senegal",[1,0]],["egypt","south korea",[1,0]],["turkey","canada",[1,0]],["spain","austria",[2,0]],["colombia","panama",[1,0]],["switzerland","ivory coast",[1,0]],["united states","belgium",[0,1]],["argentina","uruguay",[1,0]],["portugal","ghana",[1,0]]],r16:[["czechia","netherlands",[0,1]],["germany","france",[0,1]],["scotland","norway",[1,0]],["mexico","england",[1,0]],["colombia","spain",[0,3]],["turkey","egypt",[1,0]],["argentina","belgium",[0,1]],["switzerland","portugal",[1,0]]],qf:[["france","netherlands",[1,0]],["spain","turkey",[3,0]],["scotland","mexico",[0,1]],["belgium","switzerland",[1,0]]],sf:[["france","spain",[1,3]],["mexico","belgium",[1,0]]],third:[["france","belgium",[1,0]]],final:[["spain","mexico",[3,1]]],podium:["spain", "mexico", "france"],awards:["Harry Kane", "Kylian Mbappe", "Lamine Yamal", "Harry Kane", "Lamine Yamal", "Kylian Mbappe"]},
+  "Flaco": {r32:[["mexico","switzerland",[0,2]],["brazil","japan",[2,1]],["germany","paraguay",[3,0]],["netherlands","morocco",[2,2]],["ecuador","norway",[1,0]],["france","sweden",[3,0]],["south korea","scotland",[2,2]],["england","senegal",[1,0]],["belgium","czechia",[2,0]],["turkey","bosnia and herzegovina",[2,1]],["spain","austria",[3,0]],["colombia","croatia",[2,2]],["canada","ivory coast",[2,1]],["united states","egypt",[2,0]],["argentina","uruguay",[2,1]],["portugal","ghana",[1,0]]],r16:[["switzerland","netherlands",[1,2]],["germany","france",[2,3]],["brazil","ecuador",[0,1]],["scotland","england",[0,1]],["croatia","spain",[2,4]],["turkey","belgium",[1,3]],["argentina","united states",[2,0]],["canada","portugal",[0,2]]],qf:[["france","netherlands",[2,0]],["spain","belgium",[2,0]],["ecuador","england",[0,1]],["argentina","portugal",[2,2]]],sf:[["france","spain",[2,4]],["england","portugal",[1,1]]],third:[["france","england",[3,2]]],final:[["spain","portugal",[2,1]]],podium:["spain", "portugal", "france"],awards:["Mbappe", "Kane", "Haaland", "Bruno Fernandes", "Oyarzabal", "Yamal"]},
+  "Eligh": {r32:[["south korea","qatar",[2,1]],["brazil","japan",[2,0]],["germany","paraguay",[3,1]],["netherlands","morocco",[2,0]],["ecuador","senegal",[0,1]],["france","sweden",[3,0]],["mexico","ivory coast",[2,0]],["england","uzbekistan",[3,1]],["belgium","czechia",[2,1]],["united states","canada",[2,2]],["spain","algeria",[4,1]],["colombia","ghana",[3,1]],["switzerland","iran",[1,1]],["turkey","egypt",[1,2]],["argentina","uruguay",[3,2]],["portugal","norway",[3,1]]],r16:[["south korea","netherlands",[1,2]],["germany","france",[2,3]],["brazil","senegal",[4,1]],["mexico","england",[2,2]],["colombia","spain",[1,3]],["united states","belgium",[0,2]],["argentina","egypt",[3,0]],["switzerland","portugal",[1,3]]],qf:[["france","netherlands",[2,1]],["spain","belgium",[3,1]],["brazil","england",[2,1]],["argentina","portugal",[2,2]]],sf:[["france","spain",[2,3]],["brazil","portugal",[2,3]]],third:[["france","brazil",[4,2]]],final:[["spain","portugal",[3,1]]],podium:["spain", "portugal", "france"],awards:["Kylian Mbappe", "Harry Kane", "Lamine Yamal", "Lamine Yamal", "Lionel Messi", "Vinicius Junior"]},
+};
+
+
 
 const PLAYERS = ["Luis","David M. Sr","David M. Jr","Alex","Karlox","Calique","Mister","Flaca","Blas","Ethan","Flaco","Eligh"];
 
@@ -376,28 +476,28 @@ const PLAYERS = ["Luis","David M. Sr","David M. Jr","Alex","Karlox","Calique","M
    The live feed overwrites seed when the match finishes.            */
 const GAMES = [
   {id:1,  stage:"Group A", date:"2026-06-11", time:"15:00", home:"Mexico",          away:"South Africa",      m:["mexico","south africa"],            venue:"Estadio Azteca · Mexico City, CDMX", seed:[2,0]},
-  {id:2,  stage:"Group A", date:"2026-06-11", time:"21:00", home:"South Korea",    away:"Czechia",        m:["south korea","czechia"],            venue:"MetLife Stadium · East Rutherford, NJ", seed:[2,1]},
+  {id:2,  stage:"Group A", date:"2026-06-11", time:"21:00", home:"South Korea",    away:"Czechia",        m:["south korea","czechia"],            venue:"Estadio Akron · Guadalajara, Jalisco", seed:[2,1]},
   {id:3,  stage:"Group B", date:"2026-06-12", time:"15:00", home:"Canada",          away:"Bosnia & H.",    m:["canada","bosnia and herzegovina"],  venue:"BMO Field · Toronto, ON", seed:[1,1]},
   {id:4,  stage:"Group D", date:"2026-06-12", time:"21:00", home:"United States",  away:"Paraguay",       m:["united states","paraguay"],         venue:"SoFi Stadium · Inglewood, CA", seed:[4,1]},
-  {id:5,  stage:"Group B", date:"2026-06-13", time:"15:00", home:"Qatar",           away:"Switzerland",          m:["qatar","switzerland"],              venue:"Hard Rock Stadium · Miami Gardens, FL", seed:[1,1]},
-  {id:6,  stage:"Group C", date:"2026-06-13", time:"18:00", home:"Brazil",          away:"Morocco",      m:["brazil","morocco"],                 venue:"Mercedes-Benz Stadium · Atlanta, GA", seed:[1,1]},
+  {id:5,  stage:"Group B", date:"2026-06-13", time:"15:00", home:"Qatar",           away:"Switzerland",          m:["qatar","switzerland"],              venue:"Levi's Stadium · Santa Clara, CA", seed:[1,1]},
+  {id:6,  stage:"Group C", date:"2026-06-13", time:"18:00", home:"Brazil",          away:"Morocco",      m:["brazil","morocco"],                 venue:"MetLife Stadium · East Rutherford, NJ", seed:[1,1]},
   {id:7,  stage:"Group C", date:"2026-06-13", time:"21:00", home:"Haiti",           away:"Scotland",        m:["haiti","scotland"],                 venue:"Gillette Stadium · Foxborough, MA", seed:[0,1]},
-  {id:8,  stage:"Group D", date:"2026-06-14", time:"00:00", home:"Australia",       away:"Turkey",        m:["australia","turkey"],               venue:"Lumen Field · Seattle, WA", seed:[2,0]},
-  {id:9,  stage:"Group E", date:"2026-06-14", time:"13:00", home:"Germany",        away:"Curaçao",        m:["germany","curacao"],                venue:"AT&T Stadium · Arlington, TX", seed:null},
-  {id:10, stage:"Group F", date:"2026-06-14", time:"16:00", home:"Netherlands",    away:"Japan",          m:["netherlands","japan"],              venue:"NRG Stadium · Houston, TX", seed:null},
+  {id:8,  stage:"Group D", date:"2026-06-14", time:"00:00", home:"Australia",       away:"Turkey",        m:["australia","turkey"],               venue:"BC Place · Vancouver, BC", seed:[2,0]},
+  {id:9,  stage:"Group E", date:"2026-06-14", time:"13:00", home:"Germany",        away:"Curaçao",        m:["germany","curacao"],                venue:"NRG Stadium · Houston, TX", seed:null},
+  {id:10, stage:"Group F", date:"2026-06-14", time:"16:00", home:"Netherlands",    away:"Japan",          m:["netherlands","japan"],              venue:"AT&T Stadium · Arlington, TX", seed:null},
   {id:11, stage:"Group E", date:"2026-06-14", time:"19:00", home:"Ivory Coast", away:"Ecuador",        m:["ivory coast","ecuador"],            venue:"Lincoln Financial Field · Philadelphia, PA", seed:null},
-  {id:12, stage:"Group F", date:"2026-06-14", time:"22:00", home:"Sweden",          away:"Tunisia",          m:["sweden","tunisia"],                 venue:"Arrowhead Stadium · Kansas City, MO", seed:null},
-  {id:13, stage:"Group H", date:"2026-06-15", time:"12:00", home:"Spain",          away:"Cape Verde",     m:["spain","cape verde"],               venue:"Levi's Stadium · Santa Clara, CA", seed:null},
-  {id:14, stage:"Group G", date:"2026-06-15", time:"15:00", home:"Belgium",         away:"Egypt",         m:["belgium","egypt"],                  venue:"Estadio BBVA · Monterrey, Nuevo León", seed:null},
-  {id:15, stage:"Group H", date:"2026-06-15", time:"18:00", home:"Saudi Arabia",  away:"Uruguay",        m:["saudi arabia","uruguay"],           venue:"Estadio Akron · Guadalajara, Jalisco", seed:null},
-  {id:16, stage:"Group G", date:"2026-06-15", time:"21:00", home:"Iran",            away:"New Zealand",  m:["iran","new zealand"],               venue:"BC Place · Vancouver, BC", seed:null},
+  {id:12, stage:"Group F", date:"2026-06-14", time:"22:00", home:"Sweden",          away:"Tunisia",          m:["sweden","tunisia"],                 venue:"Estadio BBVA · Monterrey, Nuevo León", seed:null},
+  {id:13, stage:"Group H", date:"2026-06-15", time:"12:00", home:"Spain",          away:"Cape Verde",     m:["spain","cape verde"],               venue:"Mercedes-Benz Stadium · Atlanta, GA", seed:null},
+  {id:14, stage:"Group G", date:"2026-06-15", time:"15:00", home:"Belgium",         away:"Egypt",         m:["belgium","egypt"],                  venue:"Lumen Field · Seattle, WA", seed:null},
+  {id:15, stage:"Group H", date:"2026-06-15", time:"18:00", home:"Saudi Arabia",  away:"Uruguay",        m:["saudi arabia","uruguay"],           venue:"Hard Rock Stadium · Miami Gardens, FL", seed:null},
+  {id:16, stage:"Group G", date:"2026-06-15", time:"21:00", home:"Iran",            away:"New Zealand",  m:["iran","new zealand"],               venue:"SoFi Stadium · Inglewood, CA", seed:null},
   {id:17, stage:"Group I", date:"2026-06-16", time:"15:00", home:"France",         away:"Senegal",        m:["france","senegal"],                 venue:"MetLife Stadium · East Rutherford, NJ", seed:null},
-  {id:18, stage:"Group I", date:"2026-06-16", time:"18:00", home:"Iraq",            away:"Norway",        m:["iraq","norway"],                    venue:"Mercedes-Benz Stadium · Atlanta, GA", seed:null},
-  {id:19, stage:"Group J", date:"2026-06-16", time:"21:00", home:"Argentina",       away:"Algeria",        m:["argentina","algeria"],              venue:"Hard Rock Stadium · Miami Gardens, FL", seed:null},
-  {id:20, stage:"Group J", date:"2026-06-16", time:"23:00", home:"Austria",         away:"Jordan",       m:["austria","jordan"],                 venue:"AT&T Stadium · Arlington, TX", seed:null},
-  {id:21, stage:"Group K", date:"2026-06-17", time:"12:00", home:"Portugal",        away:"DR Congo",       m:["portugal","dr congo"],              venue:"SoFi Stadium · Inglewood, CA", seed:null},
-  {id:22, stage:"Group L", date:"2026-06-17", time:"15:00", home:"England",      away:"Croatia",        m:["england","croatia"],                venue:"Lumen Field · Seattle, WA", seed:null},
-  {id:23, stage:"Group L", date:"2026-06-17", time:"18:00", home:"Ghana",           away:"Panama",         m:["ghana","panama"],                   venue:"NRG Stadium · Houston, TX", seed:null},
+  {id:18, stage:"Group I", date:"2026-06-16", time:"18:00", home:"Iraq",            away:"Norway",        m:["iraq","norway"],                    venue:"Gillette Stadium · Foxborough, MA", seed:null},
+  {id:19, stage:"Group J", date:"2026-06-16", time:"21:00", home:"Argentina",       away:"Algeria",        m:["argentina","algeria"],              venue:"Arrowhead Stadium · Kansas City, MO", seed:null},
+  {id:20, stage:"Group J", date:"2026-06-16", time:"23:00", home:"Austria",         away:"Jordan",       m:["austria","jordan"],                 venue:"Levi's Stadium · Santa Clara, CA", seed:null},
+  {id:21, stage:"Group K", date:"2026-06-17", time:"12:00", home:"Portugal",        away:"DR Congo",       m:["portugal","dr congo"],              venue:"NRG Stadium · Houston, TX", seed:null},
+  {id:22, stage:"Group L", date:"2026-06-17", time:"15:00", home:"England",      away:"Croatia",        m:["england","croatia"],                venue:"AT&T Stadium · Arlington, TX", seed:null},
+  {id:23, stage:"Group L", date:"2026-06-17", time:"18:00", home:"Ghana",           away:"Panama",         m:["ghana","panama"],                   venue:"BMO Field · Toronto, ON", seed:null},
   {id:24, stage:"Group K", date:"2026-06-17", time:"20:00", home:"Uzbekistan",      away:"Colombia",       m:["uzbekistan","colombia"],            venue:"Estadio Azteca · Mexico City, CDMX", seed:null},
 ];
 
@@ -574,7 +674,8 @@ function recompute(){
       total += pts; if(t==="exact") exact++; if(t!=="miss") hits++;
       scored++; if(pts > GAME_AVG[g.id]) beat++;
     });
-    STATS[p] = {total, exact, hits, played, beat, scored};
+    const gsp = groupStandingsPoints(p);                 // exact-position points from completed groups
+    STATS[p] = {matchPts: total, posPts: gsp.total, total: total + gsp.total, exact, hits, played, beat, scored};
   });
   RANKED = [...PLAYERS].sort((a,b)=> STATS[b].total-STATS[a].total || STATS[b].exact-STATS[a].exact || a.localeCompare(b));
   RANK = {}; RANKED.forEach((p,i)=> RANK[p]=i+1);
@@ -607,6 +708,26 @@ const FLAGS = {
   "panama":"🇵🇦","uzbekistan":"🇺🇿","colombia":"🇨🇴"
 };
 function flag(k){ return FLAGS[k] || ""; }
+/* Key → display name (every team appears in round 1, so this covers all 48). */
+const NAME = {}; GAMES.forEach(g=>{ NAME[g.m[0]]=g.home; NAME[g.m[1]]=g.away; });
+function teamName(k){ return NAME[k] || (k ? k.replace(/\b\w/g, c=>c.toUpperCase()) : "—"); }
+/* A group is complete once all four teams have played their three group matches. */
+function groupComplete(teams){ return teams.length>=4 && teams.every(t=>t.pj>=3); }
+/* Exact-position points: 5 for each team a player placed in its exact final slot.
+   Only awarded once the group is complete; before that we expose a projection. */
+function groupStandingsPoints(player){
+  const G = computeGroups(); const out = {}; let total = 0;
+  Object.keys(G).forEach(L=>{
+    const teams = G[L], actual = teams.map(t=>t.key);
+    const pred = (POS_PRED[player] && POS_PRED[player][L]) || [null,null,null,null];
+    const started = teams.some(t=>t.pj>0), complete = groupComplete(teams);
+    const matched = pred.map((k,i)=> !!(k && actual[i]===k));
+    const pts = complete ? matched.filter(Boolean).length * POS_PTS : 0;
+    if(complete) total += pts;
+    out[L] = {pred, actual, matched, started, complete, pts};
+  });
+  return {perGroup: out, total};
+}
 function sb(score, variant, exact){
   if(!score) return `<span class="sb sm sb--pending"><i>–</i><i>–</i></span>`;
   let cls = "sb sm"; if(variant==="actual") cls+=" sb--actual"; if(variant==="live") cls+=" sb--live"; if(exact) cls+=" sb--exact";
@@ -692,6 +813,113 @@ function renderPicker(){
     b.addEventListener("click", ()=>{ activePlayer=b.dataset.player; renderPicker(); renderProfile(); });
   });
 }
+function renderGroupCard(player){
+  const gsp = groupStandingsPoints(player);
+  const tiles = Object.keys(gsp.perGroup).map(L=>{
+    const g = gsp.perGroup[L];
+    let st, stcls;
+    if(g.complete){ st = `Final · +${g.pts}`; stcls = "gcw__st--final"; }
+    else if(g.started){ st = `Live · proj +${g.matched.filter(Boolean).length*POS_PTS}`; stcls = "gcw__st--live"; }
+    else { st = "Not started"; stcls = "gcw__st--idle"; }
+    const rows = g.pred.map((k,i)=>{
+      const hit = g.matched[i];
+      const mark = g.complete ? (hit?'<span class="gcw__pt">+5</span>':'<span class="gcw__no">0</span>')
+                 : g.started ? (hit?'<span class="gcw__ok">✓</span>':'<span class="gcw__dot">·</span>')
+                 : '<span class="gcw__dot">·</span>';
+      return `<div class="gcw__row${hit&&(g.complete||g.started)?' gcw__row--hit':''}">
+        <span class="gcw__pos">${i+1}</span>
+        <span class="gcw__team">${flag(k)} ${teamName(k)}</span>${mark}</div>`;
+    }).join("");
+    return `<div class="gcw"><div class="gcw__h"><span>Group ${L}</span><span class="gcw__st ${stcls}">${st}</span></div>${rows}</div>`;
+  }).join("");
+  const note = `<p class="gcnote">Each team you placed in its exact final spot is worth <b>${POS_PTS}</b> points. Points lock in when a group finishes — until then “proj” shows what you’d earn if the table stayed as it is.</p>`;
+  return `<div class="gcardwrap">
+    <div class="ghead"><h3>Group standings points</h3><span class="gtotal">+${gsp.total}</span></div>
+    ${note}
+    <div class="gcwgrid">${tiles}</div></div>`;
+}
+/* ---------- Knockout forecast (per player) ---------- */
+function tieCard(hk, ak, score, label){
+  const draw = score[0]===score[1], hw = score[0]>score[1];
+  return `<div class="tie">
+    ${label?`<div class="tie__slot">${label}</div>`:``}
+    <div class="tie__row${!draw&&hw?' tie__row--w':''}"><span class="tie__t">${flag(hk)} ${teamName(hk)}</span><b>${score[0]}</b></div>
+    <div class="tie__row${!draw&&!hw?' tie__row--w':''}"><span class="tie__t">${flag(ak)} ${teamName(ak)}</span><b>${score[1]}</b></div>
+    ${draw?`<div class="tie__pens">decided on penalties</div>`:``}
+  </div>`;
+}
+function koRound(title, ties, slots){
+  const cards = ties.map((t,i)=> tieCard(t[0], t[1], t[2], slots?`${R32_SLOTS[i][0]} · ${R32_SLOTS[i][1]}`:"")).join("");
+  return `<div class="ko__round"><div class="ko__rtitle">${title} <span class="ko__n">${ties.length}</span></div><div class="hscroll">${cards}</div></div>`;
+}
+function renderKnockoutForecast(player){
+  const fc = FC[player]; if(!fc) return "";
+  const podLab = ["🥇 Champion","🥈 Runner-up","🥉 Third place"];
+  const podium = `<div class="hscroll">${fc.podium.map((k,i)=>`<div class="pod"><span>${podLab[i]}</span><b>${flag(k)} ${teamName(k)}</b></div>`).join("")}</div>`;
+  const awLab = ["🥇 Golden Boot","🥈 Silver Boot","🥉 Bronze Boot","🥇 Golden Ball","🥈 Silver Ball","🥉 Bronze Ball"];
+  const awSub = ["Top scorer","2nd scorer","3rd scorer","Best player","2nd best","3rd best"];
+  const awards = `<div class="hscroll">${fc.awards.map((a,i)=>`<div class="aw"><span>${awLab[i]}</span><b>${a||"—"}</b><i>${awSub[i]}</i></div>`).join("")}</div>`;
+  return `<div class="kowrap">
+    <div class="ghead"><h3>Knockout forecast</h3><span class="gtotal gtotal--ghost">${player}</span></div>
+    <p class="gcnote">Round‑of‑32 cards show the group finishes that feed each slot — e.g. <b>1A · 3CEFHI</b> means winner of Group A vs a third‑placed team. Later rounds show ${player}’s own predicted matchups. Swipe each round sideways.</p>
+    ${koRound("Round of 32", fc.r32, true)}
+    ${koRound("Round of 16", fc.r16, false)}
+    ${koRound("Quarter‑finals", fc.qf, false)}
+    ${koRound("Semi‑finals", fc.sf, false)}
+    ${koRound("Third‑place match", fc.third, false)}
+    ${koRound("Final", fc.final, false)}
+    <div class="ko__round"><div class="ko__rtitle">Podium</div>${podium}</div>
+    <div class="ko__round"><div class="ko__rtitle">Top scorers & best players</div>${awards}</div>
+  </div>`;
+}
+/* ---------- Scoring explainer (static, with examples) ---------- */
+function exCard(label, lines, pts, note, big){
+  const ls = lines.map(l=>`<div class="ex__l"><span>${l[0]}</span><span>${l[1]}</span></div>`).join("");
+  return `<div class="ex"><div class="ex__h">${label}</div>${ls}<div class="ex__pts ${big?'ex__pts--big':''}">${pts}</div>${note?`<div class="ex__note">${note}</div>`:""}</div>`;
+}
+function scRow(title, sub, cards){
+  return `<div class="ko__round"><div class="ko__rtitle">${title}</div>${sub?`<p class="gcnote">${sub}</p>`:""}<div class="hscroll">${cards.join("")}</div></div>`;
+}
+function renderScoring(){
+  const el = document.getElementById("scoring"); if(!el) return;
+  const groupMatch = scRow("Group match — 1 / 4 / 9",
+    "Cumulative: the right 1X2 result is 1, also nailing the goal difference makes it 4, the exact score makes it 9. A few matches count double.",
+    [
+      exCard("Exact score", [["Your pick","2 – 1"],["Final","2 – 1"]], "+9", "Result + difference + exact"),
+      exCard("Right difference", [["Your pick","3 – 2"],["Final","2 – 1"]], "+4", "Right winner & margin, wrong score"),
+      exCard("Right result only", [["Your pick","3 – 0"],["Final","2 – 1"]], "+1", "Correct winner, wrong margin"),
+      exCard("Wrong result", [["Your pick","1 – 2"],["Final","2 – 1"]], "0", "Wrong winner / draw"),
+      exCard("Double match · exact", [["Your pick","2 – 1"],["Final","2 – 1"],["×2",""]], "+18", "9 doubled on a ×2 match", true),
+    ]);
+  const positions = scRow("Group finishes — 5 per exact spot",
+    "When a group ends, every team you placed in its exact final position (1st/2nd/3rd/4th) is worth 5. All four right = 20.",
+    [
+      exCard("Two spots right", [["1st","🇲🇽 ✓"],["2nd","🇰🇷 ✗"],["3rd","🇨🇿 ✗"],["4th","🇿🇦 ✓"]], "+10", "Like Luis & Flaco in Group A"),
+      exCard("Perfect group", [["1st","✓"],["2nd","✓"],["3rd","✓"],["4th","✓"]], "+20", "All four exact"),
+      exCard("One off", [["3rd","✓ only"],["others","✗"]], "+5", "One place off scores nothing"),
+    ]);
+  const advance = scRow("Reaching a round — +3 each, and it stacks",
+    "+3 for every team you predicted to reach a round that actually gets there — at the R32, R16, QF, SF and Final. Position in the bracket doesn't matter, only that the team arrived.",
+    [
+      exCard("Deep run", [["Reaches R32","+3"],["Reaches R16","+3"],["Reaches QF","+3"],["Reaches SF","+3"],["Reaches Final","+3"]], "+15", "One team you sent to the final, e.g. Luis' Spain", true),
+      exCard("Out in the QF", [["R32","+3"],["R16","+3"],["QF","+3"],["SF","—"]], "+9", "Stops earning once it loses"),
+    ]);
+  const koMatch = scRow("Knockout match — 1 / 4 / 9 by slot",
+    "Same 1 / 4 / 9 as the group stage, scored by bracket slot: your predicted scoreline is compared to the real result of that slot — even if the teams that reach it aren't the ones you picked.",
+    [
+      exCard("Matchup & score right", [["Slot","1A · 3CEFHI"],["Your pick","2 – 0"],["Real","2 – 0"]], "+9", "Plus the +3s for those teams advancing"),
+      exCard("Teams differ, score right", [["Your tie","Mexico 2–0"],["Real tie","Mexico 2–0 vs other"],["Slot scoreline","matches"]], "+9", "Option A: the slot's scoreline still scores"),
+      exCard("Right outcome only", [["Your pick","3 – 1"],["Real","1 – 0"]], "+1", "Winner right, margin wrong"),
+    ]);
+  const finals = scRow("Podium, awards & penalties",
+    "These come from your Champion / Runner-up / Third picks, your top-scorer and best-player picks, and a deduction for teams you sent to rounds they've already crashed out of. Point values still to be set.",
+    [
+      exCard("Podium", [["🥇 Champion","value TBD"],["🥈 Runner-up","value TBD"],["🥉 Third","value TBD"]], "—", "You'll set these"),
+      exCard("Awards", [["Golden Boot","value TBD"],["Golden Ball","value TBD"]], "—", "Set manually once announced"),
+      exCard("Penalty", [["Team already out","−?"]], "−", "Deduction — amount TBD"),
+    ]);
+  el.innerHTML = groupMatch + positions + advance + koMatch + finals;
+}
 function renderProfile(){
   const p = activePlayer, s = STATS[p];
   const acc = s.scored ? Math.round(s.hits/s.scored*100) : 0;
@@ -727,7 +955,7 @@ function renderProfile(){
           <div class="kpi"><b>${acc}%</b><span>Correct</span></div>
           <div class="kpi"><b>${s.beat}/${s.scored}</b><span>Beat avg</span></div>
         </div>
-      </div>${body}
+      </div>${renderGroupCard(p)}${renderKnockoutForecast(p)}${body}
     </div>`;
 }
 
@@ -852,7 +1080,7 @@ function setLive(state){
   const dot=document.getElementById("livedot"), txt=document.getElementById("livetext");
   dot.className = "live " + ((state==="live"||state==="livenow") ? "on" : "off");
   txt.textContent = state==="loading" ? "Connecting to the scoreboard…"
-    : state==="livenow" ? "Live now · updating every minute"
+    : state==="livenow" ? "Live now · updating every 5 min"
     : state==="live" ? "Live · automatic results"
     : "Backup data · the live scoreboard didn't respond";
 }
@@ -888,17 +1116,18 @@ GAMES.forEach(g=>{ g.dbl = DOUBLE_SET.has(pairKey(g.m[0], g.m[1])); g.actual = g
 recompute();
 renderAll();
 
-/* Update cadence: poll every minute while any match is in play (and just after, to catch the
+/* Update cadence: poll every 5 minutes while any match is in play (and just after, to catch the
    final score); between games, sleep until the next kickoff. No constant polling otherwise. */
 let LIVE_TIMER = null;
 function nextDelay(){
   const now = Date.now();
-  if(GAMES.some(g => !g.actual && liveWindow(g))) return 60*1000;                 // a match is in play → every 60s
+  if(GAMES.some(g => !g.actual && liveWindow(g))) return 5*60*1000;               // a match is in play → every 5 min
   const up = GAMES.filter(g => !g.actual && kickoff(g).getTime() > now).map(g => kickoff(g).getTime());
   if(up.length) return Math.min(Math.max(Math.min(...up) - now, 60*1000), 30*60*1000); // wait until next kickoff (1–30 min)
   return 30*60*1000;                                                              // nothing scheduled → light heartbeat
 }
 async function liveLoop(){ await refresh(true); clearTimeout(LIVE_TIMER); LIVE_TIMER = setTimeout(liveLoop, nextDelay()); }
+renderScoring();
 refresh(false).then(()=>{ clearTimeout(LIVE_TIMER); LIVE_TIMER = setTimeout(liveLoop, nextDelay()); });
 </script>
 </body>
