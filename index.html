@@ -176,8 +176,46 @@
   .up{color:var(--red);} .down{color:var(--muted);} .eq{color:var(--muted);}
 
   /* ---------- Games ---------- */
-  .gcard{background:var(--paper); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow); margin-bottom:10px; overflow:hidden;}
-  .gcard__btn{width:100%; text-align:left; background:transparent; border:0; cursor:pointer; padding:14px 18px; display:grid; grid-template-columns:42px 1fr auto 22px; align-items:center; gap:14px;}
+  .pastwrap{margin-bottom:10px; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:rgba(18,18,18,.02);}
+  .pasttoggle{width:100%; text-align:left; background:transparent; border:0; cursor:pointer; padding:13px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px;}
+  .pasttoggle:hover{background:rgba(222,40,32,.05);}
+  .pasttoggle:focus-visible{outline:2px solid var(--red); outline-offset:-2px;}
+  .pasttoggle .pl{display:flex; align-items:center; gap:8px; font-size:14px;}
+  .pasttoggle .chev{display:inline-block; color:var(--red); font-size:11px; transition:transform .15s ease;}
+  .pastwrap.open .pasttoggle .chev{transform:rotate(90deg);}
+  .pasttoggle .pcount{font-family:"JetBrains Mono"; font-size:11px; font-weight:700; background:var(--black); color:#fff; border-radius:20px; padding:1px 8px;}
+  .pasttoggle .ph{font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; white-space:nowrap;}
+  .pastbody{display:none; padding:4px 10px 10px;}
+  .pastwrap.open .pastbody{display:block;}
+  .pastbody .gcard:last-child{margin-bottom:0;}
+  /* Spotlight hero — the current/next game */
+  .spot{border-radius:16px; padding:15px 15px 9px; margin-bottom:14px; color:#fff; box-shadow:var(--shadow);}
+  .spot--live{background:linear-gradient(165deg,#1c1c1c,#000); border:1.5px solid var(--red);}
+  .spot--next{background:linear-gradient(165deg,#202020,#0b0b0b);}
+  .spot__bar{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:13px;}
+  .spot__live{display:inline-flex; align-items:center; gap:6px; background:var(--red); color:#fff; font-family:"JetBrains Mono"; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; letter-spacing:.03em;}
+  .spot__next{display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,.13); color:#fff; font-family:"JetBrains Mono"; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; letter-spacing:.05em;}
+  .spot__meta{font-family:"JetBrains Mono"; font-size:10.5px; color:rgba(255,255,255,.6); text-align:right;}
+  .spot__mid{display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:10px; margin-bottom:12px;}
+  .spot__side{display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center; min-width:0;}
+  .spot__fl{font-size:32px; line-height:1;}
+  .spot__nm{font-size:13px; font-weight:600; line-height:1.15; max-width:100%;}
+  .spot__sc{font-family:"Russo One",sans-serif; font-size:36px; display:flex; align-items:center; gap:9px; white-space:nowrap;}
+  .spot__sc i{opacity:.45; font-style:normal; font-size:24px;}
+  .spot__sc--time{font-size:27px;}
+  .spot__sc--time small{font-size:11px; opacity:.6; margin-left:3px; font-family:"JetBrains Mono";}
+  .spot__venue{font-size:11px; color:rgba(255,255,255,.55); text-align:center; margin:-4px 0 12px;}
+  .spot__racehd{display:flex; align-items:center; justify-content:space-between; font-family:"JetBrains Mono"; font-size:9.5px; text-transform:uppercase; letter-spacing:.07em; color:rgba(255,255,255,.5); padding:9px 2px 7px; border-top:1px solid rgba(255,255,255,.12);}
+  .spot__race{background:#fff; color:var(--black); border-radius:11px; overflow:hidden; margin-bottom:6px;}
+  .srow{display:grid; grid-template-columns:18px auto 1fr auto auto; align-items:center; gap:9px; padding:6px 11px; font-size:13px;}
+  .srow+.srow{border-top:1px solid var(--line-soft);}
+  .srow--lead{background:rgba(222,40,32,.08);}
+  .srow--lead .snm{font-weight:700;}
+  .srk{font-family:"JetBrains Mono"; font-size:11px; color:var(--muted); text-align:center;}
+  .srow .av{width:22px; height:22px; font-size:9px;}
+  .snm{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .spk-none{color:#cfcfcf;}
+  .gcard{background:var(--paper); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow); margin-bottom:10px; overflow:hidden;}  .gcard__btn{width:100%; text-align:left; background:transparent; border:0; cursor:pointer; padding:14px 18px; display:grid; grid-template-columns:42px 1fr auto 22px; align-items:center; gap:14px;}
   .gcard__btn:hover{background:rgba(222,40,32,.05);}
   .gcard__btn:focus-visible{outline:2px solid var(--red); outline-offset:-2px;}
   .gnum{font-family:"Russo One"; font-size:20px; color:var(--muted); line-height:1;}
@@ -1238,50 +1276,135 @@ function renderProfile(){
 }
 
 /* ---------- Matches ---------- */
+let pastMatchesOpen = false, upcomingOpen = false;   // drawer states, remembered across live refreshes
+function gamePred(g){
+  const played = !!g.actual;
+  const liveScore = (!played && g.live) ? g.live.score : null;
+  const scored = played || !!liveScore;
+  let rows = PLAYERS.map(p=>{
+    const pred = PREDICTIONS[g.id][p];
+    const basis = played ? g.actual : liveScore;            // score the pick against the result, or the live score
+    return {p, pred, pts: basis ? pointsFor(pred, basis, g) : null, exact: basis ? isExact(pred, basis) : false};
+  });
+  if(scored) rows.sort((a,b)=> b.pts-a.pts || a.p.localeCompare(b.p)); else rows.sort((a,b)=> a.p.localeCompare(b.p));
+  return {played, liveScore, scored, rows};
+}
+function predRowHtml(r, played, liveScore){
+  let ptsHtml;
+  if(played) ptsHtml = `<span class="${r.exact?'pts pts--exact':r.pts===0?'pts pts--zero':'pts'}">${r.pts}</span>`;
+  else if(liveScore) ptsHtml = `<span class="pts pts--est" title="Estimated from the current score — not final">~${r.pts}</span>`;
+  else ptsHtml = `<span class="pts pts--zero">–</span>`;
+  return `<div class="glist__row">
+    <div class="who">${avatar(r.p)}<span>${r.p}${adminTag(r.p)}</span> ${played&&r.exact?'<span class="stamp">★ exact</span>':''}</div>
+    <div style="text-align:right">${sb(r.pred,"pred",r.exact)}</div>
+    <div style="text-align:right">${ptsHtml}</div></div>`;
+}
+function gameCard(g){
+  const rb = dayLabel(g.date), played = !!g.actual;
+  let rightTag;
+  if(played){
+    rightTag = sb(g.actual,"actual",false);
+  } else if(g.live){
+    rightTag = `<span class="live-wrap">${sb(g.live.score,"live",false)}<span class="livepill"><span class="lvdot"></span>${g.live.detail||"LIVE"}</span></span>`;
+  } else if(liveWindow(g)){
+    rightTag = `<span class="gtag gtag--live"><span class="lvdot"></span>LIVE</span>`;
+  } else {
+    rightTag = `<span class="gtag" style="background:${rb?(rb.cls==="ribbon--today"?"var(--red)":"var(--black)"):"#d3d3cf"};color:${rb?'#fff':'var(--black)'}">${rb?rb.txt:g.time+" ET"}</span>`;
+  }
+  const {played:pl, liveScore, scored, rows} = gamePred(g);
+  const list = rows.map(r=>predRowHtml(r, pl, liveScore)).join("");
+  return `<div class="gcard ${g.live?'gcard--live':''}" data-game="${g.id}">
+    <button class="gcard__btn" aria-expanded="false">
+      <span class="gnum">${String(g.id).padStart(2,"0")}</span>
+      <span class="ginfo"><span class="stage">${g.stage} · MD${mdOf(g.id)}${g.dbl?' · <b style="color:var(--red)">×2 points</b>':''}</span><span class="teams">${flag(g.m[0])} ${g.home} vs ${flag(g.m[1])} ${g.away}</span><span class="date">${fmtDate(g.date)} · ${g.time} ET</span>${g.venue?`<span class="gloc"><svg class="pin" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C8.1 2 5 5.1 5 9c0 4.7 6.2 12.3 6.5 12.6a.7.7 0 0 0 1 0C12.8 21.3 19 13.7 19 9c0-3.9-3.1-7-7-7Zm0 9.6A2.6 2.6 0 1 1 12 6.4a2.6 2.6 0 0 1 0 5.2Z"/></svg>${g.venue}</span>`:""}</span>
+      <span class="gright">${rightTag}</span><span class="chev">▶</span>
+    </button>
+    <div class="gbody"><div class="gbody__in">
+      <div class="glist__head"><span>Predictions ${scored?'· best first':''}</span><span>Pick</span><span>${liveScore?'Est. pts':'Pts'}</span></div>
+      <div class="glist">${list}</div>
+    </div></div></div>`;
+}
+function countdown(g){
+  const ms = kickoff(g).getTime() - Date.now();
+  if(ms <= 0) return "kicking off";
+  const h = Math.floor(ms/3600000), m = Math.round((ms%3600000)/60000);
+  if(h >= 24) return `in ${Math.floor(h/24)}d ${h%24}h`;
+  if(h > 0) return `in ${h}h ${m}m`;
+  return `in ${m}m`;
+}
+/* The spotlight: the one game that matters right now — live (with the live points race) or the next kickoff. */
+function spotCard(g){
+  const {played, liveScore, rows} = gamePred(g);
+  const isLiveNow = !played && (g.live || liveWindow(g));
+  const md = mdOf(g.id), dbl = g.dbl ? ' · <b style="color:#ff6a60">×2</b>' : '';
+  const race = rows.map((r,i)=>`<div class="srow${(liveScore && i===0)?' srow--lead':''}">
+      <span class="srk">${liveScore ? (i+1) : ''}</span>
+      ${avatar(r.p)}<span class="snm">${r.p}${adminTag(r.p)}</span>
+      <span class="spk">${sb(r.pred,"pred",r.exact)}</span>
+      ${liveScore ? `<span class="pts pts--est">~${r.pts}</span>` : '<span class="spk-none">–</span>'}
+    </div>`).join("");
+  if(isLiveNow){
+    const sc = g.live ? g.live.score : null;
+    return `<div class="spot spot--live">
+      <div class="spot__bar"><span class="spot__live"><span class="lvdot"></span> LIVE${g.live&&g.live.detail?` · ${g.live.detail}`:''}</span><span class="spot__meta">${g.stage} · MD${md}${dbl}</span></div>
+      <div class="spot__mid">
+        <div class="spot__side"><span class="spot__fl">${flag(g.m[0])}</span><span class="spot__nm">${g.home}</span></div>
+        <div class="spot__sc">${sc?sc[0]:'·'}<i>–</i>${sc?sc[1]:'·'}</div>
+        <div class="spot__side"><span class="spot__fl">${flag(g.m[1])}</span><span class="spot__nm">${g.away}</span></div>
+      </div>
+      <div class="spot__racehd">Live points · this match <span>${liveScore?'est. from the score':'score updating'}</span></div>
+      <div class="spot__race">${race}</div>
+    </div>`;
+  }
+  return `<div class="spot spot--next">
+    <div class="spot__bar"><span class="spot__next">UP NEXT · ${countdown(g)}</span><span class="spot__meta">${g.stage} · MD${md}${dbl}</span></div>
+    <div class="spot__mid">
+      <div class="spot__side"><span class="spot__fl">${flag(g.m[0])}</span><span class="spot__nm">${g.home}</span></div>
+      <div class="spot__sc spot__sc--time">${g.time}<small>ET</small></div>
+      <div class="spot__side"><span class="spot__fl">${flag(g.m[1])}</span><span class="spot__nm">${g.away}</span></div>
+    </div>
+    ${g.venue?`<div class="spot__venue">${fmtDate(g.date)} · ${g.venue}</div>`:`<div class="spot__venue">${fmtDate(g.date)}</div>`}
+    <div class="spot__racehd">Everyone's picks <span>locked in</span></div>
+    <div class="spot__race">${race}</div>
+  </div>`;
+}
+function drawer(id, title, count, sub, open, cardsHtml){
+  return `<div class="pastwrap${open?' open':''}" data-drawer="${id}">
+    <button class="pasttoggle" aria-expanded="${open?'true':'false'}">
+      <span class="pl"><span class="chev">▶</span> <b>${title}</b> <span class="pcount">${count}</span></span>
+      <span class="ph">${sub}</span>
+    </button>
+    <div class="pastbody">${cardsHtml}</div>
+  </div>`;
+}
 function renderGames(){
-  document.getElementById("games").innerHTML = GAMES.map(g=>{
-    const rb = dayLabel(g.date), played = !!g.actual;
-    let rightTag;
-    if(played){
-      rightTag = sb(g.actual,"actual",false);
-    } else if(g.live){
-      rightTag = `<span class="live-wrap">${sb(g.live.score,"live",false)}<span class="livepill"><span class="lvdot"></span>${g.live.detail||"LIVE"}</span></span>`;
-    } else if(liveWindow(g)){
-      rightTag = `<span class="gtag gtag--live"><span class="lvdot"></span>LIVE</span>`;
-    } else {
-      rightTag = `<span class="gtag" style="background:${rb?(rb.cls==="ribbon--today"?"var(--red)":"var(--black)"):"#d3d3cf"};color:${rb?'#fff':'var(--black)'}">${rb?rb.txt:g.time+" ET"}</span>`;
-    }
-    const liveScore = (!played && g.live) ? g.live.score : null;
-    const scored = played || !!liveScore;
-    let rows = PLAYERS.map(p=>{
-      const pred = PREDICTIONS[g.id][p];
-      const basis = played ? g.actual : liveScore;            // score the pick against the result, or the live score
-      return {p, pred, pts: basis ? pointsFor(pred, basis, g) : null, exact: basis ? isExact(pred, basis) : false};
-    });
-    if(scored) rows.sort((a,b)=> b.pts-a.pts || a.p.localeCompare(b.p)); else rows.sort((a,b)=> a.p.localeCompare(b.p));
-    const list = rows.map(r=>{
-      let ptsHtml;
-      if(played) ptsHtml = `<span class="${r.exact?'pts pts--exact':r.pts===0?'pts pts--zero':'pts'}">${r.pts}</span>`;
-      else if(liveScore) ptsHtml = `<span class="pts pts--est" title="Estimated from the current score — not final">~${r.pts}</span>`;
-      else ptsHtml = `<span class="pts pts--zero">–</span>`;
-      return `<div class="glist__row">
-        <div class="who">${avatar(r.p)}<span>${r.p}${adminTag(r.p)}</span> ${played&&r.exact?'<span class="stamp">★ exact</span>':''}</div>
-        <div style="text-align:right">${sb(r.pred,"pred",r.exact)}</div>
-        <div style="text-align:right">${ptsHtml}</div></div>`;
-    }).join("");
-    return `<div class="gcard ${g.live?'gcard--live':''}" data-game="${g.id}">
-      <button class="gcard__btn" aria-expanded="false">
-        <span class="gnum">${String(g.id).padStart(2,"0")}</span>
-        <span class="ginfo"><span class="stage">${g.stage} · MD${mdOf(g.id)}${g.dbl?' · <b style="color:var(--red)">×2 points</b>':''}</span><span class="teams">${flag(g.m[0])} ${g.home} vs ${flag(g.m[1])} ${g.away}</span><span class="date">${fmtDate(g.date)} · ${g.time} ET</span>${g.venue?`<span class="gloc"><svg class="pin" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C8.1 2 5 5.1 5 9c0 4.7 6.2 12.3 6.5 12.6a.7.7 0 0 0 1 0C12.8 21.3 19 13.7 19 9c0-3.9-3.1-7-7-7Zm0 9.6A2.6 2.6 0 1 1 12 6.4a2.6 2.6 0 0 1 0 5.2Z"/></svg>${g.venue}</span>`:""}</span>
-        <span class="gright">${rightTag}</span><span class="chev">▶</span>
-      </button>
-      <div class="gbody"><div class="gbody__in">
-        <div class="glist__head"><span>Predictions ${scored?'· best first':''}</span><span>Pick</span><span>${liveScore?'Est. pts':'Pts'}</span></div>
-        <div class="glist">${list}</div>
-      </div></div></div>`;
-  }).join("");
+  const isLive = g => !g.actual && (g.live || liveWindow(g));
+  const live = GAMES.filter(isLive).sort((a,b)=> kickoff(a)-kickoff(b));
+  const finished = GAMES.filter(g=> !!g.actual);
+  const upcoming = GAMES.filter(g=> !g.actual && !isLive(g)).sort((a,b)=> kickoff(a)-kickoff(b));
+  let spotGames = [], restUpcoming = upcoming;
+  if(live.length){ spotGames = live; restUpcoming = upcoming; }
+  else if(upcoming.length){ spotGames = [upcoming[0]]; restUpcoming = upcoming.slice(1); }
+  let html = spotGames.map(spotCard).join("");
+  if(restUpcoming.length){
+    const nx = restUpcoming[0];
+    html += drawer("up", "Upcoming", restUpcoming.length, `tap to ${upcomingOpen?'hide':'show'} · next ${fmtDate(nx.date)} ${nx.time} ET`, upcomingOpen, restUpcoming.map(gameCard).join(""));
+  }
+  if(finished.length){
+    html += drawer("done", "Completed", finished.length, `tap to ${pastMatchesOpen?'hide':'show'} · latest first`, pastMatchesOpen, finished.slice().reverse().map(gameCard).join(""));
+  }
+  if(!spotGames.length && !restUpcoming.length && !finished.length) html = `<p class="statnote">No matches yet.</p>`;
+  document.getElementById("games").innerHTML = html;
   document.querySelectorAll(".gcard__btn").forEach(btn=>{
     btn.addEventListener("click", ()=>{ const card=btn.closest(".gcard"); const open=card.classList.toggle("open"); btn.setAttribute("aria-expanded", open?"true":"false"); });
+  });
+  document.querySelectorAll(".pasttoggle").forEach(pt=>{
+    pt.addEventListener("click", ()=>{
+      const wrap=pt.closest(".pastwrap"), open=wrap.classList.toggle("open");
+      if(wrap.dataset.drawer==="up") upcomingOpen=open; else pastMatchesOpen=open;
+      pt.setAttribute("aria-expanded", open?"true":"false");
+      const ph=pt.querySelector(".ph"); if(ph) ph.textContent = ph.textContent.replace(/tap to (?:hide|show)/, "tap to "+(open?"hide":"show"));
+    });
   });
 }
 
