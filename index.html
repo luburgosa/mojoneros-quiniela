@@ -127,7 +127,7 @@
   .leader .big u{text-decoration:none; border-bottom:4px solid var(--red); padding-bottom:2px;}
 
   .board{background:var(--paper); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); overflow:hidden;}
-  .board__head, .board__row{display:grid; grid-template-columns:40px 1fr 84px 124px 88px; align-items:center; gap:10px; padding:12px 18px;}
+  .board__head, .board__row{display:grid; grid-template-columns:40px 1fr 110px 110px; align-items:center; gap:10px; padding:12px 18px;}
   .board__head{font-family:"JetBrains Mono"; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--line); background:rgba(18,18,18,.025);}
   .board__row{border-bottom:1px solid var(--line-soft);}
   .board__row:last-child{border-bottom:0;}
@@ -199,6 +199,19 @@
   .pastbody{display:none; padding:4px 10px 10px;}
   .pastwrap.open .pastbody{display:block;}
   .pastbody .gcard:last-child{margin-bottom:0;}
+  /* Matches tab — open section headers */
+  .msec{margin-bottom:26px;}
+  .msec__h{display:flex; align-items:center; gap:10px; padding:0 2px 12px; border-bottom:2px solid var(--black); margin-bottom:14px;}
+  .msec__h b{font-family:"Russo One"; font-size:18px; letter-spacing:.01em;}
+  .msec__h .pcount{font-family:"JetBrains Mono"; font-size:11px; font-weight:700; background:var(--black); color:#fff; border-radius:20px; padding:1px 8px;}
+  .msec__h .msec__sub{margin-left:auto; font-family:"JetBrains Mono"; font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; white-space:nowrap;}
+  .msec__list .gcard:last-child{margin-bottom:0;}
+  .msec--collapsible .msec__h--btn{cursor:pointer;}
+  .msec__h--btn:hover{border-bottom-color:var(--red);}
+  .mchev{display:inline-block; color:var(--red); font-size:12px; transition:transform .15s ease;}
+  .msec--collapsible:not(.msec--collapsed) .mchev{transform:rotate(90deg);}
+  .msec--collapsed .msec__list{display:none;}
+  .msec--collapsed .msec__h{margin-bottom:0;}
   /* Spotlight hero — the current/next game */
   .spot{border-radius:16px; padding:15px 15px 9px; margin-bottom:14px; color:#fff; box-shadow:var(--shadow);}
   .spot--live{background:linear-gradient(165deg,#1c1c1c,#000); border:1.5px solid var(--red);}
@@ -308,7 +321,7 @@
     .nav__in{flex-wrap:wrap; gap:2px; padding:0 12px;}
     .tab{flex:1 1 auto; padding:12px 8px; font-size:11px; text-align:center; white-space:nowrap;}
     .livebar{flex-wrap:wrap;} .livebar .refresh{margin-left:0;}
-    .board__head, .board__row{grid-template-columns:18px 1fr 38px 54px 46px; gap:9px; padding:14px 14px;}
+    .board__head, .board__row{grid-template-columns:20px 1fr 56px 58px; gap:12px; padding:14px 16px;}
     .board__head{font-size:9.5px; letter-spacing:.06em;}
     .board .av{width:27px; height:27px; font-size:10px;}
     .name-cell{gap:9px; font-size:14px;}
@@ -472,6 +485,7 @@
 <nav class="nav">
   <div class="nav__in" role="tablist" aria-label="Sections">
     <button class="tab" role="tab" id="tab-standings" aria-controls="panel-standings" aria-selected="true">Standings</button>
+    <button class="tab" role="tab" id="tab-matches" aria-controls="panel-matches" aria-selected="false">Matches</button>
     <button class="tab" role="tab" id="tab-players" aria-controls="panel-players" aria-selected="false">Players</button>
     <button class="tab" role="tab" id="tab-groups" aria-controls="panel-groups" aria-selected="false">Groups</button>
     <button class="tab" role="tab" id="tab-bracket" aria-controls="panel-bracket" aria-selected="false">Bracket</button>
@@ -487,7 +501,7 @@
     <button class="refresh" id="refreshBtn">Refresh</button>
   </div>
 
-  <!-- ===== STANDINGS + MATCHES (the hub) ===== -->
+  <!-- ===== STANDINGS ===== -->
   <section class="panel is-active" id="panel-standings" role="tabpanel" aria-labelledby="tab-standings">
     <div id="spotlight"></div>
     <div class="sectionhead">
@@ -496,10 +510,14 @@
     </div>
     <div id="leader"></div>
     <div class="board" id="board"></div>
-    <div class="sectionhead" style="margin-top:38px">
+  </section>
+
+  <!-- ===== MATCHES ===== -->
+  <section class="panel" id="panel-matches" role="tabpanel" aria-labelledby="tab-matches" hidden>
+    <div class="sectionhead">
       <div class="eyebrow"><span class="sq"></span> Match by match</div>
       <h2>The Matches</h2>
-      <p>Tap any game to open everyone's predictions and the points they earned.</p>
+      <p>Every game with everyone's predictions and the points earned — all opened up.</p>
     </div>
     <div id="games"></div>
   </section>
@@ -1007,14 +1025,12 @@ function renderStandings(){
     </div>`;
   document.getElementById("board").innerHTML = `
     <div class="board-legend">
-      <span><b>Game</b> match points</span>
-      <span><b>Group</b> locked group-finish pts · <i>grey = projected</i></span>
-      <span><b>Total</b> overall — ranks the table</span>
+      <span><b>Game</b> points from match scores</span>
+      <span><b>Total</b> overall — including group finishes; ranks the table</span>
     </div>
     <div class="board__head">
       <span>#</span><span>Player</span>
       <span style="text-align:right">Game</span>
-      <span style="text-align:right">Group</span>
       <span style="text-align:right">Total</span>
     </div>` + RANKED.map(p=>{
       const s = STATS[p], r = RANK[p];
@@ -1022,7 +1038,6 @@ function renderStandings(){
         <div class="rk-cell ${r<=3?"top":""}">${r}</div>
         <div class="name-cell">${avatar(p)}<span>${p}${adminTag(p)}</span></div>
         <div class="game-cell">${s.matchPts}</div>
-        <div class="grp-cell"><b>${s.posPts}</b><span class="proj">${s.projPos}</span></div>
         <div class="tot-cell">${s.total}</div>
       </div>`;
     }).join("") + NON_PARTICIPANTS.map(p=>`
@@ -1330,7 +1345,7 @@ function predRowHtml(r, played, liveScore){
     <div style="text-align:right">${sb(r.pred,"pred",r.exact)}</div>
     <div style="text-align:right">${ptsHtml}</div></div>`;
 }
-function gameCard(g){
+function gameCard(g, open){
   const rb = dayLabel(g.date), played = !!g.actual;
   let rightTag;
   if(played){
@@ -1344,8 +1359,8 @@ function gameCard(g){
   }
   const {played:pl, liveScore, scored, rows} = gamePred(g);
   const list = rows.map(r=>predRowHtml(r, pl, liveScore)).join("");
-  return `<div class="gcard ${g.live?'gcard--live':''}${g.dbl?' gcard--dbl':''}" data-game="${g.id}">
-    <button class="gcard__btn" aria-expanded="false">
+  return `<div class="gcard ${g.live?'gcard--live':''}${g.dbl?' gcard--dbl':''}${open?' open':''}" data-game="${g.id}">
+    <button class="gcard__btn" aria-expanded="${open?'true':'false'}">
       <span class="gnum">${String(g.id).padStart(2,"0")}</span>
       <span class="ginfo"><span class="stage">${g.stage} · MD${mdOf(g.id)}${g.dbl?' · <b class="x2tag">✦ ×2 POINTS ✦</b>':''}</span><span class="teams">${flag(g.m[0])} ${g.home} vs ${flag(g.m[1])} ${g.away}</span><span class="date">${fmtDate(g.date)} · ${g.time} ET</span>${g.venue?`<span class="gloc"><svg class="pin" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C8.1 2 5 5.1 5 9c0 4.7 6.2 12.3 6.5 12.6a.7.7 0 0 0 1 0C12.8 21.3 19 13.7 19 9c0-3.9-3.1-7-7-7Zm0 9.6A2.6 2.6 0 1 1 12 6.4a2.6 2.6 0 0 1 0 5.2Z"/></svg>${g.venue}</span>`:""}</span>
       <span class="gright">${rightTag}</span><span class="chev">▶</span>
@@ -1413,31 +1428,46 @@ function renderGames(){
   const live = GAMES.filter(isLive).sort((a,b)=> kickoff(a)-kickoff(b));
   const finished = GAMES.filter(g=> !!g.actual);
   const upcoming = GAMES.filter(g=> !g.actual && !isLive(g)).sort((a,b)=> kickoff(a)-kickoff(b));
-  let spotGames = [], restUpcoming = upcoming;
-  if(live.length){ spotGames = live; restUpcoming = upcoming; }
-  else if(upcoming.length){ spotGames = [upcoming[0]]; restUpcoming = upcoming.slice(1); }
-  let html = "";
+
+  // Spotlight (lives on the Standings tab): the one game that matters right now.
+  let spotGames = [];
+  if(live.length) spotGames = live;
+  else if(upcoming.length) spotGames = [upcoming[0]];
   const spotEl = document.getElementById("spotlight");
   if(spotEl) spotEl.innerHTML = spotGames.map(spotCard).join("");
-  if(restUpcoming.length){
-    const nx = restUpcoming[0];
-    html += drawer("up", "Upcoming", restUpcoming.length, `tap to ${upcomingOpen?'hide':'show'} · next ${fmtDate(nx.date)} ${nx.time} ET`, upcomingOpen, restUpcoming.map(gameCard).join(""));
+
+  // Matches tab: every card collapsed. Completed folds up top; live + upcoming are open lists.
+  const gamesEl = document.getElementById("games");
+  if(gamesEl){
+    const sec = (title, count, sub, cards, collapsible, collapsed, key) =>
+      `<div class="msec${collapsible?' msec--collapsible':''}${collapsible&&collapsed?' msec--collapsed':''}"${collapsible?` data-msec="${key}"`:''}>
+        <div class="msec__h${collapsible?' msec__h--btn':''}"${collapsible?` role="button" tabindex="0" aria-expanded="${collapsed?'false':'true'}"`:''}>${collapsible?'<span class="mchev">▶</span>':''}<b>${title}</b><span class="pcount">${count}</span><span class="msec__sub">${sub}</span></div>
+        <div class="msec__list">${cards}</div>
+      </div>`;
+    let html = "";
+    if(finished.length){
+      html += sec("Completed", finished.length, "tap to open · latest first", finished.slice().reverse().map(g=>gameCard(g)).join(""), true, !pastMatchesOpen, "done");
+    }
+    if(live.length){
+      html += sec("Live now", live.length, "in progress", live.map(g=>gameCard(g)).join(""), false);
+    }
+    if(upcoming.length){
+      const nx = upcoming[0];
+      html += sec("Upcoming", upcoming.length, `next: ${fmtDate(nx.date)} · ${nx.time} ET`, upcoming.map(g=>gameCard(g)).join(""), false);
+    }
+    if(!html) html = `<p class="statnote">No matches yet.</p>`;
+    gamesEl.innerHTML = html;
   }
-  if(finished.length){
-    html += drawer("done", "Completed", finished.length, `tap to ${pastMatchesOpen?'hide':'show'} · latest first`, pastMatchesOpen, finished.slice().reverse().map(gameCard).join(""));
-  }
-  if(!spotGames.length && !restUpcoming.length && !finished.length) html = `<p class="statnote">No matches yet.</p>`;
-  document.getElementById("games").innerHTML = html;
+
+  // Expand/collapse an individual match card.
   document.querySelectorAll(".gcard__btn").forEach(btn=>{
     btn.addEventListener("click", ()=>{ const card=btn.closest(".gcard"); const open=card.classList.toggle("open"); btn.setAttribute("aria-expanded", open?"true":"false"); });
   });
-  document.querySelectorAll(".pasttoggle").forEach(pt=>{
-    pt.addEventListener("click", ()=>{
-      const wrap=pt.closest(".pastwrap"), open=wrap.classList.toggle("open");
-      if(wrap.dataset.drawer==="up") upcomingOpen=open; else pastMatchesOpen=open;
-      pt.setAttribute("aria-expanded", open?"true":"false");
-      const ph=pt.querySelector(".ph"); if(ph) ph.textContent = ph.textContent.replace(/tap to (?:hide|show)/, "tap to "+(open?"hide":"show"));
-    });
+  // Fold/unfold the Completed section (state persists across live refreshes).
+  document.querySelectorAll(".msec__h--btn").forEach(h=>{
+    const toggle = ()=>{ const sec=h.closest(".msec"); const collapsed=sec.classList.toggle("msec--collapsed"); h.setAttribute("aria-expanded", collapsed?"false":"true"); if(sec.dataset.msec==="done") pastMatchesOpen = !collapsed; };
+    h.addEventListener("click", toggle);
+    h.addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); toggle(); } });
   });
 }
 
