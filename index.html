@@ -109,6 +109,7 @@
   .gcard--live{box-shadow:0 0 0 1.5px var(--red), var(--shadow);}
   .ribbon--live{background:var(--red); color:#fff; display:inline-flex; align-items:center; gap:4px;}
   .fix--live{border-color:var(--red);}
+  .fix--dbl{border:3px solid transparent; background:linear-gradient(var(--paper),var(--paper)) padding-box, linear-gradient(90deg,#ff2d55,#ff7a00,#ffcc00,#34c759,#00c7be,#007aff,#af52de,#ff2d55) border-box; background-size:100% 100%, 200% 100%; background-repeat:no-repeat, repeat; animation:rbflow 4s linear infinite; box-shadow:0 3px 16px rgba(255,45,85,.30), 0 -2px 14px rgba(0,122,255,.20), var(--shadow);}
   .fix .teams{font-weight:700; font-size:15px; margin-top:9px; line-height:1.3;}
   .fix .meta{font-size:12px; color:var(--muted); margin-top:4px;}
 
@@ -135,9 +136,6 @@
   .board__row--np:hover{background:rgba(18,18,18,.03);}
   .board__row--np .np-rk{width:26px; text-align:center; color:var(--muted); font-family:"JetBrains Mono";}
   .np-cell{margin-left:auto; color:var(--muted); font-style:italic; font-size:12.5px; white-space:nowrap;}
-  /* Karlox — rainbow card like the ×2 games */
-  .board__row--rainbow{border:2.5px solid transparent; border-radius:11px; margin:7px 8px; background:linear-gradient(var(--paper),var(--paper)) padding-box, linear-gradient(100deg,#ff2d55,#ff7a00,#ffcc00,#34c759,#00c7be,#007aff,#af52de) border-box;}
-  .board__row--rainbow:hover{background:linear-gradient(#fff7f7,#fff7f7) padding-box, linear-gradient(100deg,#ff2d55,#ff7a00,#ffcc00,#34c759,#00c7be,#007aff,#af52de) border-box;}
   .rk-cell{font-family:"Russo One"; font-size:20px; color:var(--muted);}
   .rk-cell.top{color:var(--red);}
   .name-cell{font-weight:700; display:flex; align-items:center; gap:10px; min-width:0;}
@@ -219,11 +217,17 @@
   .snm{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .spk-none{color:#cfcfcf;}
   /* ×2 double-points games — rainbow treatment so they pop */
-  .x2tag{display:inline-block; background:linear-gradient(90deg,#ff2d55,#ff9500,#ffcc00,#34c759,#00c7be,#007aff,#af52de); color:#fff; font-weight:800; font-size:10px; letter-spacing:.03em; padding:1px 8px; border-radius:20px; vertical-align:middle; text-shadow:0 1px 1px rgba(0,0,0,.3); box-shadow:0 1px 3px rgba(0,0,0,.12);}
-  .gcard--dbl{border:2.5px solid transparent; background:linear-gradient(var(--paper),var(--paper)) padding-box, linear-gradient(100deg,#ff2d55,#ff7a00,#ffcc00,#34c759,#00c7be,#007aff,#af52de) border-box;}
+  /* ×2 double-points games — bold animated rainbow so they're impossible to miss */
+  @keyframes rbflow{ to{ background-position:0% 0%, -200% 0%; } }
+  @keyframes rbflow2{ to{ background-position:-200% 0%; } }
+  @keyframes x2pulse{ 0%,100%{ box-shadow:0 0 8px rgba(255,90,150,.45), 0 1px 3px rgba(0,0,0,.2);} 50%{ box-shadow:0 0 15px 2px rgba(255,90,150,.8), 0 1px 3px rgba(0,0,0,.2);} }
+  .x2tag{display:inline-block; color:#fff; font-weight:800; font-size:11px; letter-spacing:.04em; padding:2px 9px; border-radius:20px; vertical-align:middle; text-shadow:0 1px 1px rgba(0,0,0,.4);
+    background:linear-gradient(90deg,#ff2d55,#ff7a00,#ffcc00,#34c759,#00c7be,#007aff,#af52de,#ff2d55); background-size:200% 100%; background-repeat:repeat; animation:rbflow2 3.5s linear infinite, x2pulse 2s ease-in-out infinite;}
+  .gcard--dbl{border:3px solid transparent; background:linear-gradient(var(--paper),var(--paper)) padding-box, linear-gradient(90deg,#ff2d55,#ff7a00,#ffcc00,#34c759,#00c7be,#007aff,#af52de,#ff2d55) border-box; background-size:100% 100%, 200% 100%; background-repeat:no-repeat, repeat; animation:rbflow 4s linear infinite; box-shadow:0 3px 18px rgba(255,45,85,.30), 0 -2px 16px rgba(0,122,255,.22), var(--shadow);}
   .gcard--dbl .stage{font-weight:700;}
-  .spot--dbl{position:relative; overflow:hidden;}
-  .spot--dbl::before{content:""; position:absolute; left:0; right:0; top:0; height:4px; background:linear-gradient(90deg,#ff2d55,#ff7a00,#ffcc00,#34c759,#00c7be,#007aff,#af52de);}
+  .spot--dbl{position:relative; overflow:hidden; box-shadow:0 0 24px rgba(255,60,120,.40), 0 8px 28px rgba(0,122,255,.22), var(--shadow);}
+  .spot--dbl::before{content:""; position:absolute; left:0; right:0; top:0; height:6px; z-index:2; background:linear-gradient(90deg,#ff2d55,#ff7a00,#ffcc00,#34c759,#00c7be,#007aff,#af52de,#ff2d55); background-size:200% 100%; background-repeat:repeat; animation:rbflow2 3.5s linear infinite;}
+  .spot--dbl::after{content:""; position:absolute; left:0; right:0; bottom:0; height:6px; z-index:2; background:linear-gradient(90deg,#ff2d55,#ff7a00,#ffcc00,#34c759,#00c7be,#007aff,#af52de,#ff2d55); background-size:200% 100%; background-repeat:repeat; animation:rbflow2 3.5s linear infinite reverse;}
   .gcard{background:var(--paper); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow); margin-bottom:10px; overflow:hidden;}  .gcard__btn{width:100%; text-align:left; background:transparent; border:0; cursor:pointer; padding:14px 18px; display:grid; grid-template-columns:42px 1fr auto 22px; align-items:center; gap:14px;}
   .gcard__btn:hover{background:rgba(222,40,32,.05);}
   .gcard__btn:focus-visible{outline:2px solid var(--red); outline-offset:-2px;}
@@ -962,16 +966,16 @@ function renderUpNext(){
   soon.sort((a,b)=> (b.live?1:0)-(a.live?1:0) || kickoff(a)-kickoff(b));
   row.innerHTML = soon.map(g=>{
     if(g.live){
-      return `<div class="fix fix--live"><span class="ribbon ribbon--live"><span class="lvdot"></span>LIVE</span>
+      return `<div class="fix fix--live${g.dbl?' fix--dbl':''}"><span class="ribbon ribbon--live"><span class="lvdot"></span>LIVE</span>
         <div class="when">${g.stage} · ${g.live.detail||"in play"}</div>
         <div class="teams">${flag(g.m[0])} ${g.home} <span style="color:var(--muted)">vs</span> ${flag(g.m[1])} ${g.away}</div>
-        <div class="meta">live now · <b style="color:var(--red);font-family:'JetBrains Mono'">${g.live.score[0]}–${g.live.score[1]}</b></div></div>`;
+        <div class="meta">live now · <b style="color:var(--red);font-family:'JetBrains Mono'">${g.live.score[0]}–${g.live.score[1]}</b>${g.dbl?' · <span class="x2tag">×2</span>':''}</div></div>`;
     }
     const rb = dayLabel(g.date);
-    return `<div class="fix">${rb?`<span class="ribbon ${rb.cls}">${rb.txt}</span>`:""}
+    return `<div class="fix${g.dbl?' fix--dbl':''}">${rb?`<span class="ribbon ${rb.cls}">${rb.txt}</span>`:""}
       <div class="when">${g.stage} · ${g.time} ET</div>
       <div class="teams">${flag(g.m[0])} ${g.home} <span style="color:var(--muted)">vs</span> ${flag(g.m[1])} ${g.away}</div>
-      <div class="meta">${fmtDate(g.date)} · picks locked${g.dbl?' · <b style="color:var(--red)">×2</b>':''}</div></div>`;
+      <div class="meta">${fmtDate(g.date)} · picks locked${g.dbl?' · <span class="x2tag">×2</span>':''}</div></div>`;
   }).join("");
 }
 
@@ -996,7 +1000,7 @@ function renderStandings(){
       <span class="col-hide" style="text-align:center">Correct</span>
     </div>` + RANKED.map(p=>{
       const s = STATS[p], r = RANK[p];
-      return `<div class="board__row${p==="Karlox"?" board__row--rainbow":""}">
+      return `<div class="board__row">
         <div class="rk-cell ${r<=3?"top":""}">${r}</div>
         <div class="name-cell">${avatar(p)}<span>${p}${adminTag(p)}</span></div>
         <div class="tot-cell">${s.total}</div>
