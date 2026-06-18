@@ -768,11 +768,12 @@ const ALIASES = {
   "turkiye":"turkey", "korea republic":"south korea", "republic of korea":"south korea",
   "czech republic":"czechia", "usa":"united states", "united states of america":"united states",
   "cote divoire":"ivory coast", "cabo verde":"cape verde", "bosnia herzegovina":"bosnia and herzegovina",
+  "bosnia herz":"bosnia and herzegovina", "bosniaherzegovina":"bosnia and herzegovina", "bosnia":"bosnia and herzegovina",
   "congo dr":"dr congo", "ir iran":"iran",
 };
 function norm(s){
   return (s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")
-    .replace(/&/g," and ").replace(/[^a-z0-9 ]/g,"").replace(/\s+/g," ").trim();
+    .replace(/&/g," and ").replace(/[\/\-\._]/g," ").replace(/[^a-z0-9 ]/g,"").replace(/\s+/g," ").trim();
 }
 function canon(s){ const n = norm(s); return ALIASES[n] || n; }
 function pairKey(a,b){ return [canon(a),canon(b)].sort().join("|"); }
