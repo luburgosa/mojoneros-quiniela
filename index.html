@@ -366,6 +366,17 @@
 .gcw__no{font-family:"JetBrains Mono",monospace;color:var(--muted);flex:none}
 .gcw__ok{color:var(--red);font-weight:700;flex:none}
 .gcw__dot{color:#c8c8c4;flex:none}
+.gcw__cmphd{display:grid;grid-template-columns:14px minmax(0,1fr) minmax(0,1fr);gap:8px;padding:8px 11px 4px;font-size:8.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:700}
+.gcw__acthd{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.gcw__cmphd+.gcw__row{border-top:1px solid var(--line)}
+.gcw__row--cmp{display:grid;grid-template-columns:14px minmax(0,1fr) minmax(0,1fr);gap:8px}
+.gcw__row--cmp .gcw__team{min-width:0}
+.gcw__team--act{display:flex;align-items:center;gap:6px}
+.gcw__tn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gcw__tpts{flex:none;font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;color:var(--muted)}
+.gcw__row--hit .gcw__team{font-weight:600}
+.gcw__row--hit .gcw__tn{color:var(--red);font-weight:700}
+.gcw__row--hit .gcw__tpts{color:var(--red)}
 /* Horizontal scrollers (forecast rounds + scoring examples) */
 .hscroll{display:flex;gap:10px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:2px 2px 10px;scroll-snap-type:x proximity}
 .hscroll::-webkit-scrollbar{height:7px}
@@ -967,7 +978,7 @@ function groupStandingsPoints(player){
     const pts = complete ? hitPts : 0;
     if(complete) total += pts;
     if(started) projected += hitPts;                 // forecast if the current order holds
-    out[L] = {pred, actual, matched, started, complete, pts};
+    out[L] = {pred, actual, matched, started, complete, pts, teams};
   });
   return {perGroup: out, total, projected};
 }
@@ -1073,18 +1084,25 @@ function renderGroupCard(player){
     if(g.complete){ st = `Final · +${g.pts}`; stcls = "gcw__st--final"; }
     else if(g.started){ st = `Live · proj +${g.matched.filter(Boolean).length*POS_PTS}`; stcls = "gcw__st--live"; }
     else { st = "Not started"; stcls = "gcw__st--idle"; }
-    const rows = g.pred.map((k,i)=>{
-      const hit = g.matched[i];
-      const mark = g.complete ? (hit?'<span class="gcw__pt">+5</span>':'<span class="gcw__no">0</span>')
-                 : g.started ? (hit?'<span class="gcw__ok">✓</span>':'<span class="gcw__dot">·</span>')
-                 : '<span class="gcw__dot">·</span>';
-      return `<div class="gcw__row${hit&&(g.complete||g.started)?' gcw__row--hit':''}">
+    let rows;
+    if(g.started || g.complete){
+      rows = `<div class="gcw__cmphd"><span></span><span>Your pick</span><span class="gcw__acthd"><span>${g.complete?'Final':'Live now'}</span><span>Pts</span></span></div>` +
+        g.pred.map((k,i)=>{
+          const hit = g.matched[i], t = g.teams[i];
+          return `<div class="gcw__row gcw__row--cmp${hit?' gcw__row--hit':''}">
+            <span class="gcw__pos">${i+1}</span>
+            <span class="gcw__team">${k?`${flag(k)} ${teamName(k)}`:'—'}</span>
+            <span class="gcw__team gcw__team--act">${t?`<span class="gcw__tn">${flag(t.key)} ${teamName(t.key)}</span><span class="gcw__tpts">${t.pts}</span>`:'—'}</span></div>`;
+        }).join("");
+    } else {
+      rows = g.pred.map((k,i)=>`<div class="gcw__row">
         <span class="gcw__pos">${i+1}</span>
-        <span class="gcw__team">${flag(k)} ${teamName(k)}</span>${mark}</div>`;
-    }).join("");
+        <span class="gcw__team">${flag(k)} ${teamName(k)}</span>
+        <span class="gcw__dot">·</span></div>`).join("");
+    }
     return `<div class="gcw"><div class="gcw__h"><span>Group ${L}</span><span class="gcw__st ${stcls}">${st}</span></div>${rows}</div>`;
   }).join("");
-  const note = `<p class="gcnote">Each team you placed in its exact final spot is worth <b>${POS_PTS}</b> points. Points lock in when a group finishes — until then “proj” shows what you’d earn if the table stayed as it is.</p>`;
+  const note = `<p class="gcnote">Each team placed in its exact final spot is worth <b>${POS_PTS}</b> points. Once a group kicks off you’ll see your pick next to the real table — with each team’s current points — and rows turn <b style="color:var(--red)">red</b> where they match. Points lock in when the group finishes; until then “proj” is what you’d earn if the table held.</p>`;
   return `<div class="gcardwrap">
     <div class="ghead"><h3>Group standings points</h3><span class="gtotal">+${gsp.total}</span></div>
     ${note}
