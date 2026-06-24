@@ -127,8 +127,9 @@
   .leader .big u{text-decoration:none; border-bottom:4px solid var(--red); padding-bottom:2px;}
 
   .board{background:var(--paper); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); overflow:hidden;}
-  .board__head, .board__row{display:grid; grid-template-columns:40px 1fr 110px 110px; align-items:center; gap:10px; padding:12px 18px;}
-  .board__head{font-family:"JetBrains Mono"; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--line); background:rgba(18,18,18,.025);}
+  .board__head, .board__row{display:grid; grid-template-columns:40px 1fr 92px 92px 92px 100px; align-items:center; gap:10px; padding:12px 18px;}
+  .board__head{font-family:"JetBrains Mono"; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--line); background:rgba(18,18,18,.025); line-height:1.15;}
+  .board__head>span{align-self:end;}
   .board__row{border-bottom:1px solid var(--line-soft);}
   .board__row:last-child{border-bottom:0;}
   .board__row:hover{background:rgba(222,40,32,.05);}
@@ -146,6 +147,8 @@
   .board-legend i{font-style:normal; color:#bdbdbd;}
   .tot-cell{font-family:"JetBrains Mono"; font-weight:800; font-size:17px; text-align:right; color:var(--black);}
   .game-cell{font-family:"JetBrains Mono"; font-size:14px; text-align:right; color:#9a9a9a;}
+  .stage-cell{font-family:"JetBrains Mono"; font-size:14px; text-align:right; color:#7d7d7d;}
+  .stage-cell--zero{color:#cfcfcc;}
   .grp-cell{font-family:"JetBrains Mono"; font-size:14px; display:flex; align-items:baseline; justify-content:flex-end; gap:4px; white-space:nowrap;}
   .grp-cell b{color:var(--black); font-weight:700;}
   .grp-cell .proj{color:#a8a8a8; font-size:11px; font-weight:600;}
@@ -321,13 +324,14 @@
     .nav__in{flex-wrap:wrap; gap:2px; padding:0 12px;}
     .tab{flex:1 1 auto; padding:12px 8px; font-size:11px; text-align:center; white-space:nowrap;}
     .livebar{flex-wrap:wrap;} .livebar .refresh{margin-left:0;}
-    .board__head, .board__row{grid-template-columns:20px 1fr 56px 58px; gap:12px; padding:14px 16px;}
-    .board__head{font-size:9.5px; letter-spacing:.06em;}
-    .board .av{width:27px; height:27px; font-size:10px;}
-    .name-cell{gap:9px; font-size:14px;}
+    .board__head, .board__row{grid-template-columns:16px 1fr 38px 38px 42px 44px; gap:6px; padding:14px 12px;}
+    .board__head{font-size:8px; letter-spacing:.02em;}
+    .board .av{width:25px; height:25px; font-size:9px;}
+    .name-cell{gap:8px; font-size:13.5px;}
     .rk-cell{font-size:14px;}
     .tot-cell{font-size:16px;}
     .game-cell{font-size:13px;}
+    .stage-cell{font-size:12.5px;}
     .grp-cell{font-size:13.5px; gap:3px;} .grp-cell .proj{font-size:10px;}
     .board-legend{font-size:11px; padding:11px 14px;}
     .profile__top{padding:16px;}
@@ -919,9 +923,15 @@ function recompute(){
       scored++; if(pts > GAME_AVG[g.id]) beat++;
     });
     const gsp = groupStandingsPoints(p);                 // exact-position points from completed groups
-    STATS[p] = {matchPts: total, posPts: gsp.total, projPos: gsp.projected, total: total + gsp.total, exact, hits, played, beat, scored};
+    const bracketPts = 0;                                // knockout-stage points — begins when the bracket starts
+    STATS[p] = {matchPts: total, posPts: gsp.total, projPos: gsp.projected, bracketPts, total: total + gsp.total + bracketPts, exact, hits, played, beat, scored};
   });
-  RANKED = [...PLAYERS].sort((a,b)=> STATS[b].total-STATS[a].total || STATS[b].exact-STATS[a].exact || a.localeCompare(b));
+  const TIE_SINK = new Set(["Blas"]);   // these players drop to the bottom of any tie on points
+  RANKED = [...PLAYERS].sort((a,b)=>
+      STATS[b].total - STATS[a].total
+   || (TIE_SINK.has(a)?1:0) - (TIE_SINK.has(b)?1:0)
+   || STATS[b].exact - STATS[a].exact
+   || a.localeCompare(b));
   RANK = {}; RANKED.forEach((p,i)=> RANK[p]=i+1);
   if(!activePlayer) activePlayer = RANKED[0];
 }
@@ -1036,19 +1046,21 @@ function renderStandings(){
     </div>`;
   document.getElementById("board").innerHTML = `
     <div class="board-legend">
-      <span><b>Game</b> points from match scores</span>
-      <span><b>Total</b> overall — including group finishes; ranks the table</span>
+      <span><b>Group Games</b> + <b>Group Results</b> + <b>Bracket Games</b> = <b>Total</b>. Group Results only count once every match in that group has finished.</span>
     </div>
     <div class="board__head">
       <span>#</span><span>Player</span>
-      <span style="text-align:right">Game</span>
+      <span style="text-align:right">Group Games</span>
+      <span style="text-align:right">Group Results</span>
+      <span style="text-align:right">Bracket Games</span>
       <span style="text-align:right">Total</span>
     </div>` + RANKED.map(p=>{
       const s = STATS[p], r = RANK[p];
+      const sc = v => `<div class="stage-cell${v?'':' stage-cell--zero'}">${v}</div>`;
       return `<div class="board__row">
         <div class="rk-cell ${r<=3?"top":""}">${r}</div>
         <div class="name-cell">${avatar(p)}<span>${p}${adminTag(p)}</span></div>
-        <div class="game-cell">${s.matchPts}</div>
+        ${sc(s.matchPts)}${sc(s.posPts)}${sc(s.bracketPts)}
         <div class="tot-cell">${s.total}</div>
       </div>`;
     }).join("") + NON_PARTICIPANTS.map(p=>`
