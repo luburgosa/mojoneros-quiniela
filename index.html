@@ -109,7 +109,7 @@
   .gcard--live{box-shadow:0 0 0 1.5px var(--red), var(--shadow);}
   .ribbon--live{background:var(--red); color:#fff; display:inline-flex; align-items:center; gap:4px;}
   .fix--live{border-color:var(--red);}
-  .fix--dbl{border:3px solid transparent; background:linear-gradient(var(--paper),var(--paper)) padding-box, linear-gradient(90deg,#ff2d55,#ff7a00,#ffcc00,#34c759,#00c7be,#007aff,#af52de,#ff2d55) border-box; background-size:100% 100%, 200% 100%; background-repeat:no-repeat, repeat; animation:rbflow 4s linear infinite; box-shadow:0 3px 16px rgba(255,45,85,.30), 0 -2px 14px rgba(0,122,255,.20), var(--shadow);}
+  .fix--dbl{border:2px solid transparent; background:linear-gradient(var(--paper),var(--paper)) padding-box, linear-gradient(110deg,#c9971f,#e9c25a,#fff4cf,#e6b422,#c9971f) border-box; background-size:100% 100%, 220% 100%; background-repeat:no-repeat, no-repeat; animation:goldsheen 6s linear infinite; box-shadow:0 2px 13px rgba(201,151,30,.24), var(--shadow);}
   .fix .teams{font-weight:700; font-size:15px; margin-top:9px; line-height:1.3;}
   .fix .meta{font-size:12px; color:var(--muted); margin-top:4px;}
 
@@ -216,6 +216,9 @@
   .msec--collapsed .msec__list{display:none;}
   .msec--collapsed .msec__h{margin-bottom:0;}
   /* Spotlight hero — the current/next game */
+  .spot-multi{display:flex; align-items:center; gap:8px; font-family:"JetBrains Mono"; font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:2px 2px 11px;}
+  .spot-multi__dot{width:7px; height:7px; border-radius:50%; background:var(--muted); flex:none;}
+  .spot-multi__dot.is-live{background:var(--red); animation:pulse 1.4s ease-in-out infinite;}
   .spot{border-radius:16px; padding:15px 15px 9px; margin-bottom:14px; color:#fff; box-shadow:var(--shadow);}
   .spot--live{background:linear-gradient(165deg,#1c1c1c,#000); border:1.5px solid var(--red);}
   .spot--next{background:linear-gradient(165deg,#202020,#0b0b0b);}
@@ -242,18 +245,14 @@
   .srow .av{width:22px; height:22px; font-size:9px;}
   .snm{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .spk-none{color:#cfcfcf;}
-  /* ×2 double-points games — rainbow treatment so they pop */
-  /* ×2 double-points games — bold animated rainbow so they're impossible to miss */
-  @keyframes rbflow{ to{ background-position:0% 0%, -200% 0%; } }
-  @keyframes rbflow2{ to{ background-position:-200% 0%; } }
-  @keyframes x2pulse{ 0%,100%{ box-shadow:0 0 8px rgba(255,90,150,.45), 0 1px 3px rgba(0,0,0,.2);} 50%{ box-shadow:0 0 15px 2px rgba(255,90,150,.8), 0 1px 3px rgba(0,0,0,.2);} }
-  .x2tag{display:inline-block; color:#fff; font-weight:800; font-size:11px; letter-spacing:.04em; padding:2px 9px; border-radius:20px; vertical-align:middle; text-shadow:0 1px 1px rgba(0,0,0,.4);
-    background:linear-gradient(90deg,#ff2d55,#ff7a00,#ffcc00,#34c759,#00c7be,#007aff,#af52de,#ff2d55); background-size:200% 100%; background-repeat:repeat; animation:rbflow2 3.5s linear infinite, x2pulse 2s ease-in-out infinite;}
-  .gcard--dbl{border:3px solid transparent; background:linear-gradient(var(--paper),var(--paper)) padding-box, linear-gradient(90deg,#ff2d55,#ff7a00,#ffcc00,#34c759,#00c7be,#007aff,#af52de,#ff2d55) border-box; background-size:100% 100%, 200% 100%; background-repeat:no-repeat, repeat; animation:rbflow 4s linear infinite; box-shadow:0 3px 18px rgba(255,45,85,.30), 0 -2px 16px rgba(0,122,255,.22), var(--shadow);}
+  /* ×2 double-points games — premium gold treatment with a single slow shimmer */
+  @keyframes goldsheen{ to{ background-position:-220% 0%; } }
+  .x2tag{display:inline-block; color:#3f2d00; font-weight:800; font-size:11px; letter-spacing:.04em; padding:2px 10px; border-radius:20px; vertical-align:middle;
+    background:linear-gradient(135deg,#fbe9a8,#e9c25a 42%,#caa12f); border:1px solid rgba(150,110,20,.5); box-shadow:0 1px 2px rgba(120,85,10,.25), inset 0 1px 0 rgba(255,255,255,.6);}
+  .gcard--dbl{border:2px solid transparent; background:linear-gradient(var(--paper),var(--paper)) padding-box, linear-gradient(110deg,#c9971f,#e9c25a,#fff4cf,#e6b422,#c9971f) border-box; background-size:100% 100%, 220% 100%; background-repeat:no-repeat, no-repeat; animation:goldsheen 6s linear infinite; box-shadow:0 2px 14px rgba(201,151,30,.26), var(--shadow);}
   .gcard--dbl .stage{font-weight:700;}
-  .spot--dbl{position:relative; overflow:hidden; box-shadow:0 0 24px rgba(255,60,120,.40), 0 8px 28px rgba(0,122,255,.22), var(--shadow);}
-  .spot--dbl::before{content:""; position:absolute; left:0; right:0; top:0; height:6px; z-index:2; background:linear-gradient(90deg,#ff2d55,#ff7a00,#ffcc00,#34c759,#00c7be,#007aff,#af52de,#ff2d55); background-size:200% 100%; background-repeat:repeat; animation:rbflow2 3.5s linear infinite;}
-  .spot--dbl::after{content:""; position:absolute; left:0; right:0; bottom:0; height:6px; z-index:2; background:linear-gradient(90deg,#ff2d55,#ff7a00,#ffcc00,#34c759,#00c7be,#007aff,#af52de,#ff2d55); background-size:200% 100%; background-repeat:repeat; animation:rbflow2 3.5s linear infinite reverse;}
+  .spot--dbl{position:relative; overflow:hidden; border:1px solid rgba(233,194,90,.45); box-shadow:0 0 22px rgba(233,194,90,.28), var(--shadow);}
+  .spot--dbl::before{content:""; position:absolute; left:0; right:0; top:0; height:3px; z-index:2; background:linear-gradient(90deg,#c9971f,#fff4cf,#e6b422,#fff4cf,#c9971f); background-size:220% 100%; animation:goldsheen 6s linear infinite;}
   .gcard{background:var(--paper); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow); margin-bottom:10px; overflow:hidden;}  .gcard__btn{width:100%; text-align:left; background:transparent; border:0; cursor:pointer; padding:14px 18px; display:grid; grid-template-columns:42px 1fr auto 22px; align-items:center; gap:14px;}
   .gcard__btn:hover{background:rgba(222,40,32,.05);}
   .gcard__btn:focus-visible{outline:2px solid var(--red); outline-offset:-2px;}
@@ -1326,7 +1325,7 @@ function renderProfile(){
         const ptsCls = exact?"pts pts--exact":pts===0?"pts pts--zero":"pts";
         return `<div class="presrow">
           <div class="presrow__top">
-            <div class="match"><div class="stage">${g.stage} · MD${mdOf(g.id)} · ${fmtDate(g.date)}${g.dbl?' · <b style="color:var(--red)">×2</b>':''}</div><div class="vs">${flag(g.m[0])} ${g.home} vs ${flag(g.m[1])} ${g.away}</div></div>
+            <div class="match"><div class="stage">${g.stage} · MD${mdOf(g.id)} · ${fmtDate(g.date)}${g.dbl?' · <b class="x2tag">×2</b>':''}</div><div class="vs">${flag(g.m[0])} ${g.home} vs ${flag(g.m[1])} ${g.away}</div></div>
             <span class="${ptsCls}">${pts} pt${pts===1?"":"s"}</span>
           </div>
           <div class="presrow__sub">
@@ -1459,12 +1458,22 @@ function renderGames(){
   const finished = GAMES.filter(g=> !!g.actual);
   const upcoming = GAMES.filter(g=> !g.actual && !isLive(g)).sort((a,b)=> kickoff(a)-kickoff(b));
 
-  // Spotlight (lives on the Standings tab): the one game that matters right now.
+  // Spotlight (Standings tab): show every game live right now. If none are live, show every
+  // game tied for the next kickoff, so simultaneous games (e.g. the final round) appear together.
   let spotGames = [];
-  if(live.length) spotGames = live;
-  else if(upcoming.length) spotGames = [upcoming[0]];
+  if(live.length){
+    spotGames = live;
+  } else if(upcoming.length){
+    const soonest = +kickoff(upcoming[0]);
+    spotGames = upcoming.filter(g=> +kickoff(g) === soonest);
+  }
   const spotEl = document.getElementById("spotlight");
-  if(spotEl) spotEl.innerHTML = spotGames.map(spotCard).join("");
+  if(spotEl){
+    const multi = spotGames.length > 1
+      ? `<div class="spot-multi"><span class="spot-multi__dot${live.length?' is-live':''}"></span>${live.length ? spotGames.length+' games live right now' : spotGames.length+' games kicking off together'}</div>`
+      : "";
+    spotEl.innerHTML = multi + spotGames.map(spotCard).join("");
+  }
 
   // Matches tab: every card collapsed. Completed folds up top; live + upcoming are open lists.
   const gamesEl = document.getElementById("games");
