@@ -903,6 +903,45 @@ function pointsFor(pred, actual, g){
 }
 function isExact(pred, actual){ return tierOf(pred, actual)==="exact"; }
 
+/* ===== KNOCKOUT (BRACKET) RESULTS — fill in as the bracket plays out =====
+   Each round lists the matches that ACTUALLY happened: [teamA, teamB, [scoreA, scoreB]].
+   Team order / home-away don't matter — scoring checks both orderings. Use the same English
+   team keys as the predictions (e.g. "united states", "bosnia and herzegovina").
+   Left empty during the group stage, so Bracket Games stays 0 until results are added here
+   (or the live feed fills them once the bracket begins). */
+const KO_RESULTS = {
+  r32:   [],   // Round of 32
+  r16:   [],   // Round of 16
+  qf:    [],   // Quarter-finals
+  sf:    [],   // Semi-finals
+  third: [],   // Third-place match
+  final: []    // Final
+};
+const KO_ROUNDS = ["r32","r16","qf","sf","third","final"];
+
+/* Bracket Games points (knockout match scorelines), matched by PAIRING, not bracket slot.
+   For each knockout match a player predicted, if those two exact teams actually met IN THAT ROUND
+   (either home/away order), the predicted scoreline is graded against the real result with the usual
+   1 / 4 / 9 (result / +difference / +exact). If those two teams never met that round, it scores
+   nothing — there is no real match to compare the scoreline against. */
+function bracketPoints(player){
+  const fc = FC[player]; if(!fc) return 0;
+  let total = 0;
+  KO_ROUNDS.forEach(round=>{
+    const preds = fc[round] || [], results = KO_RESULTS[round] || [];
+    preds.forEach(pr=>{
+      const a = pr[0], b = pr[1], score = pr[2];
+      if(!score) return;
+      const real = results.find(r => pairKey(r[0], r[1]) === pairKey(a, b)); // same two teams, this round
+      if(!real) return;                                                       // pairing never happened → 0
+      const pred = canon(real[0]) === canon(a) ? [score[0], score[1]] : [score[1], score[0]]; // orient to real home/away
+      total += pointsFor(pred, real[2], null);                                // knockout games are never doubled
+    });
+  });
+  return total;
+}
+
+
 let GAME_AVG = {}, STATS = {}, RANKED = [], RANK = {}, activePlayer = null;
 function recompute(){
   GAME_AVG = {};
@@ -922,7 +961,7 @@ function recompute(){
       scored++; if(pts > GAME_AVG[g.id]) beat++;
     });
     const gsp = groupStandingsPoints(p);                 // exact-position points from completed groups
-    const bracketPts = 0;                                // knockout-stage points — begins when the bracket starts
+    const bracketPts = bracketPoints(p);                 // knockout match scorelines, matched by pairing
     STATS[p] = {matchPts: total, posPts: gsp.total, projPos: gsp.projected, bracketPts, total: total + gsp.total + bracketPts, exact, hits, played, beat, scored};
   });
   const TIE_SINK = new Set(["Blas"]);   // these players drop to the bottom of any tie on points
@@ -1186,12 +1225,12 @@ function renderScoring(){
       exCard("Deep run", [["Reaches R32","+3"],["Reaches R16","+3"],["Reaches QF","+3"],["Reaches SF","+3"],["Reaches Final","+3"]], "+15", "One team you sent to the final, e.g. Luis' Spain", true),
       exCard("Out in the QF", [["R32","+3"],["R16","+3"],["QF","+3"],["SF","—"]], "+9", "Stops earning once it loses"),
     ]);
-  const koMatch = scRow("Knockout match — 1 / 4 / 9 by slot",
-    "Same 1 / 4 / 9 as the group stage, scored by bracket slot: your predicted scoreline is compared to the real result of that slot — even if the teams that reach it aren't the ones you picked.",
+  const koMatch = scRow("Bracket games — 1 / 4 / 9 by the matchup",
+    "Same 1 / 4 / 9 as the group stage, but scored by the pairing you picked — not the bracket slot. If the two teams you matched up actually meet in that round (either order), your scoreline is graded against the real result. Put the wrong teams in a fixture and it scores nothing: there's no real match to compare your scoreline to.",
     [
-      exCard("Matchup & score right", [["Slot","1A · 3CEFHI"],["Your pick","2 – 0"],["Real","2 – 0"]], "+9", "Plus the +3s for those teams advancing"),
-      exCard("Teams differ, score right", [["Your tie","Mexico 2–0"],["Real tie","Mexico 2–0 vs other"],["Slot scoreline","matches"]], "+9", "Option A: the slot's scoreline still scores"),
-      exCard("Right outcome only", [["Your pick","3 – 1"],["Real","1 – 0"]], "+1", "Winner right, margin wrong"),
+      exCard("Pairing & score exact", [["Your tie","🇪🇸 2 – 1 🇫🇷"],["Real tie","🇪🇸 2 – 1 🇫🇷"]], "+9", "Right two teams, exact score"),
+      exCard("Pairing right, result only", [["Your tie","🇪🇸 3 – 1 🇫🇷"],["Real tie","🇪🇸 1 – 0 🇫🇷"]], "+1", "Same two teams, winner right"),
+      exCard("Those teams never met", [["Your tie","🇪🇸 vs 🇫🇷"],["Reality","they didn't meet"]], "0", "No real match → no points"),
     ]);
   const finals = scRow("Podium, awards & penalties",
     "These come from your Champion / Runner-up / Third picks, your top-scorer and best-player picks, and a deduction for teams you sent to rounds they've already crashed out of. Point values still to be set.",
