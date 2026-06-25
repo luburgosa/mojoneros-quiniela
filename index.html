@@ -334,7 +334,7 @@
     .grp-cell{font-size:13.5px; gap:3px;} .grp-cell .proj{font-size:10px;}
     .board-legend{font-size:11px; padding:11px 14px;}
     .profile__top{padding:16px;}
-    .gcardwrap, .kowrap{padding:14px 16px 0;}
+    .gcardwrap, .kowrap, .ledger{padding:14px 16px 0;}
     .preswrap{padding:14px 16px 16px;}
     .kpis{margin-left:0; width:100%; justify-content:space-between; gap:8px;}
     .profile__top > div:not(.kpis){min-width:0;}
@@ -400,6 +400,58 @@
 .tie__row--w{color:var(--red)}
 .tie__row--w b{color:var(--red)}
 .tie__pens{font-size:10px;color:var(--muted);margin-top:5px;font-style:italic}
+.tie--nailed{border-color:#d8b24a;box-shadow:0 0 0 1px rgba(216,178,74,.45)}
+.tie--missed{opacity:.6}
+.tie__out{margin-top:7px;padding-top:7px;border-top:1px solid var(--line);font-family:"JetBrains Mono",monospace;font-size:10.5px;font-weight:800;letter-spacing:.02em}
+.tie__out--nailed{color:#8a6d12}
+.tie__out--missed{color:var(--muted)}
+.tie--live{border-color:var(--red);box-shadow:0 0 0 1px rgba(222,40,32,.32)}
+.tie__out--live{color:var(--red);display:flex;align-items:center;gap:5px}
+.tie__out--live .lvdot{width:6px;height:6px}
+/* knockout standings spotlight: who's in line vs already at 0 */
+.koS__none{background:#fff;color:var(--black);border-radius:11px;padding:11px 13px;font-size:12.5px;line-height:1.45}
+.koS__none b{color:var(--red)}
+.koS__zero{padding:10px 3px 3px}
+.koS__ztag{display:flex;align-items:center;gap:5px;font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:5px}
+.koS__ztag::before{content:"";width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.4)}
+.koS__znames{font-size:12.5px;color:rgba(255,255,255,.85);line-height:1.55}
+/* bracket pick-by-pick row tags */
+.kbm__tag{font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:800;white-space:nowrap;display:inline-flex;align-items:center;gap:5px}
+.kbm__tag--ok{color:#8a6d12}
+.kbm__tag--miss{color:var(--muted)}
+.kbm__tag--live{color:var(--red)}
+.kbm__tag--live .lvdot{width:6px;height:6px}
+.kbm__note{margin-left:8px;font-size:11px;color:var(--muted)}
+.gcard--ko .gnum{font-family:"JetBrains Mono",monospace;font-size:13px;font-weight:800;color:#fff;background:var(--black);border-radius:7px;padding:5px 0;text-align:center;letter-spacing:.04em}
+.stamp--ok{color:#8a6d12;background:rgba(216,178,74,.18);border:1px solid rgba(216,178,74,.55);border-radius:20px;padding:1px 7px}
+.koG__none{padding:10px 2px;color:var(--muted);font-size:12.5px}
+.koG__miss{margin-top:8px;padding-top:8px;border-top:1px solid var(--line-soft);color:var(--muted);font-size:12px}
+/* points ledger (player profile) — every total traced to its sources */
+.ledger{padding:16px 20px 0}
+.lstage{border:1px solid var(--line);border-radius:12px;background:#fff;padding:11px 13px;margin-top:8px}
+.lstage--ko{border-color:#e0c069}
+.lstage__h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:8px;margin-bottom:2px;border-bottom:1px solid var(--line)}
+.lstage__k{font-family:"JetBrains Mono",monospace;font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.lstage--ko .lstage__k{color:#8a6d12}
+.lstage__sub{font-family:"Russo One";font-size:19px;line-height:1}
+.lrow{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:1px 10px;padding:8px 0 7px;border-top:1px dashed var(--line)}
+.lstage__h+.lrow{border-top:0}
+.lrow__l{font-size:13.5px;font-weight:700}
+.lrow__n{font-family:"JetBrains Mono",monospace;font-weight:800;font-size:14px;text-align:right}
+.lrow__note{grid-column:1 / -1;font-size:11px;color:var(--muted);line-height:1.35;margin-top:1px}
+.ledger__note{margin:10px 0 0;font-size:11.5px;color:var(--muted);line-height:1.45}
+.ledger__note b{color:var(--black)}
+/* scoring stage banners + callouts */
+.scstage{margin:20px 20px 0;display:flex;flex-direction:column;gap:3px;padding:11px 14px;border-radius:12px;background:var(--black);color:#fff}
+.scstage b{font-family:"Russo One";font-size:14px;letter-spacing:.03em}
+.scstage span{font-size:12px;color:rgba(255,255,255,.82);line-height:1.4}
+.scstage--ko{border-bottom:3px solid #e9c25a}
+.scdiff{margin:12px 20px 0;padding:12px 14px;border:1px solid var(--line);border-left:4px solid var(--red);border-radius:10px;background:#fff;font-size:13px;line-height:1.5}
+.scdiff b{color:var(--red)}
+.scfinal{margin:14px 20px 0;padding:11px 14px;border-radius:10px;background:rgba(18,18,18,.03);border:1px dashed var(--line);font-size:12.5px;color:var(--muted);line-height:1.5}
+.scfinal b{color:var(--black)}
+/* standings: a thin rule splits group-stage columns | bracket | total */
+.board__head .col-div, .board__row .col-div{border-left:1px solid var(--line)}
 .postag{display:inline-block;margin-left:5px;font-family:"JetBrains Mono",monospace;font-size:9.5px;font-weight:700;color:var(--muted);background:#efefec;border-radius:4px;padding:0 4px;vertical-align:1px}
 /* Podium + awards chips */
 .pod,.aw{flex:0 0 auto;min-width:150px;border:1px solid var(--line);border-radius:12px;background:#fff;padding:10px 12px;scroll-snap-align:start}
@@ -904,11 +956,13 @@ function pointsFor(pred, actual, g){
 function isExact(pred, actual){ return tierOf(pred, actual)==="exact"; }
 
 /* ===== KNOCKOUT (BRACKET) RESULTS — fill in as the bracket plays out =====
-   Each round lists the matches that ACTUALLY happened: [teamA, teamB, [scoreA, scoreB]].
-   Team order / home-away don't matter — scoring checks both orderings. Use the same English
-   team keys as the predictions (e.g. "united states", "bosnia and herzegovina").
-   Left empty during the group stage, so Bracket Games stays 0 until results are added here
-   (or the live feed fills them once the bracket begins). */
+   Each round lists its matches: [teamA, teamB, [scoreA, scoreB]]. Team order / home-away don't
+   matter — scoring checks both. Use the same English keys as the predictions (e.g. "united states").
+   Optional 4th element flags a game for the Standings spotlight WITHOUT locking points yet:
+     ["spain","france",[1,0],"live"]   → live now (score updates; shown as projected "~" points)
+     ["spain","france",null,"next"]    → up next (matchup known, no score yet — shows who's in line / at 0)
+   Only entries with NO status (final results) lock into Bracket Games / the Total. Left empty during
+   the group stage. */
 const KO_RESULTS = {
   r32:   [],   // Round of 32
   r16:   [],   // Round of 16
@@ -918,6 +972,33 @@ const KO_RESULTS = {
   final: []    // Final
 };
 const KO_ROUNDS = ["r32","r16","qf","sf","third","final"];
+const KO_LABELS = {r32:"Round of 32", r16:"Round of 16", qf:"Quarter‑finals", sf:"Semi‑finals", third:"Third‑place match", final:"Final"};
+const KO_SIZES  = {r32:16, r16:8, qf:4, sf:2, third:1, final:1};   // matches per round, used to know when a round is fully played
+const koStatus  = e => e[3] || "final";
+
+/* For one predicted knockout pick: did that pairing happen this round, and for how many points?
+   "nailed" = the two teams met and the game is FINAL (points locked);
+   "live"   = that pairing is being played now (projected points from the live score);
+   "inplay" = that pairing is set but hasn't kicked off / has no score yet;
+   "missed" = those two teams won't meet that round; "pending" = their match isn't in yet. */
+function koOutcome(round, hk, ak, score){
+  const results = KO_RESULTS[round] || [];
+  if(!results.length) return {state:"pending"};
+  const e = results.find(r => pairKey(r[0], r[1]) === pairKey(hk, ak));
+  if(e){
+    const st = koStatus(e);
+    if(!e[2]) return {state:"inplay", status:st};                                   // matchup set, no score yet
+    const pred = canon(e[0])===canon(hk) ? [score[0],score[1]] : [score[1],score[0]];
+    const realShown = canon(e[0])===canon(hk) ? [e[2][0],e[2][1]] : [e[2][1],e[2][0]];
+    const pts = pointsFor(pred, e[2], null), tier = tierOf(pred, e[2]);
+    return {state: st==="final" ? "nailed" : "live", pts, tier, real: realShown};
+  }
+  const finalCount = results.filter(r => koStatus(r)==="final").length;
+  if(finalCount >= (KO_SIZES[round]||Infinity)) return {state:"missed", pts:0};      // round fully played, pairing never came up
+  const played = new Set(); results.forEach(r=>{ played.add(canon(r[0])); played.add(canon(r[1])); });
+  if(played.has(canon(hk)) && played.has(canon(ak))) return {state:"missed", pts:0}; // both already in this round — but not vs each other
+  return {state:"pending"};                                                          // their match isn't in yet
+}
 
 /* Bracket Games points (knockout match scorelines), matched by PAIRING, not bracket slot.
    For each knockout match a player predicted, if those two exact teams actually met IN THAT ROUND
@@ -932,8 +1013,8 @@ function bracketPoints(player){
     preds.forEach(pr=>{
       const a = pr[0], b = pr[1], score = pr[2];
       if(!score) return;
-      const real = results.find(r => pairKey(r[0], r[1]) === pairKey(a, b)); // same two teams, this round
-      if(!real) return;                                                       // pairing never happened → 0
+      const real = results.find(r => pairKey(r[0], r[1]) === pairKey(a, b) && koStatus(r)==="final" && r[2]); // FINAL games only lock
+      if(!real) return;                                                       // pairing not final/played yet → 0 for now
       const pred = canon(real[0]) === canon(a) ? [score[0], score[1]] : [score[1], score[0]]; // orient to real home/away
       total += pointsFor(pred, real[2], null);                                // knockout games are never doubled
     });
@@ -1084,22 +1165,23 @@ function renderStandings(){
     </div>`;
   document.getElementById("board").innerHTML = `
     <div class="board-legend">
-      <span><b>Group Games</b> + <b>Group Results</b> + <b>Bracket Games</b> = <b>Total</b>. Group Results only count once every match in that group has finished.</span>
+      <span><b>Group stage</b> = Group Games <i>(scorelines)</i> + Group Results <i>(exact final positions, +5 — lock when the group ends)</i>.</span>
+      <span><b>Bracket</b> = Bracket Games <i>(knockout scorelines, only if you nailed the matchup)</i>. The three add up to <b>Total</b>.</span>
     </div>
     <div class="board__head">
       <span>#</span><span>Player</span>
       <span style="text-align:right">Group Games</span>
       <span style="text-align:right">Group Results</span>
-      <span style="text-align:right">Bracket Games</span>
-      <span style="text-align:right">Total</span>
+      <span class="col-div" style="text-align:right">Bracket Games</span>
+      <span class="col-div" style="text-align:right">Total</span>
     </div>` + RANKED.map(p=>{
       const s = STATS[p], r = RANK[p];
-      const sc = v => `<div class="stage-cell${v?'':' stage-cell--zero'}">${v}</div>`;
+      const sc = (v,extra="") => `<div class="stage-cell${v?'':' stage-cell--zero'}${extra?' '+extra:''}">${v}</div>`;
       return `<div class="board__row">
         <div class="rk-cell ${r<=3?"top":""}">${r}</div>
         <div class="name-cell">${avatar(p)}<span>${p}${adminTag(p)}</span></div>
-        ${sc(s.matchPts)}${sc(s.posPts)}${sc(s.bracketPts)}
-        <div class="tot-cell">${s.total}</div>
+        ${sc(s.matchPts)}${sc(s.posPts)}${sc(s.bracketPts,"col-div")}
+        <div class="tot-cell col-div">${s.total}</div>
       </div>`;
     }).join("") + NON_PARTICIPANTS.map(p=>`
       <div class="board__row board__row--np">
@@ -1159,18 +1241,36 @@ function renderGroupCard(player){
     <div class="gcwgrid">${tiles}</div></div>`;
 }
 /* ---------- Knockout forecast (per player) ---------- */
-function tieCard(hk, ak, score, label, player){
+function tieCard(hk, ak, score, label, player, round){
   const draw = score[0]===score[1], hw = score[0]>score[1];
   const ht = posTag(player, hk), at = posTag(player, ak);
-  return `<div class="tie">
+  const o = round ? koOutcome(round, hk, ak, score) : {state:"pending"};
+  let cls = "", out = "";
+  if(o.state==="nailed"){
+    cls = " tie--nailed";
+    const exact = o.tier==="exact";
+    out = `<div class="tie__out tie__out--nailed">✓ Matchup nailed · +${o.pts}${exact?"":` · real ${o.real[0]}–${o.real[1]}`}</div>`;
+  } else if(o.state==="live"){
+    cls = " tie--live";
+    const exact = o.tier==="exact";
+    out = `<div class="tie__out tie__out--live"><span class="lvdot"></span> Matchup live · ~${o.pts}${exact?"":` · now ${o.real[0]}–${o.real[1]}`}</div>`;
+  } else if(o.state==="inplay"){
+    cls = " tie--live";
+    out = `<div class="tie__out tie__out--live"><span class="lvdot"></span> Matchup set · in play</div>`;
+  } else if(o.state==="missed"){
+    cls = " tie--missed";
+    out = `<div class="tie__out tie__out--missed">✕ These two didn’t meet · 0</div>`;
+  }
+  return `<div class="tie${cls}">
     ${label?`<div class="tie__slot">${label}</div>`:``}
     <div class="tie__row${!draw&&hw?' tie__row--w':''}"><span class="tie__t">${flag(hk)} ${teamName(hk)}${ht?`<span class="postag">${ht}</span>`:``}</span><b>${score[0]}</b></div>
     <div class="tie__row${!draw&&!hw?' tie__row--w':''}"><span class="tie__t">${flag(ak)} ${teamName(ak)}${at?`<span class="postag">${at}</span>`:``}</span><b>${score[1]}</b></div>
     ${draw?`<div class="tie__pens">decided on penalties</div>`:``}
+    ${out}
   </div>`;
 }
-function koRound(title, ties, slots, player){
-  const cards = ties.map((t,i)=> tieCard(t[0], t[1], t[2], slots?`${R32_SLOTS[i][0]} · ${R32_SLOTS[i][1]}`:"", player)).join("");
+function koRound(title, ties, slots, player, round){
+  const cards = ties.map((t,i)=> tieCard(t[0], t[1], t[2], slots?`${R32_SLOTS[i][0]} · ${R32_SLOTS[i][1]}`:"", player, round)).join("");
   return `<div class="ko__round"><div class="ko__rtitle">${title} <span class="ko__n">${ties.length}</span></div><div class="hscroll">${cards}</div></div>`;
 }
 function renderKnockoutForecast(player){
@@ -1182,13 +1282,13 @@ function renderKnockoutForecast(player){
   const awards = `<div class="hscroll">${fc.awards.map((a,i)=>`<div class="aw"><span>${awLab[i]}</span><b>${a||"—"}</b><i>${awSub[i]}</i></div>`).join("")}</div>`;
   return `<div class="kowrap">
     <div class="ghead"><h3>Knockout forecast</h3><span class="gtotal gtotal--ghost">${player}</span></div>
-    <p class="gcnote">Round‑of‑32 cards show the group finishes that feed each slot — e.g. <b>1A · 3CEFHI</b> means winner of Group A vs a third‑placed team. The small tag on each team (e.g. <b>1H</b>, <b>3C</b>) is where ${player} has that team finishing its group. Later rounds show ${player}’s own predicted matchups. Swipe each round sideways.</p>
-    ${koRound("Round of 32", fc.r32, true, player)}
-    ${koRound("Round of 16", fc.r16, false, player)}
-    ${koRound("Quarter‑finals", fc.qf, false, player)}
-    ${koRound("Semi‑finals", fc.sf, false, player)}
-    ${koRound("Third‑place match", fc.third, false, player)}
-    ${koRound("Final", fc.final, false, player)}
+    <p class="gcnote">Round‑of‑32 cards show the group finishes that feed each slot — e.g. <b>1A · 3CEFHI</b> means winner of Group A vs a third‑placed team. The small tag on each team (e.g. <b>1H</b>, <b>3C</b>) is where ${player} has that team finishing its group. Later rounds show ${player}’s own predicted matchups. Once a round is played, each card shows whether ${player} <b>nailed the matchup</b> — the two teams actually meeting — and the points that pick earned. Swipe each round sideways.</p>
+    ${koRound("Round of 32", fc.r32, true, player, "r32")}
+    ${koRound("Round of 16", fc.r16, false, player, "r16")}
+    ${koRound("Quarter‑finals", fc.qf, false, player, "qf")}
+    ${koRound("Semi‑finals", fc.sf, false, player, "sf")}
+    ${koRound("Third‑place match", fc.third, false, player, "third")}
+    ${koRound("Final", fc.final, false, player, "final")}
     <div class="ko__round"><div class="ko__rtitle">Podium</div>${podium}</div>
     <div class="ko__round"><div class="ko__rtitle">Top scorers & best players</div>${awards}</div>
   </div>`;
@@ -1203,8 +1303,8 @@ function scRow(title, sub, cards){
 }
 function renderScoring(){
   const el = document.getElementById("scoring"); if(!el) return;
-  const groupMatch = scRow("Group match — 1 / 4 / 9",
-    "Cumulative: the right 1X2 result is 1, also nailing the goal difference makes it 4, the exact score makes it 9. A few matches count double.",
+  const groupMatch = scRow("Group Games — 1 / 4 / 9",
+    "Cumulative: the right 1X2 result is 1, also nailing the goal difference makes it 4, the exact score makes it 9. A few group matches count double.",
     [
       exCard("Exact score", [["Your pick","2 – 1"],["Final","2 – 1"]], "+9", "Result + difference + exact"),
       exCard("Right difference", [["Your pick","3 – 2"],["Final","2 – 1"]], "+4", "Right winner & margin, wrong score"),
@@ -1212,34 +1312,25 @@ function renderScoring(){
       exCard("Wrong result", [["Your pick","1 – 2"],["Final","2 – 1"]], "0", "Wrong winner / draw"),
       exCard("Double match · exact", [["Your pick","2 – 1"],["Final","2 – 1"],["×2",""]], "+18", "9 doubled on a ×2 match", true),
     ]);
-  const positions = scRow("Group finishes — 5 per exact spot",
-    "When a group ends, every team you placed in its exact final position (1st/2nd/3rd/4th) is worth 5. All four right = 20.",
+  const positions = scRow("Group Results — 5 per exact finish",
+    "When a group ends, every team you placed in its exact final position (1st/2nd/3rd/4th) is worth 5. All four right = 20. Nothing locks in until the whole group is done.",
     [
       exCard("Two spots right", [["1st","🇲🇽 ✓"],["2nd","🇰🇷 ✗"],["3rd","🇨🇿 ✗"],["4th","🇿🇦 ✓"]], "+10", "Like Luis & Flaco in Group A"),
       exCard("Perfect group", [["1st","✓"],["2nd","✓"],["3rd","✓"],["4th","✓"]], "+20", "All four exact"),
       exCard("One off", [["3rd","✓ only"],["others","✗"]], "+5", "One place off scores nothing"),
     ]);
-  const advance = scRow("Reaching a round — +3 each, and it stacks",
-    "+3 for every team you predicted to reach a round that actually gets there — at the R32, R16, QF, SF and Final. Position in the bracket doesn't matter, only that the team arrived.",
-    [
-      exCard("Deep run", [["Reaches R32","+3"],["Reaches R16","+3"],["Reaches QF","+3"],["Reaches SF","+3"],["Reaches Final","+3"]], "+15", "One team you sent to the final, e.g. Luis' Spain", true),
-      exCard("Out in the QF", [["R32","+3"],["R16","+3"],["QF","+3"],["SF","—"]], "+9", "Stops earning once it loses"),
-    ]);
-  const koMatch = scRow("Bracket games — 1 / 4 / 9 by the matchup",
+  const koMatch = scRow("Bracket Games — 1 / 4 / 9 by the matchup",
     "Same 1 / 4 / 9 as the group stage, but scored by the pairing you picked — not the bracket slot. If the two teams you matched up actually meet in that round (either order), your scoreline is graded against the real result. Put the wrong teams in a fixture and it scores nothing: there's no real match to compare your scoreline to.",
     [
       exCard("Pairing & score exact", [["Your tie","🇪🇸 2 – 1 🇫🇷"],["Real tie","🇪🇸 2 – 1 🇫🇷"]], "+9", "Right two teams, exact score"),
       exCard("Pairing right, result only", [["Your tie","🇪🇸 3 – 1 🇫🇷"],["Real tie","🇪🇸 1 – 0 🇫🇷"]], "+1", "Same two teams, winner right"),
       exCard("Those teams never met", [["Your tie","🇪🇸 vs 🇫🇷"],["Reality","they didn't meet"]], "0", "No real match → no points"),
     ]);
-  const finals = scRow("Podium, awards & penalties",
-    "These come from your Champion / Runner-up / Third picks, your top-scorer and best-player picks, and a deduction for teams you sent to rounds they've already crashed out of. Point values still to be set.",
-    [
-      exCard("Podium", [["🥇 Champion","value TBD"],["🥈 Runner-up","value TBD"],["🥉 Third","value TBD"]], "—", "You'll set these"),
-      exCard("Awards", [["Golden Boot","value TBD"],["Golden Ball","value TBD"]], "—", "Set manually once announced"),
-      exCard("Penalty", [["Team already out","−?"]], "−", "Deduction — amount TBD"),
-    ]);
-  el.innerHTML = groupMatch + positions + advance + koMatch + finals;
+  const stageG = `<div class="scstage scstage--group"><b>Group stage</b><span>The fixtures are fixed — you only predict scores, plus how each group finishes.</span></div>`;
+  const stageK = `<div class="scstage scstage--ko"><b>Bracket stage</b><span>Now you also pick who plays whom. A scoreline only counts if that pairing actually happens.</span></div>`;
+  const diff = `<div class="scdiff"><b>The one big difference.</b> In the groups the matchups are set, so your scoreline is always graded. In the bracket you choose the matchups too — so a perfect 3–0 on a tie that never happens is worth <b>0</b>. Get the two teams right (either order) and your 1 / 4 / 9 is graded against the real result; get the teams wrong and there's nothing to grade.</div>`;
+  const forecast = `<div class="scfinal"><b>Forecast extras — no points.</b> Your podium (champion, runner‑up, third), Golden Boot and best‑player picks, and how far each team goes are all shown in your profile for bragging rights, but they don't change your score. Every point in the table comes from the three above: Group Games, Group Results and Bracket Games.</div>`;
+  el.innerHTML = stageG + groupMatch + positions + stageK + diff + koMatch + forecast;
 }
 /* ---------- Pool stats ---------- */
 function computeStats(){
@@ -1346,6 +1437,50 @@ function renderStats(){
      <div class="ko__round"><div class="ko__rtitle">Most-picked finalists</div>${barList(S.finRank)}</div>
      <div class="ko__round"><div class="ko__rtitle">Playing style</div><div class="hscroll">${style.join("")}</div></div>`;
 }
+/* Bracket points as a vertical list (mirrors "Match by match"): one row per knockout pick that
+   has a result, showing your tie, your score, the real score, and the points. */
+function renderBracketByMatch(player){
+  const fc = FC[player]; if(!fc) return "";
+  let total = 0, rowsHtml = "";
+  KO_ROUNDS.forEach(round=>{
+    (fc[round]||[]).forEach(pick=>{
+      const hk = pick[0], ak = pick[1], score = pick[2];
+      const o = koOutcome(round, hk, ak, score);
+      if(o.state==="pending") return;                    // round / this match not in yet — skip
+      const matchup = `${flag(hk)} ${teamName(hk)} vs ${flag(ak)} ${teamName(ak)}`;
+      let badge, tag, boxes;
+      if(o.state==="nailed"){
+        total += o.pts;
+        const exact = o.tier==="exact";
+        badge = `<span class="${exact?'pts pts--exact':o.pts===0?'pts pts--zero':'pts'}">${o.pts} pt${o.pts===1?'':'s'}</span>`;
+        tag   = `<span class="kbm__tag kbm__tag--ok">✓ nailed${exact?' · exact':''}</span>`;
+        boxes = `<span class="tag">Pick</span>${sb(score,"pred",exact)}<span class="tag" style="margin-left:8px">Real</span>${sb(o.real,"actual",false)}`;
+      } else if(o.state==="live"){
+        const exact = o.tier==="exact";
+        badge = `<span class="pts pts--est">~${o.pts}</span>`;
+        tag   = `<span class="kbm__tag kbm__tag--live"><span class="lvdot"></span> live</span>`;
+        boxes = `<span class="tag">Pick</span>${sb(score,"pred",exact)}<span class="tag" style="margin-left:8px">Now</span>${sb(o.real,"live",false)}`;
+      } else if(o.state==="inplay"){
+        badge = `<span class="pts pts--zero">–</span>`;
+        tag   = `<span class="kbm__tag kbm__tag--live"><span class="lvdot"></span> in play</span>`;
+        boxes = `<span class="tag">Pick</span>${sb(score,"pred",false)}<span class="kbm__note">matchup set · awaiting result</span>`;
+      } else { // missed
+        badge = `<span class="pts pts--zero">0</span>`;
+        tag   = `<span class="kbm__tag kbm__tag--miss">✕ didn’t meet</span>`;
+        boxes = `<span class="tag">Pick</span>${sb(score,"pred",false)}<span class="kbm__note">these two didn’t meet</span>`;
+      }
+      rowsHtml += `<div class="presrow">
+        <div class="presrow__top">
+          <div class="match"><div class="stage">${KO_LABELS[round]}</div><div class="vs">${matchup}</div></div>
+          ${badge}
+        </div>
+        <div class="presrow__sub"><span class="boxes">${boxes}</span>${tag}</div>
+      </div>`;
+    });
+  });
+  if(!rowsHtml) return "";
+  return `<div class="preswrap"><div class="ghead"><h3>Bracket — pick by pick</h3><span class="gtotal gtotal--ghost">${total} pts</span></div><div class="preslist">${rowsHtml}</div></div>`;
+}
 function renderProfile(){
   const p = activePlayer, s = STATS[p];
   const acc = s.scored ? Math.round(s.hits/s.scored*100) : 0;
@@ -1374,6 +1509,20 @@ function renderProfile(){
         </div>`;
       }).join("") + `</div></div>`;
   }
+  const ledger = `
+    <div class="ledger">
+      <div class="ghead"><h3>Where your points come from</h3><span class="gtotal">${s.total}</span></div>
+      <div class="lstage lstage--group">
+        <div class="lstage__h"><span class="lstage__k">Group stage</span><span class="lstage__sub">${s.matchPts + s.posPts}</span></div>
+        <div class="lrow"><span class="lrow__l">Group games</span><span class="lrow__n">${s.matchPts}</span><span class="lrow__note">match scorelines · 1 / 4 / 9 (a few count ×2)</span></div>
+        <div class="lrow"><span class="lrow__l">Group results</span><span class="lrow__n">${s.posPts}</span><span class="lrow__note">teams in their exact final position · +5 each, locks once the group ends</span></div>
+      </div>
+      <div class="lstage lstage--ko">
+        <div class="lstage__h"><span class="lstage__k">Bracket</span><span class="lstage__sub">${s.bracketPts}</span></div>
+        <div class="lrow"><span class="lrow__l">Bracket games</span><span class="lrow__n">${s.bracketPts}</span><span class="lrow__note">knockout scorelines · same 1 / 4 / 9, but only if your matchup actually meets</span></div>
+      </div>
+      <p class="ledger__note">Same 1 / 4 / 9 in both stages — the difference is that a bracket scoreline scores <b>nothing</b> unless the two teams you paired up truly meet that round. Everything below traces these numbers: the group table, your knockout forecast, then match by match.</p>
+    </div>`;
   document.getElementById("profile").innerHTML = `
     <div class="profile">
       <div class="profile__top">
@@ -1385,7 +1534,7 @@ function renderProfile(){
           <div class="kpi"><b>${acc}%</b><span>Correct</span></div>
           <div class="kpi"><b>${s.beat}/${s.scored}</b><span>Beat avg</span></div>
         </div>
-      </div>${renderGroupCard(p)}${renderKnockoutForecast(p)}${body}
+      </div>${ledger}${renderGroupCard(p)}${renderKnockoutForecast(p)}${renderBracketByMatch(p)}${body}
     </div>`;
 }
 
@@ -1437,6 +1586,83 @@ function gameCard(g, open){
       <div class="glist__head"><span>Predictions ${scored?'· best first':''}</span><span>Pick</span><span>${liveScore?'Est. pts':'Pts'}</span></div>
       <div class="glist">${list}</div>
     </div></div></div>`;
+}
+/* A knockout match in the Matches tab: the real pairing + score, and who nailed that combination. */
+function koGameCard(round, real, open){
+  const hk = real[0], ak = real[1], rs = real[2], status = koStatus(real);
+  const live = status==="live", pend = !rs, draw = rs && rs[0]===rs[1];
+  const nailers = PLAYERS.map(p=>{
+    const fc = FC[p]; if(!fc) return null;
+    const pick = (fc[round]||[]).find(t => pairKey(t[0],t[1])===pairKey(hk,ak));
+    if(!pick) return null;
+    const pred = canon(pick[0])===canon(hk) ? [pick[2][0],pick[2][1]] : [pick[2][1],pick[2][0]]; // orient to real home/away
+    return {p, pred, pts: rs?pointsFor(pred, rs, null):null, exact: rs?isExact(pred, rs):false};
+  }).filter(Boolean).sort((a,b)=> (b.pts||0)-(a.pts||0) || a.p.localeCompare(b.p));
+  const miss = PLAYERS.length - nailers.length;
+  const id = `${round}-${canon(hk)}-${canon(ak)}`.replace(/[^a-z0-9-]+/g,"-");
+  const ptsCell = r => pend ? '<span class="pts pts--zero">–</span>'
+    : `<span class="${r.exact?'pts pts--exact':r.pts===0?'pts pts--zero':live?'pts pts--est':'pts'}">${live?'~':''}${r.pts}</span>`;
+  const rows = nailers.length
+    ? nailers.map(r=>`<div class="glist__row">
+        <div class="who">${avatar(r.p)}<span>${r.p}${adminTag(r.p)}</span> <span class="stamp stamp--ok">✓ nailed</span>${(!pend&&r.exact)?' <span class="stamp">★ exact</span>':''}</div>
+        <div style="text-align:right">${sb(r.pred,"pred",r.exact)}</div>
+        <div style="text-align:right">${ptsCell(r)}</div></div>`).join("")
+    : `<div class="koG__none">No one predicted this matchup.</div>`;
+  const rightTag = pend
+    ? `<span class="gtag">matchup set</span>`
+    : (live ? `<span class="live-wrap">${sb(rs,"live",false)}<span class="livepill"><span class="lvdot"></span>LIVE</span></span>` : sb(rs,"actual",false));
+  const subline = `${nailers.length} of ${PLAYERS.length} nailed the matchup${pend?' · awaiting result':live?' · live now':''}${draw?' · decided on penalties':''}`;
+  return `<div class="gcard gcard--ko${live?' gcard--live':''}${open?' open':''}" data-koid="${id}">
+    <button class="gcard__btn" aria-expanded="${open?'true':'false'}">
+      <span class="gnum">KO</span>
+      <span class="ginfo"><span class="stage">${KO_LABELS[round]}</span><span class="teams">${flag(hk)} ${teamName(hk)} vs ${flag(ak)} ${teamName(ak)}</span><span class="date">${subline}</span></span>
+      <span class="gright">${rightTag}</span><span class="chev">▶</span>
+    </button>
+    <div class="gbody"><div class="gbody__in">
+      <div class="glist__head"><span>Nailed the matchup${(nailers.length&&!pend)?' · best first':''}</span><span>Pick</span><span>${live?'Est.':'Pts'}</span></div>
+      <div class="glist">${rows}</div>
+      ${miss?`<div class="koG__miss">${miss} ${miss===1?'player':'players'} picked a different matchup → 0 here</div>`:""}
+    </div></div></div>`;
+}
+/* The Standings spotlight card for a knockout game: who's in line for points vs who's already at 0. */
+function koSpotCard(round, real){
+  const hk = real[0], ak = real[1], rs = real[2], status = koStatus(real);
+  const live = status==="live", draw = rs && rs[0]===rs[1];
+  const inplay = PLAYERS.map(p=>{
+    const fc = FC[p]; if(!fc) return null;
+    const pick = (fc[round]||[]).find(t => pairKey(t[0],t[1])===pairKey(hk,ak));
+    if(!pick) return null;
+    const pred = canon(pick[0])===canon(hk) ? [pick[2][0],pick[2][1]] : [pick[2][1],pick[2][0]];
+    return {p, pred, pts: rs?pointsFor(pred, rs, null):null, exact: rs?isExact(pred, rs):false};
+  }).filter(Boolean).sort((a,b)=> (b.pts||0)-(a.pts||0) || a.p.localeCompare(b.p));
+  const zero = PLAYERS.filter(p => !inplay.some(r=>r.p===p));
+  const race = inplay.length
+    ? inplay.map((r,i)=>`<div class="srow${(rs&&i===0&&r.pts>0)?' srow--lead':''}">
+        <span class="srk">${rs?i+1:''}</span>${avatar(r.p)}<span class="snm">${r.p}${adminTag(r.p)}</span>
+        <span class="spk">${sb(r.pred,"pred",r.exact)}</span>
+        ${rs?`<span class="pts ${r.exact?'pts--exact':r.pts===0?'pts--zero':'pts--est'}">${live?'~':''}${r.pts}</span>`:'<span class="spk-none">–</span>'}
+      </div>`).join("")
+    : `<div class="koS__none">Nobody picked this exact matchup — it's <b>0 points for everyone</b>.</div>`;
+  const zeroLine = zero.length
+    ? `<div class="koS__zero"><span class="koS__ztag">Already at 0 — picked a different matchup (${zero.length})</span><span class="koS__znames">${zero.join(" · ")}</span></div>`
+    : "";
+  const bar = live ? `<span class="spot__live"><span class="lvdot"></span> LIVE</span>`
+    : (status==="next" ? `<span class="spot__next">UP NEXT</span>` : `<span class="spot__next">RESULT</span>`);
+  const mid = rs ? `<div class="spot__sc">${rs[0]}<i>–</i>${rs[1]}</div>` : `<div class="spot__sc">·<i>–</i>·</div>`;
+  const hd = inplay.length
+    ? `In line for points · ${inplay.length} of ${PLAYERS.length} <span>${rs?(live?'projected from the score':'final'):'matchup locked'}</span>`
+    : `In line for points <span>none</span>`;
+  return `<div class="spot ${live?'spot--live':'spot--next'}">
+    <div class="spot__bar">${bar}<span class="spot__meta">${KO_LABELS[round]}${draw?' · pens':''}</span></div>
+    <div class="spot__mid">
+      <div class="spot__side"><span class="spot__fl">${flag(hk)}</span><span class="spot__nm">${teamName(hk)}</span></div>
+      ${mid}
+      <div class="spot__side"><span class="spot__fl">${flag(ak)}</span><span class="spot__nm">${teamName(ak)}</span></div>
+    </div>
+    <div class="spot__racehd">${hd}</div>
+    <div class="spot__race">${race}</div>
+    ${zeroLine}
+  </div>`;
 }
 function countdown(g){
   const ms = kickoff(g).getTime() - Date.now();
@@ -1508,10 +1734,22 @@ function renderGames(){
   }
   const spotEl = document.getElementById("spotlight");
   if(spotEl){
+    // Bracket spotlight: any knockout game flagged live/next takes the top slot, with the
+    // "in line for points vs already at 0" split. Live ones win over up-next ones.
+    const koFocus = [];
+    KO_ROUNDS.forEach(r => (KO_RESULTS[r]||[]).forEach(e=>{ const st=koStatus(e); if(st==="live"||st==="next") koFocus.push({round:r, e, live:st==="live"}); }));
+    const koLive = koFocus.filter(x=>x.live), koShow = koLive.length ? koLive : koFocus;
+    let koHtml = "";
+    if(koShow.length){
+      const multiKo = koShow.length > 1
+        ? `<div class="spot-multi"><span class="spot-multi__dot${koLive.length?' is-live':''}"></span>${koLive.length ? koShow.length+' bracket games live now' : koShow.length+' bracket games up next'}</div>`
+        : "";
+      koHtml = multiKo + koShow.map(x=>koSpotCard(x.round, x.e)).join("");
+    }
     const multi = spotGames.length > 1
       ? `<div class="spot-multi"><span class="spot-multi__dot${live.length?' is-live':''}"></span>${live.length ? spotGames.length+' games live right now' : spotGames.length+' games kicking off together'}</div>`
       : "";
-    spotEl.innerHTML = multi + spotGames.map(spotCard).join("");
+    spotEl.innerHTML = koHtml + multi + spotGames.map(spotCard).join("");
   }
 
   // Matches tab: every card collapsed. Completed folds up top; live + upcoming are open lists.
@@ -1523,6 +1761,11 @@ function renderGames(){
         <div class="msec__list">${cards}</div>
       </div>`;
     let html = "";
+    // Knockout rounds appear once the bracket starts — one section per round that has results.
+    KO_ROUNDS.forEach(r=>{
+      const results = KO_RESULTS[r] || []; if(!results.length) return;
+      html += sec(KO_LABELS[r], results.length, "tap a game · who nailed the matchup", results.map(real=>koGameCard(r, real)).join(""), false);
+    });
     if(finished.length){
       html += sec("Completed", finished.length, "tap to open · latest first", finished.slice().reverse().map(g=>gameCard(g)).join(""), true, !pastMatchesOpen, "done");
     }
