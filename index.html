@@ -32,6 +32,7 @@
   .hero__txt{min-width:0;}
   .hero__eyebrow{display:flex; align-items:center; gap:9px; font-family:"JetBrains Mono"; font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--red); font-weight:700;}
   .hero__title{font-family:"Russo One"; font-size:clamp(20px,4.6vw,30px); letter-spacing:.01em; margin-top:7px; line-height:1;}
+  .hero__title--gold{background:linear-gradient(100deg,#c9971f,#e9c25a 40%,#fff4cf 50%,#e6b422 60%,#c9971f); background-size:220% 100%; -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent; animation:goldsheen 6s linear infinite; text-shadow:0 1px 12px rgba(201,151,30,.18);}
   .hero__sub{color:var(--muted); font-size:13px; margin-top:5px;}
   .demo{position:absolute; top:18px; right:20px; font-family:"JetBrains Mono"; font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; background:var(--black); color:#fff; padding:5px 9px; border-radius:5px;}
   .demo b{color:var(--red);}
@@ -542,7 +543,7 @@
         </svg>
         2026 World Cup Pool
       </div>
-      <div class="hero__title">The prediction league</div>
+      <div class="hero__title" id="heroTitle">The prediction league</div>
       <div class="hero__sub">Live results, standings, and match by match.</div>
     </div>
   </div>
@@ -1917,7 +1918,15 @@ function renderBracket(){
 function renderAll(){
   const openIds = [...document.querySelectorAll(".gcard.open")].map(c=>c.dataset.game);
   renderStandings(); renderPicker(); renderProfile(); renderGames(); renderGroups(); renderBracket(); renderStats();
+  updateHeader();
   openIds.forEach(id=>{ const c=document.querySelector(`.gcard[data-game="${id}"]`); if(c){ c.classList.add("open"); const b=c.querySelector(".gcard__btn"); if(b) b.setAttribute("aria-expanded","true"); } });
+}
+/* Header swaps to a gold "still last" jab while Blas sits dead bottom; back to normal otherwise. */
+function updateHeader(){
+  const el = document.getElementById("heroTitle"); if(!el) return;
+  const blasLast = RANKED[RANKED.length - 1] === "Blas";
+  el.textContent = blasLast ? "¡Bufas todavía estás último!" : "The prediction league";
+  el.classList.toggle("hero__title--gold", blasLast);
 }
 
 /* ============================================================
