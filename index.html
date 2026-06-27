@@ -511,7 +511,8 @@
 .bx2--tbd{background:#fafafa}
 .bx2--done{box-shadow:inset 0 0 0 1.5px var(--red)}
 .bx2--final{border-color:var(--red);box-shadow:0 0 0 1.5px var(--red)}
-.bx2__h{font-family:"JetBrains Mono",monospace;font-size:9px;font-weight:700;color:var(--red);letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
+.bx2__h{font-family:"JetBrains Mono",monospace;font-size:9px;font-weight:700;color:var(--red);letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.bx2__when{font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--muted);letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
 .bx2__r{display:flex;align-items:center;gap:5px;font-size:12px;padding:3px 0;white-space:nowrap;overflow:hidden}
 .bx2__r+.bx2__r{border-top:1px dashed var(--line)}
 .bx2__f{flex:none}
@@ -1835,6 +1836,19 @@ function renderGroups(){
   }).join("");
 }
 /* ===== Full knockout bracket (live projection) ===== */
+/* Knockout match dates + kick-off times (Eastern Time), by FIFA match number 73–104.
+   Source: official 2026 fixtures (round-of-16 venues cross-checked against FIFA, all times ET/EDT). */
+const KO_SCHED = {
+  73:["Jun 28","3:00 PM"], 74:["Jun 29","4:00 PM"], 75:["Jun 29","9:00 PM"], 76:["Jun 29","1:00 PM"],
+  77:["Jun 30","5:00 PM"], 78:["Jun 30","1:00 PM"], 79:["Jun 30","9:00 PM"], 80:["Jul 1","12:00 PM"],
+  81:["Jul 1","8:00 PM"], 82:["Jul 1","4:00 PM"], 83:["Jul 2","7:00 PM"], 84:["Jul 2","3:00 PM"],
+  85:["Jul 2","9:00 PM"], 86:["Jul 3","6:00 PM"], 87:["Jul 3","9:30 PM"], 88:["Jul 3","2:00 PM"],
+  89:["Jul 4","5:00 PM"], 90:["Jul 4","1:00 PM"], 91:["Jul 5","4:00 PM"], 92:["Jul 5","8:00 PM"],
+  93:["Jul 6","3:00 PM"], 94:["Jul 6","8:00 PM"], 95:["Jul 6","12:00 PM"], 96:["Jul 7","4:00 PM"],
+  97:["Jul 9","4:00 PM"], 98:["Jul 10","3:00 PM"], 99:["Jul 11","5:00 PM"], 100:["Jul 11","9:00 PM"],
+  101:["Jul 14","3:00 PM"], 102:["Jul 15","3:00 PM"], 103:["Jul 18","5:00 PM"], 104:["Jul 19","3:00 PM"],
+};
+function koWhen(no){ const s = KO_SCHED[no]; return s ? `<div class="bx2__when">${s[0]} · ${s[1]} ET</div>` : ""; }
 const BR_R32 = [
   [73,"2A","2B"],[74,"1E","3ABCDF"],[75,"1F","2C"],[76,"1C","2F"],
   [77,"1I","3CDFGH"],[78,"2E","2I"],[79,"1A","3CEFHI"],[80,"1L","3EHIJK"],
@@ -1886,12 +1900,12 @@ function brSide(s){
   return `<div class="bx2__r is-tbd"><span class="bx2__n">${s.label}</span></div>`;
 }
 function brR32Box(t){
-  return `<div class="bx2${(t.h.locked&&t.a.locked)?' bx2--done':''}"><div class="bx2__h">${t.no} · ${t.h.slot}·${t.a.slot}</div>${brSide(t.h)}${brSide(t.a)}</div>`;
+  return `<div class="bx2${(t.h.locked&&t.a.locked)?' bx2--done':''}"><div class="bx2__h">${t.no} · ${t.h.slot}·${t.a.slot}</div>${koWhen(t.no)}${brSide(t.h)}${brSide(t.a)}</div>`;
 }
 function brFutBox(no){
   const round = no===104?"🏆 Final":no>=101?"Semi-final":no>=97?"Quarter-final":"Round of 16";
   const [a,b]=BR_FEEDS[no];
-  return `<div class="bx2 bx2--tbd${no===104?' bx2--final':''}"><div class="bx2__h">${no} · ${round}</div>
+  return `<div class="bx2 bx2--tbd${no===104?' bx2--final':''}"><div class="bx2__h">${no} · ${round}</div>${koWhen(no)}
     <div class="bx2__r is-tbd"><span class="bx2__n">Winner ${a}</span></div>
     <div class="bx2__r is-tbd"><span class="bx2__n">Winner ${b}</span></div></div>`;
 }
@@ -1905,7 +1919,7 @@ function renderBracket(){
   const S=bracketState();
   const byNo={}; S.r32.forEach(t=>byNo[t.no]=t);
   const tree = brNode(104, byNo);
-  const third = `<div class="thirdrow"><div class="thirdlbl">Third-place match</div><div class="bx2 bx2--tbd"><div class="bx2__h">103 · 3rd place</div>
+  const third = `<div class="thirdrow"><div class="thirdlbl">Third-place match</div><div class="bx2 bx2--tbd"><div class="bx2__h">103 · 3rd place</div>${koWhen(103)}
      <div class="bx2__r is-tbd"><span class="bx2__n">Loser 101</span></div>
      <div class="bx2__r is-tbd"><span class="bx2__n">Loser 102</span></div></div></div>`;
   el.innerHTML =
