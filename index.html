@@ -246,6 +246,20 @@
   .srow .av{width:22px; height:22px; font-size:9px;}
   .snm{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .spk-none{color:#cfcfcf;}
+  .spadv__h{font-family:"JetBrains Mono"; font-size:9.5px; text-transform:uppercase; letter-spacing:.07em; color:rgba(255,255,255,.5); padding:9px 2px 7px; border-top:1px solid rgba(255,255,255,.12);}
+  .spadv{display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-bottom:6px;}
+  .spadv__t{background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); border-radius:11px; padding:8px 9px; min-width:0;}
+  .spadv__t--thru{background:rgba(216,178,74,.16); border-color:rgba(216,178,74,.5);}
+  .spadv__top{display:flex; align-items:center; gap:5px; margin-bottom:5px;}
+  .spadv__fl{font-size:15px; line-height:1;}
+  .spadv__nm{font-weight:700; font-size:12px; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .spadv__st{font-family:"JetBrains Mono"; font-size:8.5px; font-weight:800; margin-left:auto; white-space:nowrap; letter-spacing:.02em;}
+  .spadv__t--thru .spadv__st{color:#f0d488;}
+  .spadv__t--outt .spadv__st{color:rgba(255,255,255,.4);}
+  .spadv__t--lean .spadv__st{color:rgba(255,255,255,.55);}
+  .spadv__names{font-size:11.5px; color:rgba(255,255,255,.85); line-height:1.5;}
+  .spadv__ct{color:rgba(255,255,255,.45); font-size:10.5px;}
+  .spadv__no{color:rgba(255,255,255,.38); font-style:italic;}
   /* ×2 double-points games — premium gold treatment with a single slow shimmer */
   @keyframes goldsheen{ to{ background-position:-220% 0%; } }
   .x2tag{display:inline-block; color:#3f2d00; font-weight:800; font-size:11px; letter-spacing:.04em; padding:2px 10px; border-radius:20px; vertical-align:middle;
@@ -278,6 +292,16 @@
   .glist__row{display:grid; grid-template-columns:1fr auto auto; gap:12px; align-items:center; padding:9px 18px; border-bottom:1px solid var(--line-soft);}
   .glist__row:last-child{border-bottom:0;}
   .glist__row .who{font-weight:700; font-size:14px; display:flex; align-items:center; gap:9px;}
+  .korow__head{display:flex; align-items:center; justify-content:space-between; padding:8px 16px; font-family:"JetBrains Mono"; font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); background:rgba(18,18,18,.025);}
+  .korow{padding:10px 16px; border-bottom:1px solid var(--line-soft);}
+  .korow:last-child{border-bottom:0;}
+  .korow__top{display:flex; align-items:center; gap:9px;}
+  .korow__top .av{width:26px; height:26px; font-size:10px; flex:none;}
+  .korow__nm{font-weight:700; font-size:14px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .korow__pts{margin-left:auto; flex:none;}
+  .korow__sub{display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:8px; padding-left:35px;}
+  .korow__sub .stamp{margin-left:0;}
+  .korow__pick{flex:none;}
 
   .empty{padding:26px 20px; text-align:center; color:var(--muted); font-size:14px;}
 
@@ -1781,10 +1805,10 @@ function koGameCard(round, real, open, when){
     return b.join(" ");
   };
   const rows = ppl.length
-    ? ppl.map(r=>`<div class="glist__row">
-        <div class="who">${avatar(r.p)}<span>${r.p}${adminTag(r.p)}</span> ${badgesFor(r)}</div>
-        <div style="text-align:right">${r.pick?sb(r.pred,"pred",r.exact):'<span style="color:var(--muted)">—</span>'}</div>
-        <div style="text-align:right">${ptsCell(r)}</div></div>`).join("")
+    ? ppl.map(r=>`<div class="korow">
+        <div class="korow__top">${avatar(r.p)}<span class="korow__nm">${r.p}${adminTag(r.p)}</span><span class="korow__pts">${ptsCell(r)}</span></div>
+        <div class="korow__sub">${badgesFor(r)}${r.pick?`<span class="korow__pick">${sb(r.pred,"pred",r.exact)}</span>`:''}</div>
+      </div>`).join("")
     : `<div class="koG__none">No one predicted this matchup or either team to advance.</div>`;
   const rightTag = pend
     ? `<span class="gtag">matchup set</span>`
@@ -1799,7 +1823,7 @@ function koGameCard(round, real, open, when){
       <span class="gright">${rightTag}</span><span class="chev">▶</span>
     </button>
     <div class="gbody"><div class="gbody__in">
-      <div class="glist__head"><span>${headLabel}</span><span>Pick</span><span>${live?'Est.':'Pts'}</span></div>
+      <div class="korow__head"><span>${headLabel}</span><span>${live?'Est. pts':'Pts'}</span></div>
       <div class="glist">${rows}</div>
       <div class="koG__rule">Bracket points = <b>+3</b> for the team that goes through &nbsp;·&nbsp; <b>1 / 4 / 9</b> for the scoreline if you also called the matchup.</div>
       ${miss?`<div class="koG__miss">${miss} ${miss===1?'player':'players'} had no stake here — different matchup, neither team going through</div>`:""}
@@ -1809,6 +1833,26 @@ function koGameCard(round, real, open, when){
 function koSpotCard(round, real, no){
   const hk = real[0], ak = real[1], rs = real[2], status = koStatus(real);
   const live = status==="live", draw = rs && rs[0]===rs[1];
+  const winner = koWinner(real);
+  const provWinner = winner || (live && rs && rs[0]!==rs[1] ? (rs[0]>rs[1]?hk:ak) : null);
+
+  // ----- who picked each team to go through (+3 each) -----
+  const backers = team => PLAYERS.filter(p => FC[p] && advancersOf(FC[p], round).has(canon(team)));
+  const statusFor = team => {
+    if(winner) return canon(team)===canon(winner) ? ["thru","✓ +3 each"] : ["outt","out"];
+    if(live && provWinner) return canon(team)===canon(provWinner) ? ["thru","ahead · ~3"] : ["outt","behind"];
+    return ["lean","+3 if through"];
+  };
+  const advTeam = team => {
+    const [cls,txt] = statusFor(team), names = backers(team);
+    return `<div class="spadv__t spadv__t--${cls}">
+      <div class="spadv__top"><span class="spadv__fl">${flag(team)}</span><span class="spadv__nm">${teamName(team)}</span><span class="spadv__st">${txt}</span></div>
+      <div class="spadv__names">${names.length?names.map(n=>n+adminTag(n)).join(" · ")+` <span class="spadv__ct">(${names.length})</span>`:'<span class="spadv__no">nobody picked them</span>'}</div>
+    </div>`;
+  };
+  const advBlock = `<div class="spadv__h">Who goes through · +3 each</div><div class="spadv">${advTeam(hk)}${advTeam(ak)}</div>`;
+
+  // ----- the scoreline you predicted (1 / 4 / 9 if your matchup meets) -----
   const inplay = PLAYERS.map(p=>{
     const fc = FC[p]; if(!fc) return null;
     const pick = (fc[round]||[]).find(t => pairKey(t[0],t[1])===pairKey(hk,ak));
@@ -1823,16 +1867,16 @@ function koSpotCard(round, real, no){
         <span class="spk">${sb(r.pred,"pred",r.exact)}</span>
         ${rs?`<span class="pts ${r.exact?'pts--exact':r.pts===0?'pts--zero':'pts--est'}">${live?'~':''}${r.pts}</span>`:'<span class="spk-none">–</span>'}
       </div>`).join("")
-    : `<div class="koS__none">Nobody picked this exact matchup — it's <b>0 points for everyone</b>.</div>`;
+    : `<div class="koS__none">Nobody picked this exact matchup — <b>no scoreline points here</b> (the +3 above still stands).</div>`;
   const zeroLine = zero.length
-    ? `<div class="koS__zero"><span class="koS__ztag">Already at 0 — picked a different matchup (${zero.length})</span><span class="koS__znames">${zero.join(" · ")}</span></div>`
+    ? `<div class="koS__zero"><span class="koS__ztag">No scoreline — picked a different matchup (${zero.length})</span><span class="koS__znames">${zero.join(" · ")}</span></div>`
     : "";
   const bar = live ? `<span class="spot__live"><span class="lvdot"></span> LIVE</span>`
     : (status==="next" ? `<span class="spot__next">UP NEXT</span>` : `<span class="spot__next">RESULT</span>`);
   const mid = rs ? `<div class="spot__sc">${rs[0]}<i>–</i>${rs[1]}</div>` : `<div class="spot__sc">·<i>–</i>·</div>`;
   const hd = inplay.length
-    ? `In line for points · ${inplay.length} of ${PLAYERS.length} <span>${rs?(live?'projected from the score':'final'):'matchup locked'}</span>`
-    : `In line for points <span>none</span>`;
+    ? `In line for the scoreline · ${inplay.length} of ${PLAYERS.length} <span>${rs?(live?'projected':'final'):'matchup locked'}</span>`
+    : `In line for the scoreline <span>none</span>`;
   return `<div class="spot ${live?'spot--live':'spot--next'}">
     <div class="spot__bar">${bar}<span class="spot__meta">${KO_LABELS[round]}${(no&&KO_SCHED[no])?` · ${KO_SCHED[no][0]} · ${KO_SCHED[no][1]} ET`:''}${draw?' · pens':''}</span></div>
     <div class="spot__mid">
@@ -1840,6 +1884,7 @@ function koSpotCard(round, real, no){
       ${mid}
       <div class="spot__side"><span class="spot__fl">${flag(ak)}</span><span class="spot__nm">${teamName(ak)}</span></div>
     </div>
+    ${advBlock}
     <div class="spot__racehd">${hd}</div>
     <div class="spot__race">${race}</div>
     ${zeroLine}
