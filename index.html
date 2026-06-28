@@ -425,8 +425,11 @@
 .kbm__note{margin-left:8px;font-size:11px;color:var(--muted)}
 .gcard--ko .gnum{font-family:"JetBrains Mono",monospace;font-size:13px;font-weight:800;color:#fff;background:var(--black);border-radius:7px;padding:5px 0;text-align:center;letter-spacing:.04em}
 .stamp--ok{color:#8a6d12;background:rgba(216,178,74,.18);border:1px solid rgba(216,178,74,.55);border-radius:20px;padding:1px 7px}
+.stamp--out{color:var(--muted);background:rgba(18,18,18,.04);border:1px solid var(--line);border-radius:20px;padding:1px 7px}
+.stamp--lean{color:#6b6b6b;background:transparent;border:1px dashed var(--line);border-radius:20px;padding:1px 7px}
 .koG__none{padding:10px 2px;color:var(--muted);font-size:12.5px}
 .koG__miss{margin-top:8px;padding-top:8px;border-top:1px solid var(--line-soft);color:var(--muted);font-size:12px}
+.koG__rule{margin-top:8px;padding:7px 9px;background:rgba(201,151,30,.08);border:1px solid rgba(201,151,30,.25);border-radius:8px;color:#7a5e12;font-size:11.5px;line-height:1.45}
 /* points ledger (player profile) — every total traced to its sources */
 .ledger{padding:16px 20px 0}
 .lstage{border:1px solid var(--line);border-radius:12px;background:#fff;padding:11px 13px;margin-top:8px}
@@ -477,6 +480,7 @@
 .presrow__top .pts{flex:none}
 .presrow .match .vs{font-size:14px;font-weight:700;margin-top:3px}
 .presrow__sub{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:9px;padding-top:9px;border-top:1px dashed var(--line);flex-wrap:wrap}
+.presrow__sub--adv{margin-top:7px;padding-top:0;border-top:none}
 .presrow__sub .delta{min-width:0;text-align:right;font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:800}
 .presrow__sub .delta.up{color:#1a7f37}.presrow__sub .delta.down{color:var(--red)}.presrow__sub .delta.eq{color:var(--muted)}
 .presrow__sub .vsavg{display:block;font-size:9px;font-weight:400;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
@@ -1020,7 +1024,7 @@ function applyLiveKO(index){
   };
   const record = (roundKey, no, aKey, bKey)=>{
     const r = look(aKey, bKey); if(!r) return;
-    KO_LIVE[roundKey].push([aKey, bKey, r.score, r.status]);
+    KO_LIVE[roundKey].push([aKey, bKey, r.score, r.status, r.win || null]);
     if(r.status==="final" && r.win){ winnerOf[no]=r.win; loserOf[no]=(r.win===aKey?bKey:aKey); }
   };
   S.r32.forEach(m=>{ if(m.h.team && m.a.team) record("r32", m.no, m.h.team.key, m.a.team.key); });
@@ -1103,6 +1107,34 @@ function bracketPoints(player){
   return total;
 }
 
+/* The team that advanced (or won the title / 3rd-place game) from one knockout result.
+   Decisive on score; on a draw, uses the recorded winner (penalty shootout) if present. */
+function koWinner(e){
+  if(!e || !e[2] || koStatus(e)!=="final") return null;
+  if(e[2][0] !== e[2][1]) return e[2][0] > e[2][1] ? e[0] : e[1];
+  return e[4] || null;
+}
+/* The teams a player carried OUT of `round` (their picked qualifier for each game of that round):
+   r32→r16, r16→qf, qf→sf, sf→final from the next round's pairings; champion/3rd from the podium. */
+function advancersOf(fc, round){
+  const next = {r32:"r16", r16:"qf", qf:"sf", sf:"final"}[round];
+  const s = new Set();
+  if(next){ (fc[next]||[]).forEach(p=>{ s.add(canon(p[0])); s.add(canon(p[1])); }); }
+  else if(round==="final" && fc.podium && fc.podium[0]) s.add(canon(fc.podium[0]));
+  else if(round==="third" && fc.podium && fc.podium[2]) s.add(canon(fc.podium[2]));
+  return s;
+}
+/* Bracket advancement points: +3 for every knockout game whose actual winner the player had going through. */
+function advancePoints(player){
+  const fc = FC[player]; if(!fc) return 0;
+  let pts = 0;
+  ["r32","r16","qf","sf","final","third"].forEach(round=>{
+    const adv = advancersOf(fc, round);
+    koResults(round).forEach(e=>{ const w = koWinner(e); if(w && adv.has(canon(w))) pts += 3; });
+  });
+  return pts;
+}
+
 
 let GAME_AVG = {}, STATS = {}, RANKED = [], RANK = {}, activePlayer = null;
 function recompute(){
@@ -1123,8 +1155,10 @@ function recompute(){
       scored++; if(pts > GAME_AVG[g.id]) beat++;
     });
     const gsp = groupStandingsPoints(p);                 // exact-position points from completed groups
-    const bracketPts = bracketPoints(p);                 // knockout match scorelines, matched by pairing
-    STATS[p] = {matchPts: total, posPts: gsp.total, projPos: gsp.projected, bracketPts, total: total + gsp.total + bracketPts, exact, hits, played, beat, scored};
+    const bracketScore = bracketPoints(p);               // knockout match scorelines, matched by pairing
+    const bracketAdv = advancePoints(p);                 // +3 per knockout game where they picked the team that advances
+    const bracketPts = bracketScore + bracketAdv;
+    STATS[p] = {matchPts: total, posPts: gsp.total, projPos: gsp.projected, bracketScore, bracketAdv, bracketPts, total: total + gsp.total + bracketPts, exact, hits, played, beat, scored};
   });
   const TIE_SINK = new Set(["Blas"]);   // these players drop to the bottom of any tie on points
   RANKED = [...PLAYERS].sort((a,b)=>
@@ -1247,7 +1281,7 @@ function renderStandings(){
   document.getElementById("board").innerHTML = `
     <div class="board-legend">
       <span><b>Group stage</b> = Group Games <i>(scorelines)</i> + Group Results <i>(exact final positions, +5 — lock when the group ends)</i>.</span>
-      <span><b>Bracket</b> = Bracket Games <i>(knockout scorelines, only if you nailed the matchup)</i>. The three add up to <b>Total</b>.</span>
+      <span><b>Bracket</b> = Bracket Games <i>(+3 per team you send through, plus 1 / 4 / 9 scorelines when you call the matchup)</i>. The three add up to <b>Total</b>.</span>
     </div>
     <div class="board__head">
       <span>#</span><span>Player</span>
@@ -1400,18 +1434,25 @@ function renderScoring(){
       exCard("Perfect group", [["1st","✓"],["2nd","✓"],["3rd","✓"],["4th","✓"]], "+20", "All four exact"),
       exCard("One off", [["3rd","✓ only"],["others","✗"]], "+5", "One place off scores nothing"),
     ]);
-  const koMatch = scRow("Bracket Games — 1 / 4 / 9 by the matchup",
-    "Same 1 / 4 / 9 as the group stage, but scored by the pairing you picked — not the bracket slot. If the two teams you matched up actually meet in that round (either order), your scoreline is graded against the real result. Put the wrong teams in a fixture and it scores nothing: there's no real match to compare your scoreline to.",
+  const koAdvance = scRow("Teams that advance — +3 each",
+    "Every knockout game sends one team through. For each game, if you had that team advancing at that stage, you get +3 — no matter the score, and even if you got the opponent wrong. It runs all the way to the champion (your podium winner) and the third‑place game.",
     [
-      exCard("Pairing & score exact", [["Your tie","🇪🇸 2 – 1 🇫🇷"],["Real tie","🇪🇸 2 – 1 🇫🇷"]], "+9", "Right two teams, exact score"),
-      exCard("Pairing right, result only", [["Your tie","🇪🇸 3 – 1 🇫🇷"],["Real tie","🇪🇸 1 – 0 🇫🇷"]], "+1", "Same two teams, winner right"),
-      exCard("Those teams never met", [["Your tie","🇪🇸 vs 🇫🇷"],["Reality","they didn't meet"]], "0", "No real match → no points"),
+      exCard("Right team through", [["You sent through","🇧🇷"],["Result","🇧🇷 advances"]], "+3", "Called the qualifier"),
+      exCard("Champion called", [["Your champion","🇪🇸"],["Final winner","🇪🇸"]], "+3", "The final's winner counts too"),
+      exCard("Wrong team", [["You sent through","🇩🇪"],["Result","🇩🇪 out"]], "0", "They didn't go through"),
+    ]);
+  const koMatch = scRow("Bracket scorelines — 1 / 4 / 9 by the matchup",
+    "On top of the +3, the score is graded by the pairing you picked — not the bracket slot. If the two teams you matched up actually meet in that round (either order), your scoreline earns the usual 1 / 4 / 9. Put the wrong teams in a fixture and the scoreline scores nothing — there's no real match to compare it to.",
+    [
+      exCard("Matchup & score exact", [["Your tie","🇪🇸 2 – 1 🇫🇷"],["Real tie","🇪🇸 2 – 1 🇫🇷"]], "+9", "On top of +3 for the winner"),
+      exCard("Matchup right, result only", [["Your tie","🇪🇸 3 – 1 🇫🇷"],["Real tie","🇪🇸 1 – 0 🇫🇷"]], "+1", "Plus +3 for the winner"),
+      exCard("Those teams never met", [["Your tie","🇪🇸 vs 🇫🇷"],["Reality","they didn't meet"]], "0", "No scoreline points"),
     ]);
   const stageG = `<div class="scstage scstage--group"><b>Group stage</b><span>The fixtures are fixed — you only predict scores, plus how each group finishes.</span></div>`;
-  const stageK = `<div class="scstage scstage--ko"><b>Bracket stage</b><span>Now you also pick who plays whom. A scoreline only counts if that pairing actually happens.</span></div>`;
-  const diff = `<div class="scdiff"><b>The one big difference.</b> In the groups the matchups are set, so your scoreline is always graded. In the bracket you choose the matchups too — so a perfect 3–0 on a tie that never happens is worth <b>0</b>. Get the two teams right (either order) and your 1 / 4 / 9 is graded against the real result; get the teams wrong and there's nothing to grade.</div>`;
-  const forecast = `<div class="scfinal"><b>Forecast extras — no points.</b> Your podium (champion, runner‑up, third), Golden Boot and best‑player picks, and how far each team goes are all shown in your profile for bragging rights, but they don't change your score. Every point in the table comes from the three above: Group Games, Group Results and Bracket Games.</div>`;
-  el.innerHTML = stageG + groupMatch + positions + stageK + diff + koMatch + forecast;
+  const stageK = `<div class="scstage scstage--ko"><b>Bracket stage</b><span>Now you also pick who advances and who plays whom — both score.</span></div>`;
+  const diff = `<div class="scdiff"><b>The one big difference.</b> In the groups the matchups are fixed, so your scoreline is always graded. In the bracket you choose the path: you bank <b>+3</b> for every team you correctly send through (right up to the champion), and you add <b>1 / 4 / 9</b> for the scoreline whenever your matchup actually happens. A perfect 3–0 on a tie that never happens still scores <b>0</b> for the score — but if that team went through, you keep the +3.</div>`;
+  const forecast = `<div class="scfinal"><b>Just for bragging.</b> Your Golden Boot and best‑player picks show in your profile but don't change your score. Everything in the table comes from Group Games, Group Results, and the Bracket — the latter being <b>+3</b> per team you send through (up to the champion) <b>plus</b> 1 / 4 / 9 for knockout scorelines when you also call the matchup.</div>`;
+  el.innerHTML = stageG + groupMatch + positions + stageK + diff + koAdvance + koMatch + forecast;
 }
 /* ---------- Pool stats ---------- */
 function computeStats(){
@@ -1523,39 +1564,69 @@ function renderStats(){
 function renderBracketByMatch(player){
   const fc = FC[player]; if(!fc) return "";
   let total = 0, rowsHtml = "";
+  // per round: actual winners, current live leaders, losers, and whether the round is complete
+  const winners = {}, leaders = {}, losers = {}, complete = {};
+  KO_ROUNDS.forEach(r=>{
+    const wset=new Set(), lset=new Set(), oset=new Set(); let fin=0;
+    koResults(r).forEach(e=>{
+      const st=koStatus(e);
+      if(st==="final"){ fin++; const w=koWinner(e); if(w){ wset.add(canon(w)); oset.add(canon(canon(e[0])===canon(w)?e[1]:e[0])); } }
+      else if(st==="live" && e[2] && e[2][0]!==e[2][1]) lset.add(canon(e[2][0]>e[2][1]?e[0]:e[1]));
+    });
+    winners[r]=wset; leaders[r]=lset; losers[r]=oset; complete[r]= fin >= (KO_SIZES[r]||Infinity);
+  });
   KO_ROUNDS.forEach(round=>{
+    const adv = advancersOf(fc, round);
     (fc[round]||[]).forEach(pick=>{
       const hk = pick[0], ak = pick[1], score = pick[2];
       const o = koOutcome(round, hk, ak, score);
-      if(o.state==="pending") return;                    // round / this match not in yet — skip
+      const myAdv = [hk,ak].find(t=> adv.has(canon(t))) || (score ? (score[0]>=score[1]?hk:ak) : hk);  // team this pick sends through
+      let advState = "wait";
+      if(winners[round].has(canon(myAdv))) advState = "won";
+      else if(leaders[round].has(canon(myAdv))) advState = "lead";
+      else if(losers[round].has(canon(myAdv)) || complete[round]) advState = "out";
+      if(o.state==="pending" && advState==="wait") return;                     // nothing in yet for this pick
+
       const matchup = `${flag(hk)} ${teamName(hk)} vs ${flag(ak)} ${teamName(ak)}`;
-      let badge, tag, boxes;
+      // ---- scoreline (the matchup you predicted) ----
+      let scorePts = 0; const exact = o.tier==="exact";
+      let scoreTag, boxes;
       if(o.state==="nailed"){
-        total += o.pts;
-        const exact = o.tier==="exact";
-        badge = `<span class="${exact?'pts pts--exact':o.pts===0?'pts pts--zero':'pts'}">${o.pts} pt${o.pts===1?'':'s'}</span>`;
-        tag   = `<span class="kbm__tag kbm__tag--ok">✓ nailed${exact?' · exact':''}</span>`;
+        scorePts = o.pts; total += o.pts;
+        scoreTag = `<span class="kbm__tag kbm__tag--ok">✓ matchup${exact?' · exact':''}</span>`;
         boxes = `<span class="tag">Pick</span>${sb(score,"pred",exact)}<span class="tag" style="margin-left:8px">Real</span>${sb(o.real,"actual",false)}`;
       } else if(o.state==="live"){
-        const exact = o.tier==="exact";
-        badge = `<span class="pts pts--est">~${o.pts}</span>`;
-        tag   = `<span class="kbm__tag kbm__tag--live"><span class="lvdot"></span> live</span>`;
+        scoreTag = `<span class="kbm__tag kbm__tag--live"><span class="lvdot"></span> matchup live</span>`;
         boxes = `<span class="tag">Pick</span>${sb(score,"pred",exact)}<span class="tag" style="margin-left:8px">Now</span>${sb(o.real,"live",false)}`;
       } else if(o.state==="inplay"){
-        badge = `<span class="pts pts--zero">–</span>`;
-        tag   = `<span class="kbm__tag kbm__tag--live"><span class="lvdot"></span> in play</span>`;
-        boxes = `<span class="tag">Pick</span>${sb(score,"pred",false)}<span class="kbm__note">matchup set · awaiting result</span>`;
-      } else { // missed
-        badge = `<span class="pts pts--zero">0</span>`;
-        tag   = `<span class="kbm__tag kbm__tag--miss">✕ didn’t meet</span>`;
+        scoreTag = `<span class="kbm__tag kbm__tag--live"><span class="lvdot"></span> matchup set</span>`;
+        boxes = `<span class="tag">Pick</span>${sb(score,"pred",false)}<span class="kbm__note">awaiting result</span>`;
+      } else if(o.state==="missed"){
+        scoreTag = `<span class="kbm__tag kbm__tag--miss">✕ matchup didn’t meet</span>`;
         boxes = `<span class="tag">Pick</span>${sb(score,"pred",false)}<span class="kbm__note">these two didn’t meet</span>`;
+      } else {
+        scoreTag = `<span class="kbm__tag kbm__tag--miss">matchup pending</span>`;
+        boxes = `<span class="tag">Pick</span>${sb(score,"pred",false)}`;
       }
+      // ---- advancement (the team you sent through) ----
+      let advPts = 0, advTag; const who = `${flag(myAdv)} ${teamName(myAdv)}`;
+      if(advState==="won"){ advPts = 3; total += 3; advTag = `<span class="kbm__tag kbm__tag--ok">✓ ${who} went through · +3</span>`; }
+      else if(advState==="lead"){ advTag = `<span class="kbm__tag kbm__tag--live"><span class="lvdot"></span> ${who} advancing · ~3</span>`; }
+      else if(advState==="out"){ advTag = `<span class="kbm__tag kbm__tag--miss">✕ ${who} didn’t go through</span>`; }
+      else { advTag = `<span class="kbm__tag">→ ${who} to advance · +3 if it does</span>`; }
+
+      const totPts = scorePts + advPts, isLive = o.state==="live" || advState==="lead";
+      const badge = (o.state==="inplay" && advState==="wait")
+        ? `<span class="pts pts--zero">–</span>`
+        : `<span class="${exact&&scorePts? 'pts pts--exact' : totPts===0 ? 'pts pts--zero' : isLive ? 'pts pts--est' : 'pts'}">${isLive?'~':''}${totPts} pt${totPts===1?'':'s'}</span>`;
+
       rowsHtml += `<div class="presrow">
         <div class="presrow__top">
           <div class="match"><div class="stage">${KO_LABELS[round]}</div><div class="vs">${matchup}</div></div>
           ${badge}
         </div>
-        <div class="presrow__sub"><span class="boxes">${boxes}</span>${tag}</div>
+        <div class="presrow__sub"><span class="boxes">${boxes}</span>${scoreTag}</div>
+        <div class="presrow__sub presrow__sub--adv"><span class="boxes"><span class="tag">Through</span>${advTag}</span></div>
       </div>`;
     });
   });
@@ -1600,7 +1671,8 @@ function renderProfile(){
       </div>
       <div class="lstage lstage--ko">
         <div class="lstage__h"><span class="lstage__k">Bracket</span><span class="lstage__sub">${s.bracketPts}</span></div>
-        <div class="lrow"><span class="lrow__l">Bracket games</span><span class="lrow__n">${s.bracketPts}</span><span class="lrow__note">knockout scorelines · same 1 / 4 / 9, but only if your matchup actually meets</span></div>
+        <div class="lrow"><span class="lrow__l">Teams that advance</span><span class="lrow__n">${s.bracketAdv}</span><span class="lrow__note">+3 for every knockout game where you picked the team that goes through</span></div>
+        <div class="lrow"><span class="lrow__l">Bracket scorelines</span><span class="lrow__n">${s.bracketScore}</span><span class="lrow__note">1 / 4 / 9 for the score, but only if your matchup actually meets</span></div>
       </div>
       <p class="ledger__note">Same 1 / 4 / 9 in both stages — the difference is that a bracket scoreline scores <b>nothing</b> unless the two teams you paired up truly meet that round. Everything below traces these numbers: the group table, your knockout forecast, then match by match.</p>
     </div>`;
@@ -1672,27 +1744,54 @@ function gameCard(g, open){
 function koGameCard(round, real, open, when){
   const hk = real[0], ak = real[1], rs = real[2], status = koStatus(real);
   const live = status==="live", pend = !rs, draw = rs && rs[0]===rs[1];
-  const nailers = PLAYERS.map(p=>{
+  const winner = koWinner(real);                                              // decided (final) winner
+  const provWinner = winner || (live && rs && rs[0]!==rs[1] ? (rs[0]>rs[1]?hk:ak) : null);  // through, or currently ahead
+  const ppl = PLAYERS.map(p=>{
     const fc = FC[p]; if(!fc) return null;
     const pick = (fc[round]||[]).find(t => pairKey(t[0],t[1])===pairKey(hk,ak));
-    if(!pick) return null;
-    const pred = canon(pick[0])===canon(hk) ? [pick[2][0],pick[2][1]] : [pick[2][1],pick[2][0]]; // orient to real home/away
-    return {p, pred, pts: rs?pointsFor(pred, rs, null):null, exact: rs?isExact(pred, rs):false};
-  }).filter(Boolean).sort((a,b)=> (b.pts||0)-(a.pts||0) || a.p.localeCompare(b.p));
-  const miss = PLAYERS.length - nailers.length;
+    const pred = pick ? (canon(pick[0])===canon(hk) ? [pick[2][0],pick[2][1]] : [pick[2][1],pick[2][0]]) : null; // orient to real home/away
+    const scorePts = (pick && rs) ? pointsFor(pred, rs, null) : null;
+    const exact = (pick && rs) ? isExact(pred, rs) : false;
+    const adv = advancersOf(fc, round);
+    const backed = adv.has(canon(hk)) ? hk : (adv.has(canon(ak)) ? ak : null);   // which of these two teams they sent through
+    if(!pick && !backed) return null;
+    const advProj = (backed && provWinner && canon(backed)===canon(provWinner)) ? 3 : 0;  // +3 if their team is through / ahead
+    return {p, pick:!!pick, pred, scorePts, exact, backed, advProj, tot:(scorePts||0)+advProj};
+  }).filter(Boolean).sort((a,b)=> b.tot-a.tot || a.p.localeCompare(b.p));
+  const nailCount = ppl.filter(r=>r.pick).length;
+  const backHk = PLAYERS.filter(p=>FC[p]&&advancersOf(FC[p],round).has(canon(hk))).length;
+  const backAk = PLAYERS.filter(p=>FC[p]&&advancersOf(FC[p],round).has(canon(ak))).length;
+  const miss = PLAYERS.length - ppl.length;
   const id = `${round}-${canon(hk)}-${canon(ak)}`.replace(/[^a-z0-9-]+/g,"-");
-  const ptsCell = r => pend ? '<span class="pts pts--zero">–</span>'
-    : `<span class="${r.exact?'pts pts--exact':r.pts===0?'pts pts--zero':live?'pts pts--est':'pts'}">${live?'~':''}${r.pts}</span>`;
-  const rows = nailers.length
-    ? nailers.map(r=>`<div class="glist__row">
-        <div class="who">${avatar(r.p)}<span>${r.p}${adminTag(r.p)}</span> <span class="stamp stamp--ok">✓ nailed</span>${(!pend&&r.exact)?' <span class="stamp">★ exact</span>':''}</div>
-        <div style="text-align:right">${sb(r.pred,"pred",r.exact)}</div>
+  const ptsCell = r => (pend && !r.advProj) ? '<span class="pts pts--zero">–</span>'
+    : `<span class="${r.tot===0?'pts pts--zero':r.exact&&r.scorePts?'pts pts--exact':live?'pts pts--est':'pts'}">${live?'~':''}${r.tot}</span>`;
+  const badgesFor = r => {
+    const b = [];
+    if(r.backed){                                                              // the team they picked to go through
+      const who = teamName(r.backed);
+      if(winner) b.push(canon(r.backed)===canon(winner) ? `<span class="stamp stamp--ok">✓ ${who} through · +3</span>` : `<span class="stamp stamp--out">✗ ${who} out</span>`);
+      else if(live) b.push(canon(r.backed)===canon(provWinner||"") ? `<span class="stamp stamp--ok">● ${who} ahead · ~3</span>` : `<span class="stamp stamp--out">○ ${who} behind</span>`);
+      else b.push(`<span class="stamp stamp--lean">→ ${who} to advance</span>`);
+    }
+    if(r.pick){                                                                // the scoreline (matchup nailed)
+      if(pend) b.push(`<span class="stamp">matchup set</span>`);
+      else if(r.scorePts>0) b.push(`<span class="stamp">${r.exact?'★ exact score':'✓ score'} · ${live?'~':'+'}${r.scorePts}</span>`);
+      else b.push(`<span class="stamp">matchup only</span>`);
+    }
+    return b.join(" ");
+  };
+  const rows = ppl.length
+    ? ppl.map(r=>`<div class="glist__row">
+        <div class="who">${avatar(r.p)}<span>${r.p}${adminTag(r.p)}</span> ${badgesFor(r)}</div>
+        <div style="text-align:right">${r.pick?sb(r.pred,"pred",r.exact):'<span style="color:var(--muted)">—</span>'}</div>
         <div style="text-align:right">${ptsCell(r)}</div></div>`).join("")
-    : `<div class="koG__none">No one predicted this matchup.</div>`;
+    : `<div class="koG__none">No one predicted this matchup or either team to advance.</div>`;
   const rightTag = pend
     ? `<span class="gtag">matchup set</span>`
     : (live ? `<span class="live-wrap">${sb(rs,"live",false)}<span class="livepill"><span class="lvdot"></span>LIVE</span></span>` : sb(rs,"actual",false));
-  const subline = `${when?when+' · ':''}${nailers.length} of ${PLAYERS.length} nailed the matchup${pend?' · awaiting result':live?' · live now':''}${draw?' · decided on penalties':''}`;
+  const advLine = ` · ${backHk} have ${teamName(hk)} through, ${backAk} have ${teamName(ak)} through`;
+  const subline = `${when?when+' · ':''}${nailCount} of ${PLAYERS.length} nailed the matchup${advLine}${pend?' · awaiting result':live?' · live now':''}${draw?' · pens':''}`;
+  const headLabel = pend ? "In line for points" : (live ? "Scoring now · best first" : "Who scored here · best first");
   return `<div class="gcard gcard--ko${live?' gcard--live':''}${open?' open':''}" data-koid="${id}">
     <button class="gcard__btn" aria-expanded="${open?'true':'false'}">
       <span class="gnum">KO</span>
@@ -1700,9 +1799,10 @@ function koGameCard(round, real, open, when){
       <span class="gright">${rightTag}</span><span class="chev">▶</span>
     </button>
     <div class="gbody"><div class="gbody__in">
-      <div class="glist__head"><span>Nailed the matchup${(nailers.length&&!pend)?' · best first':''}</span><span>Pick</span><span>${live?'Est.':'Pts'}</span></div>
+      <div class="glist__head"><span>${headLabel}</span><span>Pick</span><span>${live?'Est.':'Pts'}</span></div>
       <div class="glist">${rows}</div>
-      ${miss?`<div class="koG__miss">${miss} ${miss===1?'player':'players'} picked a different matchup → 0 here</div>`:""}
+      <div class="koG__rule">Bracket points = <b>+3</b> for the team that goes through &nbsp;·&nbsp; <b>1 / 4 / 9</b> for the scoreline if you also called the matchup.</div>
+      ${miss?`<div class="koG__miss">${miss} ${miss===1?'player':'players'} had no stake here — different matchup, neither team going through</div>`:""}
     </div></div></div>`;
 }
 /* The Standings spotlight card for a knockout game: who's in line for points vs who's already at 0. */
@@ -1977,13 +2077,41 @@ function bracketState(){
   let thirds = Object.keys(G).filter(L=>started(L) && G[L][2]).map(L=>({L, t:G[L][2]}));
   thirds.sort((a,b)=> b.t.pts-a.t.pts || (b.t.gf-b.t.gc)-(a.t.gf-a.t.gc) || b.t.gf-a.t.gf || a.L.localeCompare(b.L));
   const qualifying = thirds.slice(0,8);
-  const assigned = {}; const usedGroups = new Set();
-  BR_R32.forEach(([no,h,a])=>{ [["h",h],["a",a]].forEach(([side,lab])=>{
-    if(lab[0]!=="3") return;
-    const allow = lab.slice(1).split("");
-    const pick = qualifying.find(q=> !usedGroups.has(q.L) && allow.includes(q.L));
-    if(pick){ usedGroups.add(pick.L); assigned[no+side] = {key:pick.t.key, name:pick.t.name}; }
-  }); });
+  const qGroups = qualifying.map(q=>q.L);
+  const byGroup = {}; qualifying.forEach(q=> byGroup[q.L]=q.t);
+
+  // Slot the 8 best third-placed teams into their Round-of-32 slots. Each slot only accepts a third
+  // from a fixed set of groups (FIFA's allocation), and a naive greedy pick fails ~80% of the time
+  // even though a valid full assignment always exists — so solve it with backtracking (most-constrained
+  // slot first). Falls back to a greedy partial while the group stage is still in progress.
+  const tSlots = [];
+  BR_R32.forEach(([no,h,a])=> [["h",h],["a",a]].forEach(([side,lab])=>{
+    if(lab[0]==="3") tSlots.push({k:no+side, allow:lab.slice(1).split("").filter(g=>qGroups.includes(g))});
+  }));
+  const order = [...tSlots].sort((x,y)=> x.allow.length - y.allow.length);
+  let full = null;
+  (function(){
+    const cur = {};
+    (function bt(i, used){
+      if(full) return true;
+      if(i >= order.length){ full = {...cur}; return true; }
+      for(const g of order[i].allow){
+        if(used.has(g)) continue;
+        used.add(g); cur[order[i].k] = g;
+        if(bt(i+1, used)) return true;
+        used.delete(g); delete cur[order[i].k];
+      }
+      return false;            // this slot can't be filled with what's left → backtrack
+    })(0, new Set());
+  })();
+  const assigned = {};
+  if(full){
+    Object.keys(full).forEach(k=>{ const t=byGroup[full[k]]; assigned[k]={key:t.key, name:t.name}; });
+  } else {                     // group stage still running: best-effort greedy projection
+    const used = new Set();
+    order.forEach(s=>{ const g=s.allow.find(x=> !used.has(x)); if(g){ used.add(g); const t=byGroup[g]; if(t) assigned[s.k]={key:t.key, name:t.name}; } });
+  }
+
   function resolve(no, side, lab){
     if(lab[0]==="1" || lab[0]==="2"){
       const L=lab[1], pos=+lab[0]-1;
@@ -1993,7 +2121,7 @@ function bracketState(){
     }
     const a=assigned[no+side];
     if(!a) return {slot:lab, label:"Best 3rd ("+lab.slice(1).split("").join("/")+")", team:null, locked:false};
-    return {slot:lab, team:a, locked:false, projected:true};
+    return {slot:lab, team:a, locked:allDone, projected:!allDone};   // confirmed once every group is complete
   }
   const r32 = BR_R32.map(([no,h,a])=>({no, h:resolve(no,"h",h), a:resolve(no,"a",a)}));
   const confirmed = r32.reduce((n,t)=> n+(t.h.locked?1:0)+(t.a.locked?1:0), 0);
