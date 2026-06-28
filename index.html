@@ -655,6 +655,15 @@ const ET_OFFSET = "-04:00";               // US Eastern is EDT (UTC−4) across 
 function kickoff(g){ return new Date(`${g.date}T${g.time}:00${ET_OFFSET}`); }
 const LIVE_MS = 140*60*1000;              // a match counts as "in play" from kickoff until ~140 min after (covers the final)
 function liveWindow(g){ const k = kickoff(g).getTime(), n = Date.now(); return n >= k && n <= k + LIVE_MS; }
+const KO_MON = {Jan:"01",Feb:"02",Mar:"03",Apr:"04",May:"05",Jun:"06",Jul:"07",Aug:"08",Sep:"09",Oct:"10",Nov:"11",Dec:"12"};
+function koKickoff(no){
+  const s = KO_SCHED[no]; if(!s) return null;
+  const [mon,day] = s[0].split(" ");
+  let [t,ap] = s[1].split(" "); let [hh,mm] = t.split(":").map(Number);
+  if(ap==="PM" && hh!==12) hh+=12; if(ap==="AM" && hh===12) hh=0;
+  return new Date(`2026-${KO_MON[mon]}-${String(+day).padStart(2,"0")}T${String(hh).padStart(2,"0")}:${String(mm).padStart(2,"0")}:00-04:00`);
+}
+function koLiveWindowAny(){ return Object.keys(KO_SCHED).some(no=>{ const k=koKickoff(+no); if(!k) return false; const n=Date.now(); return n>=k.getTime() && n<=k.getTime()+LIVE_MS; }); }
 const SCORING = { exact: 5, diff: 3, sign: 1, miss: 0 };  // group stage, cumulative: result 1 + goal diff 3 + exact 5 = up to 9
 const POS_PTS = 5;   // exact final group position (1st/2nd/3rd/4th) = 5 pts each, scored when the group is complete
 const POS_PRED = {
@@ -876,7 +885,9 @@ let SCORERS = {};   // tournament goal tally (scorer name → goals), from the l
 async function fetchLive(){
   const index = {};
   const scorers = {};
-  const payloads = await Promise.all(LIVE_DATES.map(async d=>{
+  const koDates = [...new Set(Object.values(KO_SCHED).map(s=>{ const [mon,day]=s[0].split(" "); return `2026${KO_MON[mon]}${String(+day).padStart(2,"0")}`; }))];
+  const fetchDates = [...new Set([...LIVE_DATES, ...koDates])];
+  const payloads = await Promise.all(fetchDates.map(async d=>{
     try{
       const res = await fetch(`${ESPN_BASE}?dates=${d}`, {cache:"no-store"});
       return res.ok ? await res.json() : null;
@@ -897,8 +908,8 @@ async function fetchLive(){
       const completed = !!(st.type && st.type.completed);
       const detail = (st.type && st.type.shortDetail) || st.displayClock || "";
       index[pairKey(hn,an)] = {
-        home:{n:hn, s:H.score!=null?parseInt(H.score,10):null},
-        away:{n:an, s:A.score!=null?parseInt(A.score,10):null},
+        home:{n:hn, s:H.score!=null?parseInt(H.score,10):null, w:H.winner===true},
+        away:{n:an, s:A.score!=null?parseInt(A.score,10):null, w:A.winner===true},
         completed, state, detail
       };
       // Golden Boot: count goals from scoring plays (skip own goals & shootout kicks)
@@ -930,6 +941,7 @@ function applyLive(index){
       g.live = { score:[hs!=null?hs:0, as!=null?as:0], detail:f.detail };
     }
   });
+  applyLiveKO(index);   // bracket games update from the same feed
   return n;
 }
 
@@ -978,13 +990,55 @@ const KO_LABELS = {r32:"Round of 32", r16:"Round of 16", qf:"Quarter‑finals", 
 const KO_SIZES  = {r32:16, r16:8, qf:4, sf:2, third:1, final:1};   // matches per round, used to know when a round is fully played
 const koStatus  = e => e[3] || "final";
 
+/* Live knockout results pulled from the scoreboard each refresh (rebuilt every cycle, like g.live).
+   Keyed by round → list of [teamA, teamB, score|null, "live"|"final"]. */
+let KO_LIVE = {r32:[], r16:[], qf:[], sf:[], third:[], final:[]};
+/* Effective results for a round = entered results (KO_RESULTS, manual, take precedence) + the live feed. */
+function koResults(round){
+  const out = [...(KO_RESULTS[round] || [])];
+  ((KO_LIVE && KO_LIVE[round]) || []).forEach(e=>{ if(!out.some(m => pairKey(m[0],m[1])===pairKey(e[0],e[1]))) out.push(e); });
+  return out;
+}
+/* Rebuild KO_LIVE from the scoreboard index. Bracket fixtures are derived round by round:
+   R32 from the resolved groups, then each later round from the winners (and 3rd-place from the SF losers).
+   A pairing is matched to the feed by the two teams, exactly like group games. */
+function applyLiveKO(index){
+  KO_LIVE = {r32:[], r16:[], qf:[], sf:[], third:[], final:[]};
+  if(!(GAMES.length && GAMES.every(g=>g.actual)) || !index) return;   // matchups unknown until the group stage ends
+  const S = bracketState(), winnerOf = {}, loserOf = {};
+  const look = (aKey, bKey)=>{
+    const f = index[pairKey(aKey, bKey)]; if(!f) return null;
+    const homeIsA = canon(f.home.n)===canon(aKey);
+    const hs = homeIsA?f.home.s:f.away.s, as = homeIsA?f.away.s:f.home.s;
+    const aw = homeIsA?f.home.w:f.away.w, bw = homeIsA?f.away.w:f.home.w;
+    if(f.completed && hs!=null && as!=null){
+      const win = hs>as?aKey : as>hs?bKey : (aw?aKey : bw?bKey : null); // higher score, else the advancing team (penalties)
+      return {score:[hs,as], status:"final", win};
+    }
+    if(f.state==="in") return {score:[hs!=null?hs:0, as!=null?as:0], status:"live", win:null};
+    return null;
+  };
+  const record = (roundKey, no, aKey, bKey)=>{
+    const r = look(aKey, bKey); if(!r) return;
+    KO_LIVE[roundKey].push([aKey, bKey, r.score, r.status]);
+    if(r.status==="final" && r.win){ winnerOf[no]=r.win; loserOf[no]=(r.win===aKey?bKey:aKey); }
+  };
+  S.r32.forEach(m=>{ if(m.h.team && m.a.team) record("r32", m.no, m.h.team.key, m.a.team.key); });
+  [["r16","Round of 16"],["qf","Quarter-finals"],["sf","Semi-finals"],["final","Final"],["third","Third-place match"]].forEach(([rk,fk])=>{
+    (BR_FLOW[fk]||[]).forEach(([no,x,y,isThird])=>{
+      const aKey = isThird?loserOf[x]:winnerOf[x], bKey = isThird?loserOf[y]:winnerOf[y];
+      if(aKey && bKey) record(rk, no, aKey, bKey);   // both feeders decided → fixture known
+    });
+  });
+}
+
 /* For one predicted knockout pick: did that pairing happen this round, and for how many points?
    "nailed" = the two teams met and the game is FINAL (points locked);
    "live"   = that pairing is being played now (projected points from the live score);
    "inplay" = that pairing is set but hasn't kicked off / has no score yet;
    "missed" = those two teams won't meet that round; "pending" = their match isn't in yet. */
 function koOutcome(round, hk, ak, score){
-  const results = KO_RESULTS[round] || [];
+  const results = koResults(round);
   if(!results.length) return {state:"pending"};
   const e = results.find(r => pairKey(r[0], r[1]) === pairKey(hk, ak));
   if(e){
@@ -1011,7 +1065,7 @@ function bracketPoints(player){
   const fc = FC[player]; if(!fc) return 0;
   let total = 0;
   KO_ROUNDS.forEach(round=>{
-    const preds = fc[round] || [], results = KO_RESULTS[round] || [];
+    const preds = fc[round] || [], results = koResults(round);
     preds.forEach(pr=>{
       const a = pr[0], b = pr[1], score = pr[2];
       if(!score) return;
@@ -1590,7 +1644,7 @@ function gameCard(g, open){
     </div></div></div>`;
 }
 /* A knockout match in the Matches tab: the real pairing + score, and who nailed that combination. */
-function koGameCard(round, real, open){
+function koGameCard(round, real, open, when){
   const hk = real[0], ak = real[1], rs = real[2], status = koStatus(real);
   const live = status==="live", pend = !rs, draw = rs && rs[0]===rs[1];
   const nailers = PLAYERS.map(p=>{
@@ -1613,7 +1667,7 @@ function koGameCard(round, real, open){
   const rightTag = pend
     ? `<span class="gtag">matchup set</span>`
     : (live ? `<span class="live-wrap">${sb(rs,"live",false)}<span class="livepill"><span class="lvdot"></span>LIVE</span></span>` : sb(rs,"actual",false));
-  const subline = `${nailers.length} of ${PLAYERS.length} nailed the matchup${pend?' · awaiting result':live?' · live now':''}${draw?' · decided on penalties':''}`;
+  const subline = `${when?when+' · ':''}${nailers.length} of ${PLAYERS.length} nailed the matchup${pend?' · awaiting result':live?' · live now':''}${draw?' · decided on penalties':''}`;
   return `<div class="gcard gcard--ko${live?' gcard--live':''}${open?' open':''}" data-koid="${id}">
     <button class="gcard__btn" aria-expanded="${open?'true':'false'}">
       <span class="gnum">KO</span>
@@ -1739,7 +1793,7 @@ function renderGames(){
     // Bracket spotlight: any knockout game flagged live/next takes the top slot, with the
     // "in line for points vs already at 0" split. Live ones win over up-next ones.
     const koFocus = [];
-    KO_ROUNDS.forEach(r => (KO_RESULTS[r]||[]).forEach(e=>{ const st=koStatus(e); if(st==="live"||st==="next") koFocus.push({round:r, e, live:st==="live"}); }));
+    KO_ROUNDS.forEach(r => koResults(r).forEach(e=>{ const st=koStatus(e); if(st==="live"||st==="next") koFocus.push({round:r, e, live:st==="live"}); }));
     const koLive = koFocus.filter(x=>x.live), koShow = koLive.length ? koLive : koFocus;
     let koHtml = "";
     if(koShow.length){
@@ -1763,10 +1817,30 @@ function renderGames(){
         <div class="msec__list">${cards}</div>
       </div>`;
     let html = "";
-    // Knockout rounds appear once the bracket starts — one section per round that has results.
+    // Knockout rounds. R32 auto-fills from the resolved bracket the moment the group stage is
+    // mathematically complete (last group game final); later rounds appear as results are entered.
+    const stageDone = GAMES.length>0 && GAMES.every(g=>g.actual);
+    const S = stageDone ? bracketState() : null;
+    const r32no = {};
+    let r32list = [...koResults("r32")];   // entered + live feed
+    if(S){
+      S.r32.forEach(m=>{
+        if(!m.h.team || !m.a.team) return;
+        const pk = pairKey(m.h.team.key, m.a.team.key);
+        r32no[pk] = m.no;
+        if(!r32list.some(e => pairKey(e[0],e[1])===pk)) r32list.push([m.h.team.key, m.a.team.key, null, "next"]); // up-next card, no points yet
+      });
+      r32list.sort((a,b)=> (r32no[pairKey(a[0],a[1])]||99) - (r32no[pairKey(b[0],b[1])]||99));
+    }
     KO_ROUNDS.forEach(r=>{
-      const results = KO_RESULTS[r] || []; if(!results.length) return;
-      html += sec(KO_LABELS[r], results.length, "tap a game · who nailed the matchup", results.map(real=>koGameCard(r, real)).join(""), false);
+      const results = r==="r32" ? r32list : koResults(r);
+      if(!results.length) return;
+      const cards = results.map(real=>{
+        const no = r==="r32" ? r32no[pairKey(real[0],real[1])] : null;
+        const when = (no && KO_SCHED[no]) ? `${KO_SCHED[no][0]} · ${KO_SCHED[no][1]} ET` : "";
+        return koGameCard(r, real, false, when);
+      }).join("");
+      html += sec(KO_LABELS[r], results.length, "tap a game · who nailed the matchup", cards, false);
     });
     if(finished.length){
       html += sec("Completed", finished.length, "tap to open · latest first", finished.slice().reverse().map(g=>gameCard(g)).join(""), true, !pastMatchesOpen, "done");
@@ -1991,7 +2065,8 @@ renderAll();
 let LIVE_TIMER = null;
 function nextDelay(){
   const now = Date.now();
-  if(GAMES.some(g => !g.actual && liveWindow(g))) return 5*60*1000;               // a match is in play → every 5 min
+  if(GAMES.some(g => !g.actual && liveWindow(g))) return 5*60*1000;               // a group match is in play → every 5 min
+  if(koLiveWindowAny()) return 5*60*1000;                                          // a bracket match is in play → every 5 min
   const up = GAMES.filter(g => !g.actual && kickoff(g).getTime() > now).map(g => kickoff(g).getTime());
   if(up.length) return Math.min(Math.max(Math.min(...up) - now, 60*1000), 30*60*1000); // wait until next kickoff (1–30 min)
   return 30*60*1000;                                                              // nothing scheduled → light heartbeat
