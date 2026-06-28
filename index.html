@@ -1032,6 +1032,31 @@ function applyLiveKO(index){
   });
 }
 
+/* All currently-known knockout fixtures (for the standings spotlight + "next game"):
+   R32 from the resolved groups, later rounds from the winners of completed games.
+   Each carries its kickoff time and current status from koResults. */
+function bracketFixtures(){
+  if(!(GAMES.length && GAMES.every(g=>g.actual))) return [];
+  const S = bracketState(), winnerOf = {}, loserOf = {}, out = [];
+  const consider = (round, no, a, b)=>{
+    const e = koResults(round).find(x => pairKey(x[0],x[1])===pairKey(a,b));
+    const entry = e || [a, b, null, "next"];
+    out.push({round, no, a, b, entry, status: koStatus(entry), k: koKickoff(no)});
+    if(e && koStatus(e)==="final" && e[2] && e[2][0]!==e[2][1]){
+      const winKey = e[2][0] > e[2][1] ? e[0] : e[1];
+      winnerOf[no] = winKey; loserOf[no] = (canon(winKey)===canon(a) ? b : a);
+    }
+  };
+  S.r32.forEach(m=>{ if(m.h.team && m.a.team) consider("r32", m.no, m.h.team.key, m.a.team.key); });
+  [["r16","Round of 16"],["qf","Quarter-finals"],["sf","Semi-finals"],["final","Final"],["third","Third-place match"]].forEach(([rk,fk])=>{
+    (BR_FLOW[fk]||[]).forEach(([no,x,y,isThird])=>{
+      const a = isThird?loserOf[x]:winnerOf[x], b = isThird?loserOf[y]:winnerOf[y];
+      if(a && b) consider(rk, no, a, b);   // both feeders decided → fixture known
+    });
+  });
+  return out;
+}
+
 /* For one predicted knockout pick: did that pairing happen this round, and for how many points?
    "nailed" = the two teams met and the game is FINAL (points locked);
    "live"   = that pairing is being played now (projected points from the live score);
@@ -1681,7 +1706,7 @@ function koGameCard(round, real, open, when){
     </div></div></div>`;
 }
 /* The Standings spotlight card for a knockout game: who's in line for points vs who's already at 0. */
-function koSpotCard(round, real){
+function koSpotCard(round, real, no){
   const hk = real[0], ak = real[1], rs = real[2], status = koStatus(real);
   const live = status==="live", draw = rs && rs[0]===rs[1];
   const inplay = PLAYERS.map(p=>{
@@ -1709,7 +1734,7 @@ function koSpotCard(round, real){
     ? `In line for points · ${inplay.length} of ${PLAYERS.length} <span>${rs?(live?'projected from the score':'final'):'matchup locked'}</span>`
     : `In line for points <span>none</span>`;
   return `<div class="spot ${live?'spot--live':'spot--next'}">
-    <div class="spot__bar">${bar}<span class="spot__meta">${KO_LABELS[round]}${draw?' · pens':''}</span></div>
+    <div class="spot__bar">${bar}<span class="spot__meta">${KO_LABELS[round]}${(no&&KO_SCHED[no])?` · ${KO_SCHED[no][0]} · ${KO_SCHED[no][1]} ET`:''}${draw?' · pens':''}</span></div>
     <div class="spot__mid">
       <div class="spot__side"><span class="spot__fl">${flag(hk)}</span><span class="spot__nm">${teamName(hk)}</span></div>
       ${mid}
@@ -1790,17 +1815,24 @@ function renderGames(){
   }
   const spotEl = document.getElementById("spotlight");
   if(spotEl){
-    // Bracket spotlight: any knockout game flagged live/next takes the top slot, with the
-    // "in line for points vs already at 0" split. Live ones win over up-next ones.
-    const koFocus = [];
-    KO_ROUNDS.forEach(r => koResults(r).forEach(e=>{ const st=koStatus(e); if(st==="live"||st==="next") koFocus.push({round:r, e, live:st==="live"}); }));
-    const koLive = koFocus.filter(x=>x.live), koShow = koLive.length ? koLive : koFocus;
+    // Bracket spotlight: live knockout games take the top slot; otherwise the soonest upcoming
+    // bracket fixture(s) (so the standings page shows the next game once the group stage ends).
+    const fx = bracketFixtures();
+    const koLiveFx = fx.filter(f => f.status === "live");
+    let koShow = [];
+    if(koLiveFx.length){
+      koShow = koLiveFx;
+    } else {
+      const up = fx.filter(f => f.status === "next" && f.k).sort((a,b)=> a.k - b.k);
+      if(up.length){ const soonest = +up[0].k; koShow = up.filter(f => +f.k === soonest); }
+    }
     let koHtml = "";
     if(koShow.length){
+      const anyLive = koShow.some(f => f.status === "live");
       const multiKo = koShow.length > 1
-        ? `<div class="spot-multi"><span class="spot-multi__dot${koLive.length?' is-live':''}"></span>${koLive.length ? koShow.length+' bracket games live now' : koShow.length+' bracket games up next'}</div>`
+        ? `<div class="spot-multi"><span class="spot-multi__dot${anyLive?' is-live':''}"></span>${anyLive ? koShow.length+' bracket games live now' : koShow.length+' bracket games up next'}</div>`
         : "";
-      koHtml = multiKo + koShow.map(x=>koSpotCard(x.round, x.e)).join("");
+      koHtml = multiKo + koShow.map(f => koSpotCard(f.round, f.entry, f.no)).join("");
     }
     const multi = spotGames.length > 1
       ? `<div class="spot-multi"><span class="spot-multi__dot${live.length?' is-live':''}"></span>${live.length ? spotGames.length+' games live right now' : spotGames.length+' games kicking off together'}</div>`
