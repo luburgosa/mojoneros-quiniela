@@ -549,6 +549,12 @@
 .bx2__r.is-q{background:rgba(222,40,32,.06);margin:0 -9px;padding:3px 9px}
 .bx2__r.is-p .bx2__n{color:#555}
 .bx2__r.is-tbd{color:#9a9a9a;font-style:italic;font-size:11px}
+.bx2__s{font-family:"JetBrains Mono";font-weight:800;font-size:12px;margin-left:auto;padding-left:6px}
+.bx2__r.is-win{background:rgba(222,40,32,.07);margin:0 -9px;padding:3px 9px}
+.bx2__r.is-win .bx2__n{font-weight:700}
+.bx2__r.is-out{color:#9a9a9a}
+.bx2__r.is-out .bx2__s{color:#9a9a9a}
+.bx2__r.is-set .bx2__n{font-weight:600}
 /* connector lines */
 .node__kids>.node{position:relative}
 .node__kids>.node::after{content:"";position:absolute;top:50%;left:100%;width:17px;height:2px;background:var(--line)}
@@ -1070,10 +1076,8 @@ function bracketFixtures(){
     const e = koResults(round).find(x => pairKey(x[0],x[1])===pairKey(a,b));
     const entry = e || [a, b, null, "next"];
     out.push({round, no, a, b, entry, status: koStatus(entry), k: koKickoff(no)});
-    if(e && koStatus(e)==="final" && e[2] && e[2][0]!==e[2][1]){
-      const winKey = e[2][0] > e[2][1] ? e[0] : e[1];
-      winnerOf[no] = winKey; loserOf[no] = (canon(winKey)===canon(a) ? b : a);
-    }
+    const w = e ? koWinner(e) : null;                       // decisive or penalty winner
+    if(w){ winnerOf[no] = w; loserOf[no] = (canon(w)===canon(a) ? b : a); }
   };
   S.r32.forEach(m=>{ if(m.h.team && m.a.team) consider("r32", m.no, m.h.team.key, m.a.team.key); });
   [["r16","Round of 16"],["qf","Quarter-finals"],["sf","Semi-finals"],["final","Final"],["third","Third-place match"]].forEach(([rk,fk])=>{
@@ -1577,7 +1581,44 @@ function renderStats(){
       `<div class="ko__round"><div class="ko__rtitle">Golden Boot race</div><p class="statnote">Top scorers across the tournament, from the live scoreboard.</p>${scorerList(T.boot)}</div>
        <div class="ko__round"><div class="ko__rtitle">Tournament so far</div><div class="hscroll">${facts.join("")}</div></div>`;
   }
-  el.innerHTML = tourneyHtml +
+  // --- Bracket race (knockout-only stats) — appears once the bracket has games ---
+  let koStatsHtml = "";
+  const koPlayed = KO_ROUNDS.some(r => koResults(r).some(e => koStatus(e)==="final" && e[2]));
+  const fcPlayers = PLAYERS.filter(p=>FC[p]);
+  if(koPlayed && fcPlayers.length){
+    const eliminated = new Set();
+    KO_ROUNDS.forEach(r=> koResults(r).forEach(e=>{ if(koStatus(e)==="final"){ const w=koWinner(e); if(w) eliminated.add(canon(canon(e[0])===canon(w)?e[1]:e[0])); } }));
+    const alive = t => t && !eliminated.has(canon(t));
+    const r32teams = new Set(); Object.values(R32_REAL).forEach(([a,b])=>{ r32teams.add(canon(a)); r32teams.add(canon(b)); });
+    const aliveCount = [...r32teams].filter(t=>!eliminated.has(t)).length;
+    const advCount = p => Math.round((STATS[p]?.bracketAdv||0)/3);                                  // correct qualifiers (+3 each)
+    const nailCount = p => { let n=0; KO_ROUNDS.forEach(r=>{ (FC[p][r]||[]).forEach(pk=>{ if(koResults(r).some(e=>koStatus(e)==="final" && e[2] && pairKey(e[0],e[1])===pairKey(pk[0],pk[1]))) n++; }); }); return n; };
+    const byPts  = [...fcPlayers].sort((a,b)=> (STATS[b].bracketPts-STATS[a].bracketPts) || a.localeCompare(b));
+    const byAdv  = [...fcPlayers].sort((a,b)=> (advCount(b)-advCount(a)) || a.localeCompare(b));
+    const byNail = [...fcPlayers].sort((a,b)=> (nailCount(b)-nailCount(a)) || a.localeCompare(b));
+    const champAlive = fcPlayers.filter(p=> alive(FC[p].podium && FC[p].podium[0]));
+    const cards = [
+      statCard("Leading the bracket", byPts[0], STATS[byPts[0]].bracketPts+" pts", advCount(byPts[0])+" through · "+STATS[byPts[0]].bracketScore+" on scorelines"),
+      statCard("Most teams through", byAdv[0], advCount(byAdv[0])+"", "qualifiers called · +3 each"),
+      statCard("Most ties nailed", byNail[0], nailCount(byNail[0])+"", "knockout matchups hit"),
+      factCard("Champions alive", champAlive.length+" of "+fcPlayers.length, "still hold a live title pick"),
+      factCard("Teams standing", aliveCount+" of 32", "still in the tournament"),
+    ];
+    const champAliveRank = {};
+    fcPlayers.forEach(p=>{ const c=FC[p].podium && FC[p].podium[0]; if(c && alive(c)) champAliveRank[canon(c)] = (champAliveRank[canon(c)]||0)+1; });
+    const carr = Object.entries(champAliveRank).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
+    const out = fcPlayers.filter(p=> !alive(FC[p].podium && FC[p].podium[0]));
+    const bustNote = out.length
+      ? `<p class="statnote">Champion already out: ${out.map(p=>teamName(FC[p].podium[0])+" ("+p+")").join(", ")}.</p>`
+      : `<p class="statnote">Every entry still has a live champion pick.</p>`;
+    koStatsHtml =
+      `<div class="ko__round"><div class="ko__rtitle">Bracket race <span class="ko__n" style="background:#3b3b3b">knockouts</span></div>
+         <p class="statnote">Knockout points so far — +3 for each team you send through, plus 1 / 4 / 9 when you call the tie.</p>
+         <div class="hscroll">${cards.join("")}</div>
+         ${carr.length?`<div class="ko__rtitle" style="margin-top:14px">Surviving title picks</div>${barList(carr)}`:""}
+         ${bustNote}</div>`;
+  }
+  el.innerHTML = tourneyHtml + koStatsHtml +
     `<div class="ko__round"><div class="ko__rtitle">Form so far <span class="ko__n" style="background:#3b3b3b">the pool</span></div>${form}</div>
      <div class="ko__round"><div class="ko__rtitle">The crowd's champion</div><p class="statnote">Who the ${PLAYERS.length} entries picked to win it all.</p>${barList(S.champRank)}${loneTxt}</div>
      <div class="ko__round"><div class="ko__rtitle">Most-picked finalists</div>${barList(S.finRank)}</div>
@@ -1994,31 +2035,23 @@ function renderGames(){
         <div class="msec__list">${cards}</div>
       </div>`;
     let html = "";
-    // Knockout rounds. R32 auto-fills from the resolved bracket the moment the group stage is
-    // mathematically complete (last group game final); later rounds appear as results are entered.
-    const stageDone = GAMES.length>0 && GAMES.every(g=>g.actual);
-    const S = stageDone ? bracketState() : null;
-    const r32no = {};
-    let r32list = [...koResults("r32")];   // entered + live feed
-    if(S){
-      S.r32.forEach(m=>{
-        if(!m.h.team || !m.a.team) return;
-        const pk = pairKey(m.h.team.key, m.a.team.key);
-        r32no[pk] = m.no;
-        if(!r32list.some(e => pairKey(e[0],e[1])===pk)) r32list.push([m.h.team.key, m.a.team.key, null, "next"]); // up-next card, no points yet
+    // Knockout rounds. Every known tie comes from bracketFixtures(): all 16 Round-of-32 ties the
+    // moment the group stage ends, then each later-round tie as soon as BOTH its feeder games finish
+    // (so a determined Round-of-16 game shows here even before it kicks off). Each round sorted by time.
+    const fxAll = bracketFixtures();
+    if(fxAll.length){
+      const byRound = {};
+      fxAll.forEach(f=>{ (byRound[f.round] = byRound[f.round] || []).push(f); });
+      KO_ROUNDS.forEach(r=>{
+        const list = byRound[r]; if(!list || !list.length) return;
+        list.sort((a,b)=> (a.k?+a.k:8.64e15) - (b.k?+b.k:8.64e15) || (a.no||0)-(b.no||0));   // by kickoff time
+        const cards = list.map(f=>{
+          const when = (f.no && KO_SCHED[f.no]) ? `${KO_SCHED[f.no][0]} · ${KO_SCHED[f.no][1]} ET` : "";
+          return koGameCard(r, f.entry, false, when);
+        }).join("");
+        html += sec(KO_LABELS[r], list.length, "tap a game · +3 for the team through, scoreline if you nailed it", cards, false);
       });
-      r32list.sort((a,b)=> (r32no[pairKey(a[0],a[1])]||99) - (r32no[pairKey(b[0],b[1])]||99));
     }
-    KO_ROUNDS.forEach(r=>{
-      const results = r==="r32" ? r32list : koResults(r);
-      if(!results.length) return;
-      const cards = results.map(real=>{
-        const no = r==="r32" ? r32no[pairKey(real[0],real[1])] : null;
-        const when = (no && KO_SCHED[no]) ? `${KO_SCHED[no][0]} · ${KO_SCHED[no][1]} ET` : "";
-        return koGameCard(r, real, false, when);
-      }).join("");
-      html += sec(KO_LABELS[r], results.length, "tap a game · who nailed the matchup", cards, false);
-    });
     if(finished.length){
       html += sec("Completed", finished.length, "tap to open · latest first", finished.slice().reverse().map(g=>gameCard(g)).join(""), true, !pastMatchesOpen, "done");
     }
@@ -2194,29 +2227,54 @@ function brSide(s){
   if(s.team) return `<div class="bx2__r ${s.locked?'is-q':'is-p'}"><span class="bx2__f">${flag(s.team.key)}</span><span class="bx2__n">${s.team.name}</span>${s.locked?'<i class="qmark">✓</i>':'<i class="pmark">○</i>'}</div>`;
   return `<div class="bx2__r is-tbd"><span class="bx2__n">${s.label}</span></div>`;
 }
-function brR32Box(t){
-  return `<div class="bx2${(t.h.locked&&t.a.locked)?' bx2--done':''}"><div class="bx2__h">${t.no} · ${t.h.slot}·${t.a.slot}</div>${koWhen(t.no)}${brSide(t.h)}${brSide(t.a)}</div>`;
+/* Two team rows for a tie whose teams are known — highlights the winner (or current leader, live)
+   and shows the scoreline once it exists. Used for resolved future ties and played R32 ties. */
+function brRows(a, b, entry){
+  const rs = entry && entry[2], st = entry ? koStatus(entry) : "next";
+  const w = entry ? koWinner(entry) : null;
+  const leader = (!w && st==="live" && rs && rs[0]!==rs[1]) ? (rs[0]>rs[1]?a:b) : null;
+  const row = (team)=>{
+    let cls = "is-set";
+    if(w) cls = (canon(team)===canon(w)) ? "is-win" : "is-out";
+    else if(leader) cls = (canon(team)===canon(leader)) ? "is-win" : "is-out";
+    const sc = (rs && (st==="final"||st==="live")) ? `<span class="bx2__s">${canon(team)===canon(a)?rs[0]:rs[1]}</span>` : "";
+    return `<div class="bx2__r ${cls}"><span class="bx2__f">${flag(team)}</span><span class="bx2__n">${teamName(team)}</span>${sc}</div>`;
+  };
+  return row(a) + row(b);
 }
-function brFutBox(no){
+function brR32Box(t, fx){
+  const played = fx && fx.entry && koStatus(fx.entry)!=="next";       // has a score / is live
+  const body = played ? brRows(fx.a, fx.b, fx.entry) : brSide(t.h)+brSide(t.a);
+  const done = (fx && koStatus(fx.entry)==="final") || (t.h.locked && t.a.locked);
+  return `<div class="bx2${done?' bx2--done':''}"><div class="bx2__h">${t.no} · ${t.h.slot}·${t.a.slot}</div>${koWhen(t.no)}${body}</div>`;
+}
+function brFutBox(no, fx){
   const round = no===104?"🏆 Final":no>=101?"Semi-final":no>=97?"Quarter-final":"Round of 16";
   const [a,b]=BR_FEEDS[no];
+  if(fx && fx.a && fx.b){                                              // both feeders decided → real teams
+    const done = koStatus(fx.entry)==="final";
+    return `<div class="bx2${done?' bx2--done':''}${no===104?' bx2--final':''}"><div class="bx2__h">${no} · ${round}</div>${koWhen(no)}${brRows(fx.a, fx.b, fx.entry)}</div>`;
+  }
   return `<div class="bx2 bx2--tbd${no===104?' bx2--final':''}"><div class="bx2__h">${no} · ${round}</div>${koWhen(no)}
     <div class="bx2__r is-tbd"><span class="bx2__n">Winner ${a}</span></div>
     <div class="bx2__r is-tbd"><span class="bx2__n">Winner ${b}</span></div></div>`;
 }
-function brNode(no, byNo){
-  if(no<=88) return `<div class="node">${brR32Box(byNo[no])}</div>`;
+function brNode(no, byNo, fixByNo){
+  if(no<=88) return `<div class="node">${brR32Box(byNo[no], fixByNo[no])}</div>`;
   const [a,b]=BR_FEEDS[no];
-  return `<div class="node"><div class="node__kids">${brNode(a,byNo)}${brNode(b,byNo)}</div>${brFutBox(no)}</div>`;
+  return `<div class="node"><div class="node__kids">${brNode(a,byNo,fixByNo)}${brNode(b,byNo,fixByNo)}</div>${brFutBox(no, fixByNo[no])}</div>`;
 }
 function renderBracket(){
   const el=document.getElementById("qualified"); if(!el) return;
   const S=bracketState();
   const byNo={}; S.r32.forEach(t=>byNo[t.no]=t);
-  const tree = brNode(104, byNo);
-  const third = `<div class="thirdrow"><div class="thirdlbl">Third-place match</div><div class="bx2 bx2--tbd"><div class="bx2__h">103 · 3rd place</div>${koWhen(103)}
-     <div class="bx2__r is-tbd"><span class="bx2__n">Loser 101</span></div>
-     <div class="bx2__r is-tbd"><span class="bx2__n">Loser 102</span></div></div></div>`;
+  const fixByNo={}; bracketFixtures().forEach(f=> fixByNo[f.no]=f);    // resolved ties cascade in as games finish
+  const tree = brNode(104, byNo, fixByNo);
+  const tfx = fixByNo[103];
+  const thirdInner = (tfx && tfx.a && tfx.b)
+    ? brRows(tfx.a, tfx.b, tfx.entry)
+    : `<div class="bx2__r is-tbd"><span class="bx2__n">Loser 101</span></div><div class="bx2__r is-tbd"><span class="bx2__n">Loser 102</span></div>`;
+  const third = `<div class="thirdrow"><div class="thirdlbl">Third-place match</div><div class="bx2${(tfx&&tfx.a)?'':' bx2--tbd'}${tfx&&koStatus(tfx.entry)==="final"?' bx2--done':''}"><div class="bx2__h">103 · 3rd place</div>${koWhen(103)}${thirdInner}</div></div>`;
   el.innerHTML =
     `<div class="brbanner"><b>${S.confirmed}</b><span>teams locked into the bracket</span>
        <span class="brlegend"><span><span class="qmark">✓</span> Locked</span><span><span class="pmark">○</span> In position now</span></span></div>
