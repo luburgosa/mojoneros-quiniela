@@ -462,6 +462,14 @@
 .lstage__h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:8px;margin-bottom:2px;border-bottom:1px solid var(--line)}
 .lstage__k{font-family:"JetBrains Mono",monospace;font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
 .lstage--ko .lstage__k{color:#8a6d12}
+.lstage--honor{border-color:#caa63d;background:linear-gradient(180deg,#fffdf5,#fff)}
+.lstage--honor .lstage__k{color:#8a6d12}
+.hrpill{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:999px;margin-top:6px}
+.hrpill--alive{background:#fdf6df;color:#8f6a0e;border:1px solid #e6c86e}
+.hrpill--out{background:#f4f4f1;color:#a0a09a;border:1px solid #e3e3de}
+.hrpill--wait{background:#f4f4f1;color:#8b8b85;border:1px solid #e3e3de}
+.hrpill--hit{background:#e9f7ee;color:#1a7f37;border:1px solid #bfe6cd}
+.hrpill--miss{background:#fdefee;color:#b3261e;border:1px solid #f2c6c2}
 .lstage__sub{font-family:"Russo One";font-size:19px;line-height:1}
 .lrow{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:1px 10px;padding:8px 0 7px;border-top:1px dashed var(--line)}
 .lstage__h+.lrow{border-top:0}
@@ -900,6 +908,9 @@ GAMES.forEach(g=>{ if(g.id>24){ const k=g.m[0]+">"+g.m[1]; PLAYERS.forEach(p=>{ 
    LIVE DATA — public data feed (no API key, CORS-friendly).
    ============================================================ */
 const ESPN_BASE = "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard";
+/* Final group-stage scores — baked in. The group stage is over, so these results are history and
+   never change; hardcoding them makes every point on the page independent of the group-date feed. */
+const GROUP_RESULTS = { 1:[2,0], 2:[2,1], 3:[1,1], 4:[4,1], 5:[1,1], 6:[1,1], 7:[0,1], 8:[2,0], 9:[7,1], 10:[2,2], 11:[1,0], 12:[5,1], 13:[0,0], 14:[1,1], 15:[1,1], 16:[2,2], 17:[3,1], 18:[1,4], 19:[3,0], 20:[3,1], 21:[1,1], 22:[4,2], 23:[1,0], 24:[1,3], 25:[1,1], 26:[4,1], 27:[6,0], 28:[1,0], 29:[2,0], 30:[0,1], 31:[3,0], 32:[0,1], 33:[5,1], 34:[2,1], 35:[0,0], 36:[0,4], 37:[4,0], 38:[0,0], 39:[2,2], 40:[1,3], 41:[2,0], 42:[3,0], 43:[3,2], 44:[1,2], 45:[5,0], 46:[0,0], 47:[0,1], 48:[1,0], 49:[2,1], 50:[3,1], 51:[0,3], 52:[4,2], 53:[0,3], 54:[1,0], 55:[0,2], 56:[2,1], 57:[1,1], 58:[1,3], 59:[3,2], 60:[0,0], 61:[1,4], 62:[5,0], 63:[0,0], 64:[0,1], 65:[1,1], 66:[1,5], 67:[0,2], 68:[2,1], 69:[0,0], 70:[3,1], 71:[3,3], 72:[1,3] };
 const LIVE_DATES = [...new Set(GAMES.map(g=>g.date))].sort().map(d=>d.replace(/-/g,"")); // derived from the matches
 // Alias: feed name -> our English name
 const ALIASES = {
@@ -921,7 +932,8 @@ async function fetchLive(){
   const index = {};
   const scorers = {};
   const koDates = [...new Set(Object.values(KO_SCHED).map(s=>{ const [mon,day]=s[0].split(" "); return `2026${KO_MON[mon]}${String(+day).padStart(2,"0")}`; }))];
-  const fetchDates = [...new Set([...LIVE_DATES, ...koDates])];
+  const groupsKnown = GAMES.length && GAMES.every(g=>g.actual);          // all 72 group results recorded (feed or cache)
+  const fetchDates = groupsKnown ? koDates : [...new Set([...LIVE_DATES, ...koDates])];
   const payloads = await Promise.all(fetchDates.map(async d=>{
     try{
       const res = await fetch(`${ESPN_BASE}?dates=${d}`, {cache:"no-store"});
@@ -1013,10 +1025,43 @@ function isExact(pred, actual){ return tierOf(pred, actual)==="exact"; }
    Only entries with NO status (final results) lock into Bracket Games / the Total. Left empty during
    the group stage. */
 const KO_RESULTS = {
-  r32:   [],   // Round of 32
-  r16:   [],   // Round of 16
-  qf:    [],   // Quarter-finals
-  sf:    [],   // Semi-finals
+  r32: [  // Round of 32 — final scores; 5th value = shootout winner when the tie ended level
+    ["south africa","canada",[0,1],"final",null],
+    ["brazil","japan",[2,1],"final",null],
+    ["germany","paraguay",[1,1],"final","paraguay"],
+    ["netherlands","morocco",[1,1],"final","morocco"],
+    ["ivory coast","norway",[1,2],"final",null],
+    ["france","sweden",[3,0],"final",null],
+    ["mexico","ecuador",[2,0],"final",null],
+    ["england","dr congo",[2,1],"final",null],
+    ["belgium","senegal",[3,2],"final",null],
+    ["united states","bosnia and herzegovina",[2,0],"final",null],
+    ["spain","austria",[3,0],"final",null],
+    ["portugal","croatia",[2,1],"final",null],
+    ["switzerland","algeria",[2,0],"final",null],
+    ["australia","egypt",[1,1],"final","egypt"],
+    ["argentina","cape verde",[3,2],"final",null],
+    ["colombia","ghana",[1,0],"final",null]
+  ],
+  r16: [  // Round of 16
+    ["canada","morocco",[0,3],"final",null],
+    ["paraguay","france",[0,1],"final",null],
+    ["brazil","norway",[1,2],"final",null],
+    ["mexico","england",[2,3],"final",null],
+    ["portugal","spain",[0,1],"final",null],
+    ["united states","belgium",[1,4],"final",null],
+    ["argentina","egypt",[3,2],"final",null],
+    ["switzerland","colombia",[0,0],"final","switzerland"]
+  ],
+  qf: [   // Quarter-finals
+    ["france","morocco",[2,0],"final",null],
+    ["spain","belgium",[2,1],"final",null],
+    ["norway","england",[1,2],"final",null],
+    ["argentina","switzerland",[3,1],"final",null]
+  ],
+  sf: [   // Semi-finals (102 England-Argentina pending — comes in live)
+    ["france","spain",[0,2],"final",null]
+  ],
   third: [],   // Third-place match
   final: []    // Final
 };
@@ -1028,6 +1073,7 @@ const koStatus  = e => e[3] || "final";
 /* Live knockout results pulled from the scoreboard each refresh (rebuilt every cycle, like g.live).
    Keyed by round → list of [teamA, teamB, score|null, "live"|"final"]. */
 let KO_LIVE = {r32:[], r16:[], qf:[], sf:[], third:[], final:[]};
+let KO_KNOWN = {r32:[], r16:[], qf:[], sf:[], third:[], final:[]};   // finals already seen — survives partial feeds & page reloads
 /* Effective results for a round = entered results (KO_RESULTS, manual, take precedence) + the live feed. */
 function koResults(round){
   const out = [...(KO_RESULTS[round] || [])];
@@ -1039,7 +1085,7 @@ function koResults(round){
    A pairing is matched to the feed by the two teams, exactly like group games. */
 function applyLiveKO(index){
   KO_LIVE = {r32:[], r16:[], qf:[], sf:[], third:[], final:[]};
-  if(!(GAMES.length && GAMES.every(g=>g.actual)) || !index) return;   // matchups unknown until the group stage ends
+  if(!index) return;                          // R32 pairings are locked in R32_REAL — knockout scoring no longer waits on group data
   const S = bracketState(), winnerOf = {}, loserOf = {};
   const look = (aKey, bKey)=>{
     const f = index[pairKey(aKey, bKey)]; if(!f) return null;
@@ -1054,9 +1100,13 @@ function applyLiveKO(index){
     return null;
   };
   const record = (roundKey, no, aKey, bKey)=>{
-    const r = look(aKey, bKey); if(!r) return;
-    KO_LIVE[roundKey].push([aKey, bKey, r.score, r.status, r.win || null]);
-    if(r.status==="final" && r.win){ winnerOf[no]=r.win; loserOf[no]=(r.win===aKey?bKey:aKey); }
+    const r = look(aKey, bKey);
+    let e = r ? [aKey, bKey, r.score, r.status, r.win || null] : null;
+    if(!e) e = KO_KNOWN[roundKey].find(x=> x[3]==="final" && pairKey(x[0],x[1])===pairKey(aKey,bKey)) || null; // feed missing this game → fall back to a final we already saw
+    if(!e) return;
+    KO_LIVE[roundKey].push(e);
+    const w = koWinner(e);
+    if(w){ winnerOf[no]=w; loserOf[no]=(canon(w)===canon(aKey)?bKey:aKey); }
   };
   S.r32.forEach(m=>{ if(m.h.team && m.a.team) record("r32", m.no, m.h.team.key, m.a.team.key); });
   [["r16","Round of 16"],["qf","Quarter-finals"],["sf","Semi-finals"],["final","Final"],["third","Third-place match"]].forEach(([rk,fk])=>{
@@ -1064,6 +1114,9 @@ function applyLiveKO(index){
       const aKey = isThird?loserOf[x]:winnerOf[x], bKey = isThird?loserOf[y]:winnerOf[y];
       if(aKey && bKey) record(rk, no, aKey, bKey);   // both feeders decided → fixture known
     });
+  });
+  Object.keys(KO_LIVE).forEach(rk=>{               // remember every final so a partial feed can never erase points
+    KO_LIVE[rk].forEach(e=>{ if(e[3]==="final" && !KO_KNOWN[rk].some(x=>pairKey(x[0],x[1])===pairKey(e[0],e[1]))) KO_KNOWN[rk].push(e); });
   });
 }
 
@@ -1157,12 +1210,101 @@ function advancersOf(fc, round){
 function advancePoints(player){
   const fc = FC[player]; if(!fc) return 0;
   let pts = 0;
-  ["r32","r16","qf","sf","final","third"].forEach(round=>{
+  ["r32","r16","qf","sf"].forEach(round=>{      // winning the final / bronze game pays via the Honor Roll (25 / 10), like the admin sheet
     const adv = advancersOf(fc, round);
     koResults(round).forEach(e=>{ const w = koWinner(e); if(w && adv.has(canon(w))) pts += 3; });
   });
+  // "Equipos 3-4": +3 for each semi-final loser the player correctly sent to the third-place match
+  const t34 = new Set(); (fc.third||[]).forEach(x=>{ t34.add(canon(x[0])); t34.add(canon(x[1])); });
+  koResults("sf").forEach(e=>{
+    const w = koWinner(e); if(!w) return;
+    const loser = canon(w)===canon(e[0]) ? e[1] : e[0];
+    if(t34.has(canon(loser))) pts += 3;
+  });
   return pts;
 }
+/* "Equipos 1/16": +3 for every team the player correctly sent OUT of the groups into the Round of 32.
+   Same rule family as the knockout advancers — the admin sheet scores this stage too. */
+const QUAL_PTS = 3;
+function qualifyPoints(player){
+  const fc = FC[player]; if(!fc || !fc.r32) return 0;
+  if(Object.keys(R32_REAL).length < 16) return 0;              // only once the real field of 32 is locked
+  const real = new Set(); Object.values(R32_REAL).forEach(([a,b])=>{ real.add(canon(a)); real.add(canon(b)); });
+  const mine = new Set(); fc.r32.forEach(x=>{ mine.add(canon(x[0])); mine.add(canon(x[1])); });
+  let n = 0; mine.forEach(t=>{ if(real.has(t)) n++; });
+  return n * QUAL_PTS;
+}
+/* Honor roll — the endgame points from the admin's "Cuadro de Honor".
+   Champion / runner-up / third resolve automatically from the last two games; the six individual
+   awards are announced after the final — enter them in AWARD_RESULTS when FIFA hands them out. */
+const HONOR_PTS = {podium:[25,15,10], awards:[15,10,7,15,10,7]};
+const AWARD_RESULTS = [null, null, null, null, null, null];
+// Order: Golden Boot, Silver Boot, Bronze Boot, Golden Ball, Silver Ball, Bronze Ball.
+// Example once known: ["Kylian Mbappé","Harry Kane","Erling Haaland","Lamine Yamal","Pedri","Jude Bellingham"]
+
+function realPodium(){
+  const fin = koResults("final").find(e=>koStatus(e)==="final" && e[2]);
+  const thr = koResults("third").find(e=>koStatus(e)==="final" && e[2]);
+  const champ = fin ? koWinner(fin) : null;
+  return {
+    champ,
+    runner: (fin && champ) ? (canon(champ)===canon(fin[0]) ? fin[1] : fin[0]) : null,
+    third:  thr ? koWinner(thr) : null
+  };
+}
+function lev(a,b){
+  const m=a.length, n=b.length; if(Math.abs(m-n)>2) return 9;
+  const d=Array.from({length:m+1},(_,i)=>[i]);
+  for(let j=1;j<=n;j++) d[0][j]=j;
+  for(let i=1;i<=m;i++) for(let j=1;j<=n;j++)
+    d[i][j]=Math.min(d[i-1][j]+1, d[i][j-1]+1, d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));
+  return d[m][n];
+}
+/* Forgiving name match — the picks were typed by hand ("Halaand", "vini", "Lamine"…). */
+function samePlayer(pick, real){
+  const A=norm(pick), B=norm(real); if(!A||!B) return false;
+  if(A===B || A.includes(B) || B.includes(A)) return true;
+  const ta=A.split(" ").filter(t=>t.length>=4), tb=B.split(" ").filter(t=>t.length>=4);
+  return ta.some(x=> tb.some(y=> x.includes(y) || y.includes(x) || lev(x,y) <= (Math.min(x.length,y.length)>=6 ? 2 : 1)));
+}
+/* Where (if anywhere) a team fell out — drives the Alive / Out pills on the podium picks. */
+function koLossRound(team){
+  const t = canon(team);
+  for(const r of KO_ROUNDS){
+    for(const e of koResults(r)){
+      const w = koWinner(e); if(!w) continue;
+      if(canon(canon(w)===canon(e[0]) ? e[1] : e[0]) === t) return r;
+    }
+  }
+  const inField = Object.values(R32_REAL).some(([a,b])=> canon(a)===t || canon(b)===t);
+  return inField ? null : "groups";
+}
+function honorBreakdown(player){
+  const fc = FC[player] || {};
+  const rp = realPodium();
+  const podium = ["champ","runner","third"].map((k,i)=>{
+    const pick = fc.podium && fc.podium[i];
+    let state = "wait", pts = 0;
+    if(pick){
+      const real = rp[k];
+      if(real){ if(canon(real)===canon(pick)){ state="hit"; pts=HONOR_PTS.podium[i]; } else state="miss"; }
+      else{
+        const loss = koLossRound(pick);
+        state = ((k==="third") ? (loss===null || loss==="sf") : loss===null) ? "alive" : "out";
+      }
+    }
+    return {pick, pts, state, max:HONOR_PTS.podium[i]};
+  });
+  const awards = (fc.awards||[]).map((pick,i)=>{
+    const real = AWARD_RESULTS[i];
+    let state="wait", pts=0;
+    if(real && pick){ if(samePlayer(pick, real)){ state="hit"; pts=HONOR_PTS.awards[i]; } else state="miss"; }
+    return {pick, pts, state, max:HONOR_PTS.awards[i]};
+  });
+  const podiumPts = podium.reduce((s,x)=>s+x.pts,0), awardPts = awards.reduce((s,x)=>s+x.pts,0);
+  return {podium, awards, podiumPts, awardPts, total: podiumPts + awardPts};
+}
+function honorPoints(player){ return honorBreakdown(player).total; }
 
 
 let GAME_AVG = {}, STATS = {}, RANKED = [], RANK = {}, activePlayer = null;
@@ -1186,8 +1328,10 @@ function recompute(){
     const gsp = groupStandingsPoints(p);                 // exact-position points from completed groups
     const bracketScore = bracketPoints(p);               // knockout match scorelines, matched by pairing
     const bracketAdv = advancePoints(p);                 // +3 per knockout game where they picked the team that advances
-    const bracketPts = bracketScore + bracketAdv;
-    STATS[p] = {matchPts: total, posPts: gsp.total, projPos: gsp.projected, bracketScore, bracketAdv, bracketPts, total: total + gsp.total + bracketPts, exact, hits, played, beat, scored};
+    const qualPts = qualifyPoints(p);                    // +3 per team correctly out of the groups (Round-of-32 field)
+    const bracketPts = bracketScore + bracketAdv + qualPts;
+    const honorPts = honorPoints(p);                     // Cuadro de Honor: podium 25/15/10 + Boots & Balls 15/10/7
+    STATS[p] = {matchPts: total, posPts: gsp.total, projPos: gsp.projected, bracketScore, bracketAdv, qualPts, bracketPts, honorPts, total: total + gsp.total + bracketPts + honorPts, exact, hits, played, beat, scored};
   });
   const TIE_SINK = new Set(["Blas"]);   // these players drop to the bottom of any tie on points
   RANKED = [...PLAYERS].sort((a,b)=>
@@ -1419,11 +1563,24 @@ function koRound(title, ties, slots, player, round){
 }
 function renderKnockoutForecast(player){
   const fc = FC[player]; if(!fc) return "";
+  const hb = honorBreakdown(player);
+  const hrPill = st => st==="hit" ? `` : st==="miss" ? `<span class="hrpill hrpill--miss">✗ missed</span>`
+    : st==="alive" ? `<span class="hrpill hrpill--alive">Alive</span>`
+    : st==="out" ? `<span class="hrpill hrpill--out">Out</span>`
+    : `<span class="hrpill hrpill--wait">After the final</span>`;
   const podLab = ["🥇 Champion","🥈 Runner-up","🥉 Third place"];
-  const podium = `<div class="hscroll">${fc.podium.map((k,i)=>`<div class="pod"><span>${podLab[i]}</span><b>${flag(k)} ${teamName(k)}</b></div>`).join("")}</div>`;
+  const podium = `<div class="hscroll">${fc.podium.map((k,i)=>{
+    const st = hb.podium[i] ? hb.podium[i].state : "wait";
+    const pill = st==="hit" ? `<span class="hrpill hrpill--hit">✓ +${hb.podium[i].pts}</span>` : hrPill(st);
+    return `<div class="pod"><span>${podLab[i]} · +${HONOR_PTS.podium[i]}</span><b>${flag(k)} ${teamName(k)}</b>${pill}</div>`;
+  }).join("")}</div>`;
   const awLab = ["🥇 Golden Boot","🥈 Silver Boot","🥉 Bronze Boot","🥇 Golden Ball","🥈 Silver Ball","🥉 Bronze Ball"];
   const awSub = ["Top scorer","2nd scorer","3rd scorer","Best player","2nd best","3rd best"];
-  const awards = `<div class="hscroll">${fc.awards.map((a,i)=>`<div class="aw"><span>${awLab[i]}</span><b>${a||"—"}</b><i>${awSub[i]}</i></div>`).join("")}</div>`;
+  const awards = `<div class="hscroll">${fc.awards.map((a,i)=>{
+    const st = hb.awards[i] ? hb.awards[i].state : "wait";
+    const pill = st==="hit" ? `<span class="hrpill hrpill--hit">✓ +${hb.awards[i].pts}</span>` : hrPill(st);
+    return `<div class="aw"><span>${awLab[i]} · +${HONOR_PTS.awards[i]}</span><b>${a||"—"}</b><i>${awSub[i]}</i>${pill}</div>`;
+  }).join("")}</div>`;
   return `<div class="kowrap">
     <div class="ghead"><h3>Knockout forecast</h3><span class="gtotal gtotal--ghost">${player}</span></div>
     <p class="gcnote">Round‑of‑32 cards show the group finishes that feed each slot — e.g. <b>1A · 3CEFHI</b> means winner of Group A vs a third‑placed team. The small tag on each team (e.g. <b>1H</b>, <b>3C</b>) is where ${player} has that team finishing its group. Later rounds show ${player}’s own predicted matchups. Once a round is played, each card shows whether ${player} <b>nailed the matchup</b> — the two teams actually meeting — and the points that pick earned. Swipe each round sideways.</p>
@@ -1464,10 +1621,10 @@ function renderScoring(){
       exCard("One off", [["3rd","✓ only"],["others","✗"]], "+5", "One place off scores nothing"),
     ]);
   const koAdvance = scRow("Teams that advance — +3 each",
-    "Every knockout game sends one team through. For each game, if you had that team advancing at that stage, you get +3 — no matter the score, and even if you got the opponent wrong. It runs all the way to the champion (your podium winner) and the third‑place game.",
+    "It starts the moment the groups end: +3 for every team you correctly put in the Round-of-32 field. From there, every knockout game sends one team through — if you had that team advancing at that stage, +3, no matter the score, and even if you got the opponent wrong. The two semi-final losers you correctly sent to the third-place game earn +3 as well. Winning the final or the bronze game pays separately — through the Honor Roll below.",
     [
       exCard("Right team through", [["You sent through","🇧🇷"],["Result","🇧🇷 advances"]], "+3", "Called the qualifier"),
-      exCard("Champion called", [["Your champion","🇪🇸"],["Final winner","🇪🇸"]], "+3", "The final's winner counts too"),
+      exCard("Into the final", [["You sent to the final","🇪🇸"],["Result","🇪🇸 reaches it"]], "+3", "Reaching it counts — winning pays in the Honor Roll"),
       exCard("Wrong team", [["You sent through","🇩🇪"],["Result","🇩🇪 out"]], "0", "They didn't go through"),
     ]);
   const koMatch = scRow("Bracket scorelines — 1 / 4 / 9 by the matchup",
@@ -1479,9 +1636,17 @@ function renderScoring(){
     ]);
   const stageG = `<div class="scstage scstage--group"><b>Group stage</b><span>The fixtures are fixed — you only predict scores, plus how each group finishes.</span></div>`;
   const stageK = `<div class="scstage scstage--ko"><b>Bracket stage</b><span>Now you also pick who advances and who plays whom — both score.</span></div>`;
-  const diff = `<div class="scdiff"><b>The one big difference.</b> In the groups the matchups are fixed, so your scoreline is always graded. In the bracket you choose the path: you bank <b>+3</b> for every team you correctly send through (right up to the champion), and you add <b>1 / 4 / 9</b> for the scoreline whenever your matchup actually happens. A perfect 3–0 on a tie that never happens still scores <b>0</b> for the score — but if that team went through, you keep the +3.</div>`;
-  const forecast = `<div class="scfinal"><b>Just for bragging.</b> Your Golden Boot and best‑player picks show in your profile but don't change your score. Everything in the table comes from Group Games, Group Results, and the Bracket — the latter being <b>+3</b> per team you send through (up to the champion) <b>plus</b> 1 / 4 / 9 for knockout scorelines when you also call the matchup.</div>`;
-  el.innerHTML = stageG + groupMatch + positions + stageK + diff + koAdvance + koMatch + forecast;
+  const diff = `<div class="scdiff"><b>The one big difference.</b> In the groups the matchups are fixed, so your scoreline is always graded. In the bracket you choose the path: you bank <b>+3</b> for every team you correctly send through — reaching the final and the bronze game included — and you add <b>1 / 4 / 9</b> for the scoreline whenever your matchup actually happens. A perfect 3–0 on a tie that never happens still scores <b>0</b> for the score — but if that team went through, you keep the +3.</div>`;
+  const honor = scRow("The Honor Roll — up to 114 at the final whistle",
+    "The endgame points, settled when the tournament ends. Your podium: champion 25, runner-up 15, third place 10 — exact slot only. Then the individual awards: the Golden, Silver and Bronze Boot (top three scorers) are worth 15 / 10 / 7, and the Golden, Silver and Bronze Ball (three best players) the same 15 / 10 / 7. Check your profile — every pick shows what it's worth and whether it's still alive.",
+    [
+      exCard("Champion", [["Your pick wins the final","🥇"]], "+25", "The biggest single prize in the pool"),
+      exCard("Runner-up", [["Your pick loses the final","🥈"]], "+15", "Exact slot — champion pick finishing 2nd scores 0 here"),
+      exCard("Third place", [["Your pick wins the bronze game","🥉"]], "+10", "Decided Jul 18"),
+      exCard("Boots & Balls", [["Each award: 🥇 +15","🥈 +10 · 🥉 +7"]], "+64", "All six right = 64 — announced after the final"),
+    ]);
+  const forecast = `<div class="scfinal"><b>Every drop counts now.</b> Group Games and Group Results are banked. The Bracket keeps paying — +3 per team through, 1 / 4 / 9 on matchups — and the Honor Roll lands last: up to <b>114</b> points between the podium and the Boots &amp; Balls. Leads can vanish on the final whistle.</div>`;
+  el.innerHTML = stageG + groupMatch + positions + stageK + diff + koAdvance + koMatch + honor + forecast;
 }
 /* ---------- Pool stats ---------- */
 function computeStats(){
@@ -1701,6 +1866,7 @@ function renderBracketByMatch(player){
 }
 function renderProfile(){
   const p = activePlayer, s = STATS[p];
+  const hb = honorBreakdown(p);
   const acc = s.scored ? Math.round(s.hits/s.scored*100) : 0;
   const rowsScored = GAMES.filter(g=>g.actual);
   let body;
@@ -1737,8 +1903,14 @@ function renderProfile(){
       </div>
       <div class="lstage lstage--ko">
         <div class="lstage__h"><span class="lstage__k">Bracket</span><span class="lstage__sub">${s.bracketPts}</span></div>
-        <div class="lrow"><span class="lrow__l">Teams that advance</span><span class="lrow__n">${s.bracketAdv}</span><span class="lrow__note">+3 for every knockout game where you picked the team that goes through</span></div>
+        <div class="lrow"><span class="lrow__l">Out of the groups</span><span class="lrow__n">${s.qualPts}</span><span class="lrow__note">+3 for every team you correctly put in the Round-of-32 field</span></div>
+        <div class="lrow"><span class="lrow__l">Teams that advance</span><span class="lrow__n">${s.bracketAdv}</span><span class="lrow__note">+3 for every knockout game where you picked the team that goes through — semi-final losers you sent to the third-place game count too</span></div>
         <div class="lrow"><span class="lrow__l">Bracket scorelines</span><span class="lrow__n">${s.bracketScore}</span><span class="lrow__note">1 / 4 / 9 for the score, but only if your matchup actually meets</span></div>
+      </div>
+      <div class="lstage lstage--honor">
+        <div class="lstage__h"><span class="lstage__k">Honor roll · up to 114</span><span class="lstage__sub">${s.honorPts}</span></div>
+        <div class="lrow"><span class="lrow__l">Podium called</span><span class="lrow__n">${hb.podiumPts}</span><span class="lrow__note">champion +25 · runner-up +15 · third place +10, judged at the final whistle</span></div>
+        <div class="lrow"><span class="lrow__l">Boots &amp; Balls</span><span class="lrow__n">${hb.awardPts}</span><span class="lrow__note">top scorers +15 / +10 / +7 · best players +15 / +10 / +7, once the awards are announced</span></div>
       </div>
       <p class="ledger__note">Same 1 / 4 / 9 in both stages — the difference is that a bracket scoreline scores <b>nothing</b> unless the two teams you paired up truly meet that round. Everything below traces these numbers: the group table, your knockout forecast, then match by match.</p>
     </div>`;
@@ -2318,10 +2490,29 @@ function setLive(state){
 function stampNow(){
   document.getElementById("livestamp").textContent = "· updated " + new Date().toLocaleTimeString("en-US",{timeZone:"America/New_York",hour:"2-digit",minute:"2-digit"}) + " ET";
 }
+/* Results cache: finished scores never change, so keep them on the device. A fresh page load
+   paints from the cache instantly and still shows every point even if a feed request fails. */
+const CACHE_KEY = "mojo_results_v1";
+function saveResults(){
+  try{
+    const a = {}; GAMES.forEach(g=>{ if(g.actual) a[g.id] = g.actual; });
+    localStorage.setItem(CACHE_KEY, JSON.stringify({a, k: KO_KNOWN}));
+  }catch(e){}
+}
+function loadResults(){
+  try{
+    const c = JSON.parse(localStorage.getItem(CACHE_KEY) || "null"); if(!c) return;
+    GAMES.forEach(g=>{ if(!g.actual && c.a && c.a[g.id]) g.actual = c.a[g.id]; });
+    if(c.k){
+      Object.keys(KO_KNOWN).forEach(rk=>{ if(Array.isArray(c.k[rk])) KO_KNOWN[rk] = c.k[rk]; });
+      KO_LIVE = JSON.parse(JSON.stringify(KO_KNOWN));                    // show cached finals before the first fetch lands
+    }
+  }catch(e){}
+}
 async function refresh(silent){
   if(!silent) setLive("loading");
   const idx = await fetchLive();
-  if(idx){ applyLive(idx); recompute(); renderAll(); setLive(GAMES.some(g=>g.live)?"livenow":"live"); stampNow(); }
+  if(idx){ applyLive(idx); recompute(); renderAll(); saveResults(); setLive(GAMES.some(g=>g.live)?"livenow":"live"); stampNow(); }
   else if(!silent){ setLive("offline"); stampNow(); }
 }
 
@@ -2343,7 +2534,7 @@ document.getElementById("refreshBtn").addEventListener("click", ()=>refresh(fals
    INIT
    ============================================================ */
 const DOUBLE_SET = new Set(DOUBLE_MATCHUPS.map(p=>pairKey(p[0],p[1])));
-GAMES.forEach(g=>{ g.dbl = DOUBLE_SET.has(pairKey(g.m[0], g.m[1])); g.actual = g.seed ? [g.seed[0], g.seed[1]] : null; }); // double points + saved results
+GAMES.forEach(g=>{ g.dbl = DOUBLE_SET.has(pairKey(g.m[0], g.m[1])); const r = GROUP_RESULTS[g.id] || g.seed; g.actual = r ? [r[0], r[1]] : null; }); // double points + saved results (GROUP_RESULTS holds the full final group stage)
 recompute();
 renderAll();
 
@@ -2360,6 +2551,7 @@ function nextDelay(){
 }
 async function liveLoop(){ await refresh(true); clearTimeout(LIVE_TIMER); LIVE_TIMER = setTimeout(liveLoop, nextDelay()); }
 renderScoring();
+loadResults(); recompute(); renderAll();                                 // instant paint from cached results
 refresh(false).then(()=>{ clearTimeout(LIVE_TIMER); LIVE_TIMER = setTimeout(liveLoop, nextDelay()); });
 </script>
 <script data-goatcounter="https://luburgos.goatcounter.com/count"
