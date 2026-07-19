@@ -1059,11 +1059,16 @@ const KO_RESULTS = {
     ["norway","england",[1,2],"final",null],
     ["argentina","switzerland",[3,1],"final",null]
   ],
-  sf: [   // Semi-finals (102 England-Argentina pending — comes in live)
-    ["france","spain",[0,2],"final",null]
+  sf: [   // Semi-finals
+    ["france","spain",[0,2],"final",null],
+    ["england","argentina",[1,2],"final",null]
   ],
-  third: [],   // Third-place match
-  final: []    // Final
+  third: [  // Third-place match — the 10-goal Miami madness
+    ["france","england",[4,6],"final",null]
+  ],
+  final: [  // Final — Spain champions of the world (Torres 106', aet)
+    ["spain","argentina",[1,0],"final",null]
+  ]
 };
 const KO_ROUNDS = ["r32","r16","qf","sf","third","final"];
 const KO_LABELS = {r32:"Round of 32", r16:"Round of 16", qf:"Quarter‑finals", sf:"Semi‑finals", third:"Third‑place match", final:"Final"};
@@ -1238,7 +1243,7 @@ function qualifyPoints(player){
    Champion / runner-up / third resolve automatically from the last two games; the six individual
    awards are announced after the final — enter them in AWARD_RESULTS when FIFA hands them out. */
 const HONOR_PTS = {podium:[25,15,10], awards:[15,10,7,15,10,7]};
-const AWARD_RESULTS = [null, null, null, null, null, null];
+const AWARD_RESULTS = ["Kylian Mbappé", "Lionel Messi", "Jude Bellingham", "Rodri", "Lionel Messi", "Kylian Mbappé"];   // official — announced Jul 19 after the final
 // Order: Golden Boot, Silver Boot, Bronze Boot, Golden Ball, Silver Ball, Bronze Ball.
 // Example once known: ["Kylian Mbappé","Harry Kane","Erling Haaland","Lamine Yamal","Pedri","Jude Bellingham"]
 
@@ -1784,7 +1789,30 @@ function renderStats(){
          ${carr.length?`<div class="ko__rtitle" style="margin-top:14px">Surviving title picks</div>${barList(carr)}`:""}
          ${bustNote}</div>`;
   }
-  el.innerHTML = tourneyHtml + koStatsHtml +
+  // --- Final honours — shown once the World Cup is decided ---
+  let honoursHtml = "";
+  const rpod = realPodium();
+  if(rpod.champ){
+    const win = RANKED[0];
+    honoursHtml = `<div class="ko__round"><div class="ko__rtitle">Final honours <span class="ko__n" style="background:#8a6d12">tournament over</span></div>
+      <p class="statnote">Spain are champions of the world — and the quiniela is settled.</p>
+      <div class="hscroll">${[
+        statCard("Quiniela champion", win, (STATS[win]?STATS[win].total:"")+" pts", "the final table is locked"),
+        factCard("World champions", flag("spain")+" Spain", "1-0 aet vs Argentina · Torres 106'"),
+        factCard("Runners-up", flag("argentina")+" Argentina", "Messi's last dance falls short"),
+        factCard("Third place", flag("england")+" England", "6-4 over France in Miami"),
+      ].join("")}</div>
+      <div class="ko__rtitle" style="margin-top:14px">Boots &amp; Balls — the real ones</div>
+      <div class="hscroll">${[
+        factCard("🥇 Golden Boot", "Kylian Mbappé", "10 goals"),
+        factCard("🥈 Silver Boot", "Lionel Messi", "8 goals"),
+        factCard("🥉 Bronze Boot", "Jude Bellingham", "7 goals"),
+        factCard("🥇 Golden Ball", "Rodri", "player of the tournament"),
+        factCard("🥈 Silver Ball", "Lionel Messi", "best of the rest"),
+        factCard("🥉 Bronze Ball", "Kylian Mbappé", "10 goals not enough"),
+      ].join("")}</div></div>`;
+  }
+  el.innerHTML = honoursHtml + tourneyHtml + koStatsHtml +
     `<div class="ko__round"><div class="ko__rtitle">Form so far <span class="ko__n" style="background:#3b3b3b">the pool</span></div>${form}</div>
      <div class="ko__round"><div class="ko__rtitle">The crowd's champion</div><p class="statnote">Who the ${PLAYERS.length} entries picked to win it all.</p>${barList(S.champRank)}${loneTxt}</div>
      <div class="ko__round"><div class="ko__rtitle">Most-picked finalists</div>${barList(S.finRank)}</div>
@@ -2466,6 +2494,11 @@ function renderAll(){
 /* Header swaps to a gold "still last" jab while Blas sits dead bottom; back to normal otherwise. */
 function updateHeader(){
   const el = document.getElementById("heroTitle"); if(!el) return;
+  if(realPodium().champ && RANKED.length){                                    // tournament over → crown the quiniela champion
+    el.textContent = `🏆 ${RANKED[0]} wins the quiniela!`;
+    el.classList.add("hero__title--gold"); el.classList.remove("hero__title--blue");
+    return;
+  }
   const blasLast = RANKED[RANKED.length - 1] === "Blas";
   const luisBeatingBlas = STATS["Luis"] && STATS["Blas"] && STATS["Luis"].total > STATS["Blas"].total;
   let text = "The prediction league", gold = false, blue = false;
